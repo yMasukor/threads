@@ -1,0 +1,191 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <title></title>
+
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="viewport" content="width=device-width">
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #263238;
+        }
+
+        canvas{
+            position: absolute;
+            top: 0px;
+            left: 0px;
+            right: 0px;
+            bottom:0px;
+            margin: auto;
+        }
+    </style>
+
+    <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
+    <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+    <script src="phaser.min.js"></script>
+</head>
+<body>
+    <script type="text/javascript">
+        
+    var socket = io();
+
+    var padCols = 10;
+    var padRows = 10;
+
+    barDuration = 8000;
+
+
+    var game = new Phaser.Game(1280, 720, Phaser.AUTO, '', { preload: preload, create: create, update: update, render: render });
+    var points = [];
+    var ball;
+    var lastMouseLoc = new Phaser.Point(0, 0);
+    var playhead;
+
+
+    function preload() {
+    }
+ 
+    function create() {
+
+        game.stage.backgroundColor = '0xEFEBE9'
+
+        //draw a circle
+        var graphics = new Phaser.Graphics();
+        graphics.beginFill(0xFF3300);
+        graphics.drawCircle(0, 0,10);
+
+        ball = game.add.renderTexture(10, 10, 'foo');
+        ball.renderXY(graphics, 5, 5, true);
+        
+
+
+        graphics.clear();
+        graphics.lineStyle(1, '0xFFFFFF', 1);
+        graphics.moveTo(0,0);
+        graphics.lineTo(0, 720);
+
+        //game.stage.addChild(graphics)
+        foo = game.add.renderTexture(1, 720, 'bar');
+        foo.renderXY(graphics, 0, 0, true);
+
+        playhead = game.add.sprite(0,0,foo)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        game.input.addMoveCallback(move, this);
+
+
+
+        game.input.onDown.add(function(){
+            points = [];
+            pointer = game.input.activePointer;
+            lastMouseLoc.setTo(pointer.x, pointer.y)
+        });
+
+        game.input.onUp.add(function(){
+            
+        });
+
+
+
+
+
+
+        for(var i=0; i<padCols; i++){
+
+        }
+
+
+
+        
+    }
+ 
+    function update() {
+
+        var time=this.game.time.totalElapsedSeconds()*1000;
+        var barTime = time%barDuration;
+        var barProgress = barTime/barDuration
+
+        //console.log(barPercent);
+        playhead.x = game.stage.width*barProgress;
+        
+        points.forEach(function(point){
+            //console.log(barProgress, point.progress)
+            if(barProgress-1 < point.progress && barProgress > point.progress){
+                point.display.scale=new Phaser.Point(3,3);
+            }
+        });
+
+    }
+
+    function render() {
+
+
+    }
+
+    function move(pointer, x, y){
+        if(pointer.isDown){
+            
+
+
+            //;
+
+            //socket.emit('pointer moved', {x:x, y:y});
+
+            //
+            
+            // points.push(point);
+            // console.log(points);
+
+            point = new Phaser.Point(x, y);
+
+
+            if(point.distance(lastMouseLoc) > 100){
+                point.display = game.add.sprite(point.x, point.y, ball);
+                point.progress = point.x/game.stage.width;
+
+                point.display.scale=new Phaser.Point(1,1);
+                points.push(point);
+
+                lastMouseLoc = point;
+            };
+
+
+            
+        }
+    }
+
+    socket.on('pointer moved', function(msg){
+        //console.log(msg);
+        //game.add.sprite(msg.x, msg.y, ball);
+    });
+
+ 
+    </script>
+ 
+    </body>
+</html>

@@ -1,0 +1,188 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <title></title>
+
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="viewport" content="width=device-width">
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #263238;
+        }
+
+        canvas{
+            /*position: absolute;
+            top: 0px;
+            left: 0px;
+            right: 0px;
+            bottom:0px;
+            margin: auto;*/
+        }
+    </style>
+
+    <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
+    <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+    <script src="phaser.min.js"></script>
+</head>
+<body>
+    <script type="text/javascript">
+        
+    var socket = io();
+
+    var game = new Phaser.Game(1280, 720, Phaser.AUTO, '', { preload: preload, create: create, update: update, render: render });
+
+
+    var metronome = {};
+
+
+    function preload() {
+    }
+ 
+    function create() {
+
+        game.stage.backgroundColor = '0xEFEBE9'
+        addMetronome();
+
+
+        //setup input callbacks
+
+        game.input.onDown.add(function(){
+
+            pointer = game.input.activePointer;
+            pointerDown(pointer, pointer.x, pointer.y);
+
+        });
+
+        game.input.addMoveCallback(pointerMove, this);
+
+        game.input.onUp.add(function(){
+
+            pointer = game.input.activePointer;
+            pointerDown(pointer, pointer.x, pointer.y);
+
+        });
+
+        // game.input.onUp.add(function(){
+            
+        // });
+
+    }
+
+
+    function pointerDown(pointer, x, y){
+        console.log('pointer down')
+    }
+
+    function pointerMove(pointer, x, y){
+        if(pointer.isDown){
+
+            
+        }
+    }
+
+    function pointerUp(pointer, x, y){
+        console.log(pointerUp)
+    }
+   
+
+
+
+
+
+
+ 
+    function update() {
+
+        //get elapsed miliseconds
+        // var time= new Date().getTime();
+        
+
+        // if(time > lastStepTime+stepDuration){
+        //     lastStepTime = time;
+        //     currentStep++;
+
+        //     if(currentStep == totalSteps){
+        //         currentStep = 0;
+        //     }
+
+        //     //update everything that needs it
+        //     metronome.update(currentStep);
+        // }
+    }
+
+
+
+
+
+
+
+    function render() {
+
+
+    }
+
+    
+
+    socket.on('step', function(currentStep){
+        metronome.update(currentStep);
+        //console.log(msg);
+        //game.add.sprite(msg.x, msg.y, ball);
+    });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    function addMetronome(){
+
+        metronome.steps = []
+
+        var stepWidth = Math.floor(game.stage.width/16);
+
+        var graphics = new Phaser.Graphics();
+        graphics.beginFill(0xFF0000);
+        graphics.drawRect(0, 0, stepWidth, 10);
+
+        square = game.add.renderTexture(stepWidth, 10, 'tick');
+        square.renderXY(graphics, 0, 0, true);
+
+        // metronome.minorTick = game.add.sprite(0,0,square);
+
+        for(var i=0; i<16; i++){
+
+            var step = game.add.sprite(i*stepWidth, 0, square);
+            step.visible = false;
+            metronome.steps.push(step);
+
+        }
+
+        metronome.update = function(currentStep){
+            
+            this.steps.forEach(function(step, index){
+
+                if(index == currentStep){
+                    step.visible = true;
+                }else{
+                    step.visible = false;
+                }
+            });     
+        }
+    }
+
+ 
+    </script>
+ 
+    </body>
+</html>

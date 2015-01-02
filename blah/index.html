@@ -1,0 +1,207 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <title>pixi.js example 1</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #000000;
+        }
+    </style>
+    <script src="pixi.js"></script>
+    <script src="victor.js"></script>
+</head>
+<body>
+    <script type="text/javascript">
+ 
+    var stage = new PIXI.Stage(0x66ff99);
+    var renderer = PIXI.autoDetectRecommendedRenderer(window.innerWidth, window.innerHeight, null);
+    var mouseLoc = new Victor(0,0);
+
+    document.body.appendChild(renderer.view);
+
+
+
+
+
+    // function Particle(x, y, radius, color){
+
+    //     this.x = x;
+    //     this.y = y;
+    //     this.radius = radius;
+    //     this.displayObject = new PIXI.Graphics();
+
+    //     this.displayObject.beginFill(color);
+    //     this.displayObject.drawCircle(x, y, radius);
+    // }
+
+
+    // Particle.prototype.calculatePosition = function(){
+    //     this.x = Math.floor(Math.random()*stage.width);
+    //     this.y = Math.floor(Math.random()*stage.height);
+    // }
+
+    // Particle.prototype.draw = function(){
+    //     this.displayObject.x = this.x;
+    //     this.displayObject.y = this.y;
+    // }
+
+
+
+
+    function Particle(texture){
+        PIXI.Sprite.call(this);
+        this.texture = texture;
+        // this.beginFill(color);
+        // this.drawCircle(0,0,radius);
+
+        this.x = 0;
+        this.y = 0;
+
+        this.mass = 1;
+        this.pos = new Victor(0, 0);
+        this.vel = new Victor(0,0);
+        this.acc = new Victor(20,0);
+
+        this.maxVel = 10;
+
+        
+    }
+
+    Particle.prototype = Object.create(PIXI.Sprite.prototype);
+    Particle.prototype.constructor = Particle;
+
+    Particle.prototype.accelerateToPoint = function(point){
+
+
+
+        var dir = this.pos.clone().subtract(point);
+
+        //console.log(dir, this);
+
+        var distSqrd = dir.lengthSq();
+
+        dir = dir.normalize();
+        var force = (distSqrd*0.0001)/this.mass;
+
+        this.acc.subtract(dir.multiply(new Victor(force, force)))
+
+    }
+
+    Particle.prototype.update = function(){
+        //Add acceleration to velocity
+        this.vel.add(this.acc);
+
+
+        if(this.vel.length() > this.maxVel){
+            this.vel = this.vel.setLength(this.maxVel);
+        }
+
+        //Decay velocity
+
+
+        this.vel.multiply(new Victor(0.9, 0.9));
+
+        //Add velocity to position
+        this.pos.add(this.vel);
+        //Update position
+
+        this.x = this.pos.x;
+        this.y = this.pos.y;
+
+        //Reset acceleration
+        this.acc.x = 0;
+        this.acc.y = 0;
+
+        if(this.vel.length() < 0.1){
+            this.acc = this.acc.randomize(new Victor(-10, -10), new Victor(10, 10));
+        }
+    }
+
+
+
+
+
+
+    var particleCount = 1000;
+    var particles = [];
+
+    setup();
+
+    function setup(){
+
+
+        var foo = new PIXI.Graphics();
+        foo.beginFill(0xffd900);
+        foo.drawCircle(0, 0, 10);
+        var texture = foo.generateTexture(1, PIXI.scaleModes.LINEAR);
+
+
+        for(var i=0; i<particleCount; i++){
+            var particle = new Particle(texture);
+            
+            
+            
+            stage.addChild(particle);
+
+            particles.push(particle);
+        }
+
+        stage.interactive = true
+        //register touch/click events
+        stage.mousedown = stage.touchstart = function(data){
+            console.log('touch started');
+            stage.dragging = true;
+        }
+
+        stage.mousemove = stage.touchmove = function(data){
+            //console.log(data);
+
+            mouseLoc.x = data.getLocalPosition(stage).x;
+            mouseLoc.y = data.getLocalPosition(stage).y;
+
+            //console.log(mouseLoc)
+        }
+
+        stage.mouseup = stage.mouseupoutside = stage.touchend = stage.touchendoutside = function(data){
+            //console.log('touch ended');
+            stage.dragging = false;
+        }
+
+        requestAnimFrame(animate);
+
+
+
+    }
+
+
+    
+
+    // var circle = new PIXI.Graphics();
+    // circle.beginFill(0xFF3300);
+    // circle.lineStyle(10, 0xffd900, 1);
+    // circle.drawCircle(0,0,10);
+
+    // stage.addChild(circle);
+
+
+    function animate(){
+        requestAnimFrame(animate);
+        particles.forEach(function(particle){
+            if(stage.dragging){
+               particle.accelerateToPoint(mouseLoc); 
+            }
+            //
+            particle.update();
+        });
+
+        renderer.render(stage);
+    }
+
+    // Code will go here
+ 
+    </script>
+ 
+    </body>
+</html>
