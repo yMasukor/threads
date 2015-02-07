@@ -1,366 +1,242 @@
-<!DOCTYPE HTML>
+<!DOCTYPE html>
 <html>
 <head>
-    <title></title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<title></title>
+		<meta charset="utf-8">
 
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="viewport" content="width=1280">
+	<script src="lib/proton-1.0.1.js"></script>
+	<script src="lib/phaser.min.js"></script>
+	<script src="lib/dat.gui.min.js"></script>
 
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            background-color: #263238;
-        }
+	<script src="ParticleSystem.js"></script>
+	<script src="AudioPlayer.js"></script>
 
-        canvas{
+	<meta name="mobile-web-app-capable" content="yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+	<style type="text/css">
+		canvas, body, html{
+			margin: 0px;
+			padding: 0px;
             position: absolute;
             top: 0px;
             left: 0px;
             right: 0px;
             bottom:0px;
-            margin: auto;
-        }
-    </style>
+            overflow: hidden;
 
-    <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
-    <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
-    <script src="phaser.min.js"></script>
+        }
+	</style>
 
 </head>
-<body>
-    <script type="text/javascript">
-        
-    var socket = io();
+	<body>
+		<script>
 
-    var playerID;
-    var stepCount = 16;
-    var stepWidth;
 
 
+			var width, height, game, player, soundManager, bmd, controls
 
-    var colors = [
-        '0xF44336',
-        '0xE91E63',
-        '0x2196F3',
-        '0x4CAF50',
-        '0xFF5722'
-    ]
+			width = window.innerWidth
+			height = window.innerHeight
 
-    var game = new Phaser.Game(1280, 720, Phaser.AUTO, '', { preload: preload, create: create, update: update, render: render });
 
+			var stepCount = 0;
 
-    //
+			var bar = {
+				clap:{steps:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], sprites:[]},
+				closedHiHat:{steps:[1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0], sprites:[]},
+				hiConga:{steps:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], sprites:[]},
+				hiTom:{steps:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], sprites:[]},
+				lowConga:{steps:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], sprites:[]},
+				lowTom:{steps:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], sprites:[]},
+				midConga:{steps:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], sprites:[]},
+				midTom:{steps:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], sprites:[]},
+				openHiHat:{steps:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], sprites:[]},
+				snare:{steps:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0], sprites:[]},
+				kick:{steps:[1,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0], sprites:[]}
+			}
+				
 
-    socket.on('joined', function(id){
-        playerID = id;
-        console.log('my id is', playerID);
-        states.update('passive');
-    });
 
-    socket.on('createNewBar', function(bar){
-        console.log('creating new bar', bar);
-        if(states.state != 'inactive' && !bar.complete){
-            states.update('active');
-        }
-        currentBar.display(bar, null);
-    });
+			game = new Phaser.Game(width, height, Phaser.AUTO, 'phaser-example', { preload: preload, create: create, update: update }, false, false);
+			audioPlayer = new AudioPlayer(game);
+			
 
-    socket.on('wait', function(){
-        states.update('passive');
-    });
+			function preload()
+			{
 
-    socket.on('complete', function(){
-        states.update('complete');
-    });
+				audioPlayer.load();
+				// game.load.audio('kick', 'samples/808/KickDrum.mp3');
+			}
 
-    socket.on('stop', function(){
-        states.update('inactive');
-    });
+			function create()
+			{
 
+				audioPlayer.init();
 
+				game.time.events.loop(125, step, this);
 
-    var states = {
-        state:'inactive',
-        passiveState:null,
-        activeState:null,
-        inactiveState:null,
-        completeState:null,
 
 
-        createStates:function(){
 
-            this.activeState = game.add.sprite(0,10,'');
 
 
-            var textStyle = { font: "72px Arial", fill: "#FFFFFF", align: "center" };
+				particleLayer = new ParticleSystem(game, null);
+				particleLayer.init();
+				particleLayer.setState({
+					randomFill:false,
+					fill:'#FFFFFF',
+					minRate:10,
+					maxRate:8,
+					frequency: 0,
+					minLife:'infinity',
+					maxLife:'infinity',
+					driftX:10,
+					driftY:10,
+				});
 
+				bmd = game.make.bitmapData(game.width, game.height);
+				var sprite = game.add.sprite(0,0, bmd);
+				// particleLayer.emitter.emit();
 
-            //Passive state
-            this.passiveState = game.add.sprite(0,10,'');
-            this.passiveState.alpha = 0;
+				particleLayer.burst()
 
-            //draw it's background
-            var passiveBackground = game.add.graphics(0,0);
-            this.passiveState.addChild(passiveBackground);
-            passiveBackground.beginFill('0x000000');
-            passiveBackground.drawRect(0,0,game.stage.width, game.stage.height);
 
-            var passiveText = game.add.text(48, 200, 'WAIT', textStyle);
-            this.passiveState.addChild(passiveText);
+				
+				for(track in bar){
 
+					bar[track].steps.forEach(function(item, i){
 
-            //Inactive state
-            this.inactiveState = game.add.sprite(0,10,'');
-            this.inactiveState.alpha = 0;
+						if(Math.floor(Math.random()*32) == 0){
+							bar[track].steps[i] = 1
+						}
+						else{
+							// bar[track].steps[i] = 0;
+						}
+					});	
+				}
 
-            //draw it's background
-            var inactiveBackground = game.add.graphics(0,0);
-            this.inactiveState.addChild(inactiveBackground);
-            inactiveBackground.beginFill('0x000000');
-            inactiveBackground.drawRect(0,0,game.stage.width, game.stage.height);
+				console.log(bar)
 
-            var inactiveText = game.add.text(48, 200, 'TOUCH TO START', textStyle);
-            this.inactiveState.addChild(inactiveText);
 
 
+				var size = width/24
 
-            //Complete state
-            this.completeState = game.add.sprite(0,10,'');
-            this.completeState.alpha = 0;
+				var circle = game.add.bitmapData(size, size);
+				circle.circle(size/2, size/2, size/4, '#FFFFFF');
+					
 
-            //draw it's background
-            var completeBackground = game.add.graphics(0,0);
-            this.completeState.addChild(completeBackground);
-            completeBackground.beginFill('0x000000');
-            completeBackground.drawRect(0,0,game.stage.width, game.stage.height);
+				console.log(size)
+				// controls = game.add.sprite(width/2-((16*48)/2), height/2-((2*48)/2));
 
-            var completeText = game.add.text(48, 200, 'TRACK COMPLETE', textStyle);
-            this.completeState.addChild(completeText);
-        },
+				controls = game.add.sprite()
 
-        update:function(state){
-            this.state = state;
+				var i=0
 
-            if(this.state == 'active'){
-                var hidePassive = game.add.tween(this.passiveState).to( { alpha: 0 }, 200, Phaser.Easing.Linear.None, true, 0, 0, false);
-                var hideInactive = game.add.tween(this.inactiveState).to( { alpha: 0 }, 200, Phaser.Easing.Linear.None, true, 0, 0, false);
-                var hideComplete = game.add.tween(this.inactiveState).to( { alpha: 0 }, 200, Phaser.Easing.Linear.None, true, 0, 0, false);
+				for(track in bar){
+					i++;
+					for(var j=0; j<16; j++){
+						var sprite = controls.addChild(game.make.sprite((j*size)+(width/2 - (size*15)/2),(i*size)+(height/2 - (size*12)/2) , circle));
 
-            }else if(this.state == 'passive'){
-                var showPassive = game.add.tween(this.passiveState).to( { alpha: 0.6 }, 200, Phaser.Easing.Linear.None, true, 0, 0, false);
-                var hideInactive = game.add.tween(this.inactiveState).to( { alpha: 0 }, 200, Phaser.Easing.Linear.None, true, 0, 0, false);
-                var hideComplete = game.add.tween(this.completeState).to( { alpha: 0 }, 200, Phaser.Easing.Linear.None, true, 0, 0, false);
+						if(!bar[track].steps[j]){
+							sprite.on = false;
+							sprite.tint = 0x111111;
+						}
 
-            }else if(this.state == 'inactive'){
-                var hidePassive = game.add.tween(this.passiveState).to( { alpha: 0 }, 200, Phaser.Easing.Linear.None, true, 0, 0, false);
-                var showInactive = game.add.tween(this.inactiveState).to( { alpha: 1 }, 200, Phaser.Easing.Linear.None, true, 0, 0, false);
-                var hideComplete = game.add.tween(this.completeState).to( { alpha: 0 }, 200, Phaser.Easing.Linear.None, true, 0, 0, false);
+						bar[track].sprites.push(sprite);
 
-            }else if(this.state == 'complete'){
-                var hidePassive = game.add.tween(this.passiveState).to( { alpha: 0 }, 200, Phaser.Easing.Linear.None, true, 0, 0, false);
-                var hideInactive = game.add.tween(this.inactiveState).to( { alpha: 0 }, 200, Phaser.Easing.Linear.None, true, 0, 0, false);
-                var showComplete = game.add.tween(this.completeState).to( { alpha: 1 }, 200, Phaser.Easing.Linear.None, true, 0, 0, false);
-            }
-        }
-    }
-
-
-
-    var currentBar = {
-        
-        displayMode:0,
-        players:{},
-        sprite:null,
+						sprite.track = track;
+						sprite.stepIndex = j;
 
-        display:function(bar, stepData){
-            this.displayMode = bar.displayMode;
-            this.players = bar.players;
+						sprite.anchor.x = 0.5;
+						sprite.anchor.y = 0.5;
 
-            //create a new sprite for the next bar
-            var newBar = game.add.sprite(0,0,'');
-            newBar.alpha = 0;
+						sprite.inputEnabled = true;
+						sprite.input.useHandCursor = true; //if you want a hand cursor
+						sprite.events.onInputDown.add(padPressed, this);
 
-            states.activeState.addChild(newBar);
+						// console.log('added sprite', bmd)
+					}
+				}
 
-            //draw it's background
-            var background = game.add.graphics(0,0);
-            newBar.addChild(background);
-            background.beginFill(colors[this.displayMode]);
-            background.drawRect(0,0,game.stage.width, game.stage.height);
+				console.log(controls);
+				// controls.x = width/2 - controls.width/2;
+				// 
+			}	
 
 
-            if(stepData != null){
-                this.populate(stepData)
-            }
+			function update()
+			{
 
+				bmd.fill(0, 0, 0, 0.2);
+				particleLayer.update();
 
-            var showBar = game.add.tween(newBar).to( { alpha: 1 }, 200, Phaser.Easing.Linear.None, true, 0, 0, false);
+				bmd.drawGroup(particleLayer)
+				
+				// console.log(controls.getBounds())
+// bar[track].sprites[stepCount].scale.setTo(1, 1)
 
-            showBar.onComplete.add(function(target){
-                if(this.sprite){
-                    this.sprite.destroy(true);
-                }
-                this.sprite = target;
-            }.bind(this));
-        },
+// 				bar[track].sprites[stepCount].scale.setTo(1, 1)
+				
+			}
 
-        addStep:function(playerID, step){
-            this.players[playerID].steps.push(step);
-            this.showStep(step);
-            socket.emit('stepAdded', step);
-        },
-        showStep:function(step){
-            var point = game.add.sprite(step.x, step.y, debugPoint);
-            this.sprite.addChild(point);
-        },
 
-        populate:function(stepData){
-            //if we're playing back a bar, populate it with data here
-        }
-    }
+			function render()
+			{
+				
+			}
 
 
+			function padPressed(sprite){
+				console.log(sprite);
 
- 
-    
+				bar[sprite.track].steps[sprite.stepIndex] = !bar[sprite.track].steps[sprite.stepIndex];
 
+				if(bar[sprite.track].steps[sprite.stepIndex]){
+					sprite.on = true;
+					sprite.tint = 0xFFFFFF;
+				}else{
+					sprite.on = false;
+					sprite.tint = 0x111111;
+				}
+			}
 
-    var input = {
 
-        lastPos:null,
+			function step(){
+				// audioPlayer.play('closedHiHat');
 
-        init:function(){
-            this.lastPos = new Phaser.Point(0, 0)
-            // game.input.activePointer.onDown.add(function(){
-            //     console.log('sadfsadf')
-            //     pointer = game.input.activePointer;
-            //     input.down(pointer, pointer.x, pointer.y);
-            // });
+				for(track in bar){
 
-            game.input.addMoveCallback(input.move, this);
+					if(bar[track].steps[stepCount]){
+						audioPlayer.play(track);
 
-            game.input.onUp.add(function(){
-                pointer = game.input.activePointer;
-                input.up(pointer, pointer.x, pointer.y);
-            });
-            
-        },
+						particleLayer.behaviours.attraction.targetPosition.x = bar[track].sprites[stepCount].x;
+						particleLayer.behaviours.attraction.targetPosition.y = bar[track].sprites[stepCount].y;
+					}
 
+					for(var j=0; j<16; j++){
+						var sprite = bar[track].sprites[j];
 
-        move:function(pointer, x, y){
+						if(bar[track].steps[j] && j == stepCount){
+							sprite.scale.setTo(2, 2)
+						}else{
+							sprite.scale.setTo(1, 1)
+						}
 
-            if(pointer.isDown && states.state == 'active'){
-                
-                if(Math.floor(this.lastPos.x/stepWidth) != Math.floor(x/stepWidth)){
-                    var step = {
-                        x:x,
-                        y:y,
-                        stepIndex:Math.floor(x/stepWidth)
-                    }
-                    currentBar.addStep(playerID, step); 
-                }
-                
-                this.lastPos.setTo(x, y);
-            }else if(pointer.isDown && states.state == 'inactive'){
-                socket.emit('playerJoined');
-            }
+					}
+					
+				}
 
-        },
-        up:function(pointer, x, y){
+				stepCount++;
 
-        }
-    }
+				stepCount = stepCount%16;
+				// console.log(stepCount);
+			}
 
 
-    var debugPoint;
-
-
-
-
-
-
-    function preload() {
-        var graphics = new Phaser.Graphics();
-        graphics.beginFill(0xFFFFFF);
-        graphics.drawCircle(0, 0,10);
-
-        debugPoint = game.add.renderTexture(10, 10, 'foo');
-        debugPoint.renderXY(graphics, 5, 5, true);
-    }
- 
-    function create() {
-
-        stepWidth = game.stage.width/stepCount;
-
-        input.init(); 
-
-        states.createStates();
-        states.update('inactive');
-
-        metronome.add();
-    }
-
-
-
-    function update() {
-
-    }
-
-
-
-
-
-
-
-    function render() {
-
-
-    }
-
-
-
-    var metronome = {
-        steps:[],
-
-        add:function(){
-
-            var graphics = new Phaser.Graphics();
-            graphics.beginFill(0xFF0000);
-            graphics.drawRect(0, 0, stepWidth, 10);
-
-            square = game.add.renderTexture(stepWidth, 10, 'tick');
-            square.renderXY(graphics, 0, 0, true);
-
-            // metronome.minorTick = game.add.sprite(0,0,square);
-
-            for(var i=0; i<16; i++){
-
-                var step = game.add.sprite(i*stepWidth, 0, square);
-                step.visible = false;
-                this.steps.push(step);
-
-            }
-
-
-            socket.on('step', function(currentStep){
-                metronome.update(currentStep);
-            });
-        },
-
-        update:function(currentStep){
-            this.steps.forEach(function(step, index){
-                if(index == currentStep){
-                    step.visible = true;
-                }else{
-                    step.visible = false;
-                }
-            });
-        }
-    }
-
- 
-    </script>
- 
-    </body>
+			
+		</script>
+	
+</body>
 </html>

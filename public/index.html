@@ -1,188 +1,633 @@
-<!DOCTYPE HTML>
+<!doctype html>
 <html>
-<head>
-    <title></title>
+	<head>
+	<script src="lib/jquery-2.1.3.min.js"></script>
+	<script src="lib/tween.min.js"></script>
+    <script src="lib/tsw.js"></script>
+	<script src="lib/two.js"></script>
+	
+    <script src="threads-alt.js"></script>
+	</head>
+	<body>
 
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="viewport" content="width=device-width">
+	<script>
 
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            background-color: #263238;
+		var TWO_PI = Math.PI * 2;
+
+        var width = $(window).width(), height = $(window).height();
+        var center = {x: width/2, y:height/2}
+
+        var duration = 1000;
+        var animations = {}
+        var Easing = TWEEN.Easing;
+
+        var colors=[
+            //Cool Grey
+            '#263238', 
+            '#ECEFF1', 
+            '#607D8B', 
+            //Reds
+            '#F44336', 
+            '#B71C1C', 
+            '#FF8A80', 
+            //Pinks
+            '#E91E63', 
+            '#880E4F', 
+            '#FF80AB', 
+            //Purples
+            '#9C27B0', 
+            '#4A148C', 
+            '#EA80FC', 
+            //Deep Purple
+            '#673AB7', 
+            '#311B92', 
+            '#B388FF', 
+            //Indigo
+            '#3F51B5', 
+            '#1A237E', 
+            '#8C9EFF',
+            //Blue
+            '#2196F3', 
+            '#0D47A1', 
+            '#82B1FF',
+            //Light Blue
+            '#03A9F4', 
+            '#01579B', 
+            '#80D8FF',
+            //Cyan
+            '#00BCD4', 
+            '#006064', 
+            '#84FFFF',
+            //Teal
+            '#009688', 
+            '#004D40', 
+            '#A7FFEB',
+            //Green
+            '#4CAF50', 
+            '#1B5E20', 
+            '#B9F6CA',
+            //Light Green
+            '#8BC34A', 
+            '#33691E', 
+            '#CCFF90',
+            //Lime
+            '#CDDC39', 
+            '#827717', 
+            '#F4FF81',
+            //Yellow
+            '#FFEB3B', 
+            '#F57F17', 
+            '#FFFF8D', 
+            //Amber
+            '#FFC107', 
+            '#FF6F00', 
+            '#FFE57F', 
+            //Orange
+            '#3F51B5', 
+            '#1A237E', 
+            '#8C9EFF', 
+            //Deep Orange
+            '#FF5722', 
+            '#BF360C', 
+            '#FF9E80', 
+            //Brown
+            '#795548', 
+            '#3E2723', 
+            '#BCAAA4', 
+            //White
+            '#FFFFFF' 
+            ]
+
+
+
+
+        var backgroundColors = [
+            
+
+        ]
+
+
+        var samples = {
+            clap:'samples/808/Clap.mp3',
+            closedHiHat:'samples/808/ClosedHihat.mp3',
+            cymbal:'samples/808/CYmbal.mp3',
+            hiConga:'samples/808/HiConga.mp3',
+            hiTom:'samples/808/HiTom.mp3',
+            kick:'samples/808/KickDrum.mp3',
+            lowConga:'samples/808/LowConga.mp3',
+            lowTom:'samples/808/LowTom.mp3',
+            midConga:'samples/808/MidConga.mp3',
+            midTom:'samples/808/MidTom.mp3',
+            openHiHat:'samples/808/OpenHihat.mp3',
+            snare:'samples/808/SnareDrum.mp3',
         }
-
-        canvas{
-            /*position: absolute;
-            top: 0px;
-            left: 0px;
-            right: 0px;
-            bottom:0px;
-            margin: auto;*/
-        }
-    </style>
-
-    <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
-    <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
-    <script src="phaser.min.js"></script>
-</head>
-<body>
-    <script type="text/javascript">
         
-    var socket = io();
-
-    var game = new Phaser.Game(1280, 720, Phaser.AUTO, '', { preload: preload, create: create, update: update, render: render });
 
 
-    var metronome = {};
+        tsw.load(samples, function (response) {
+            
 
+            for(key in response){
+                var sampleBuffer = response[key];
+                var sampleNode = tsw.bufferBox(sampleBuffer);
 
-    function preload() {
-    }
- 
-    function create() {
+                //connect each sample note to the gain
+                tsw.connect(sampleNode, tsw.speakers);
 
-        game.stage.backgroundColor = '0xEFEBE9'
-        addMetronome();
+                response[key] = sampleNode;
+            }
 
-
-        //setup input callbacks
-
-        game.input.onDown.add(function(){
-
-            pointer = game.input.activePointer;
-            pointerDown(pointer, pointer.x, pointer.y);
-
+            samples = response;
         });
 
-        game.input.addMoveCallback(pointerMove, this);
-
-        game.input.onUp.add(function(){
-
-            pointer = game.input.activePointer;
-            pointerDown(pointer, pointer.x, pointer.y);
-
-        });
-
-        // game.input.onUp.add(function(){
-            
-        // });
-
-    }
 
 
-    function pointerDown(pointer, x, y){
-        console.log('pointer down')
-    }
+		var two = new Two({
+			fullscreen: true,
+			type: Two.Types.canvas,
+		}).appendTo(document.body);
 
-    function pointerMove(pointer, x, y){
-        if(pointer.isDown){
 
-            
-        }
-    }
+		two.renderer.domElement.style.background = randomColor();
 
-    function pointerUp(pointer, x, y){
-        console.log(pointerUp)
-    }
-   
+
+		console.log(width, height, center, two.renderer);
 
 
 
 
+		
 
 
- 
-    function update() {
+        //Background Transitions
+		var horizontalWipe = (function() {
+            var color = randomColor(), startPos = -center.x, endPos = center.x;
 
-        //get elapsed miliseconds
-        // var time= new Date().getTime();
-        
+			var points = [
+				new Two.Anchor(- center.x, -center.y),
+				new Two.Anchor(center.x, - center.y),
+				new Two.Anchor(center.x, center.y),
+				new Two.Anchor(- center.x, center.y)
+		    ];
 
-        // if(time > lastStepTime+stepDuration){
-        //     lastStepTime = time;
-        //     currentStep++;
+		    var shape = two.makePolygon(points);
 
-        //     if(currentStep == totalSteps){
-        //         currentStep = 0;
-        //     }
+			shape.noStroke();
+			shape.visible = false;
+			
+			var start = function(onComplete) {
+                color = randomColor();
 
-        //     //update everything that needs it
-        //     metronome.update(currentStep);
-        // }
-    }
-
-
-
-
-
-
-
-    function render() {
-
-
-    }
-
-    
-
-    socket.on('step', function(currentStep){
-        metronome.update(currentStep);
-        //console.log(msg);
-        //game.add.sprite(msg.x, msg.y, ball);
-    });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    function addMetronome(){
-
-        metronome.steps = []
-
-        var stepWidth = Math.floor(game.stage.width/16);
-
-        var graphics = new Phaser.Graphics();
-        graphics.beginFill(0xFF0000);
-        graphics.drawRect(0, 0, stepWidth, 10);
-
-        square = game.add.renderTexture(stepWidth, 10, 'tick');
-        square.renderXY(graphics, 0, 0, true);
-
-        // metronome.minorTick = game.add.sprite(0,0,square);
-
-        for(var i=0; i<16; i++){
-
-            var step = game.add.sprite(i*stepWidth, 0, square);
-            step.visible = false;
-            metronome.steps.push(step);
-
-        }
-
-        metronome.update = function(currentStep){
-            
-            this.steps.forEach(function(step, index){
-
-                if(index == currentStep){
-                    step.visible = true;
+                if(Math.round(Math.random()) == 0){
+                    startPos = -center.x;
+                    endPos = center.x;
                 }else{
-                    step.visible = false;
+                    startPos = center.x*1.5;
+                    endPos = center.x;
                 }
-            });     
-        }
-    }
 
- 
-    </script>
- 
-    </body>
+				reset();
+                shape.visible = true;
+				animateIn.start();
+			}
+
+			var reset = function(){
+                shape.fill = color;
+				shape.translation.set(startPos, center.y);
+                // shape.visible = false;
+			}
+
+			var animateIn = new TWEEN.Tween(shape.translation)
+				.to({x:endPos}, duration * 0.5)
+				.easing(Easing.Exponential.Out)
+				.onComplete(function() {
+					two.renderer.domElement.style.background = color;
+                    reset();
+
+				});
+
+			var published = {
+				start:start,
+				reset:reset,
+				name:'horizontalWipe'
+			}
+
+			reset();
+
+			animations[published.name] = published;
+			return published;
+
+		})();
+
+
+		var verticalWipe = (function() {
+            var color = randomColor(), startPos = -center.y, endPos = center.y;
+
+            var points = [
+                new Two.Anchor(- center.x, -center.y),
+                new Two.Anchor(center.x, - center.y),
+                new Two.Anchor(center.x, center.y),
+                new Two.Anchor(- center.x, center.y)
+            ];
+
+            var shape = two.makePolygon(points);
+
+            shape.noStroke();
+            shape.visible = false;
+            
+            var start = function(onComplete) {
+                color = randomColor();
+
+                if(Math.round(Math.random()) == 0){
+                    startPos = -center.y;
+                    endPos = center.y;
+                }else{
+                    startPos = center.y*1.5;
+                    endPos = center.y;
+                }
+
+                reset();
+                shape.visible = true;
+                animateIn.start();
+            }
+
+            var reset = function(){
+                shape.fill = color;
+                shape.translation.set(center.x, startPos);
+                // shape.visible = false;
+            }
+
+            var animateIn = new TWEEN.Tween(shape.translation)
+                .to({y:endPos}, duration * 0.5)
+                .easing(Easing.Exponential.Out)
+                .onComplete(function() {
+                    two.renderer.domElement.style.background = color;
+                    reset();
+                });
+
+            var published = {
+                start:start,
+                reset:reset,
+                name:'verticalWipe'
+            }
+
+            reset();
+
+            animations[published.name] = published;
+            return published;
+
+        })();
+
+
+
+        var circularZoom = (function() {
+            var color = randomColor(); pos = new Two.Vector(Math.floor(Math.random()*width), Math.floor(Math.random()*height));
+            var shape = two.makeCircle(pos.x,pos.y, width*0.77);
+
+            shape.noStroke();
+            // shape.visible = false;
+            
+            var start = function(onComplete) {
+                color = randomColor();
+
+                pos.x = Math.floor(Math.random()*width);
+                pos.y = Math.floor(Math.random()*height);
+
+                reset();
+                shape.visible = true;
+                translateIn.start();
+                scaleIn.start();
+
+                console.log(shape)
+            }
+
+            var reset = function(){
+                shape.fill = color;
+                shape.translation.set(pos.x, pos.y);
+                shape.scale = 0;
+                shape.visible = false;
+            }
+
+            var translateIn = new TWEEN.Tween(shape.translation, shape)
+                .to({x:center.x, y:center.y}, duration * 0.5)
+                .easing(Easing.Exponential.Out)
+                .onComplete(function() {
+                });
+
+            var scaleIn = new TWEEN.Tween(shape)
+                .to({scale:1}, duration * 0.5)
+                .easing(Easing.Exponential.Out)
+                .onComplete(function() {
+                    two.renderer.domElement.style.background = color;
+                    reset();
+                });
+
+            var published = {
+                start:start,
+                reset:reset,
+                name:'circularZoom'
+            }
+
+            reset();
+
+            animations[published.name] = published;
+            return published;
+
+        })();
+
+
+
+
+
+        var pew = (function() {
+            var color = randomColor(); pos = new Two.Vector(Math.floor(Math.random()*width), Math.floor(Math.random()*height));
+
+            
+            var shape 
+            
+
+            // shape.noStroke();
+            // shape.visible = false;
+            
+            var start = function(onComplete) {
+
+                
+                if(Math.round(Math.random())){
+                   shape = two.makePolygon([new Two.Anchor(Math.floor(Math.random()*width), 0), new Two.Anchor(Math.floor(Math.random()*width), height)], true);
+                    shape.subdivide();
+                }else{
+                    shape = two.makePolygon([new Two.Anchor(0, Math.floor(Math.random()*height)), new Two.Anchor(width, Math.floor(Math.random()*height))], true);
+                    shape.subdivide();
+                }
+
+
+                shape.noFill();
+                shape.stroke = '#fff';
+                shape.linewidth = 20;
+                shape.cap = 'round'
+                shape.beginning = 0;
+                shape.ending = 0;
+
+                console.log(shape);
+                
+                var animate = new TWEEN.Tween(shape)
+                .to({beginning:1, ending:1.5}, duration * 0.5)
+                .easing(Easing.Exponential.Out)
+                .onComplete(function() {
+                    shape.remove();
+                });
+
+                animate.start();
+            }
+
+            var reset = function(){
+                
+                
+            }
+
+            
+
+
+            var published = {
+                start:start,
+                reset:reset,
+                name:'pew'
+            }
+
+            // reset();
+
+            animations[published.name] = published;
+            return published;
+
+        })();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        var jitterThread = (function() {
+            
+
+            var start = function(){
+                if(thread){
+                    thread.jitter(); 
+                }
+                
+            }
+
+            var published = {
+                start:start,
+                name:'jitterThread'
+            }
+
+          
+
+            animations[published.name] = published;
+            return published;
+
+        })();
+
+
+        var pulseThread = (function() {
+            
+
+            var start = function(){
+                if(thread){
+                    thread.pulse(); 
+                }
+                
+            }
+
+            var published = {
+                start:start,
+                name:'pulseThread'
+            }
+
+          
+
+            animations[published.name] = published;
+            return published;
+
+        })();
+
+
+
+
+
+
+		// var squiggle = (function() {
+
+		// 	var shape = two.makeCurve(
+	 //            _.map(_.range(100), function(i) {
+		// 			var percent = i / (100 - 1);
+		// 			var theta = percent * TWO_PI * 1.5 + Math.PI / 2;
+
+		// 			var x = width * percent - width / 2;
+		// 			var y = height / 8 * Math.sin(theta);
+		// 			return new Two.Anchor(x, y);
+	 //            }),
+	 //            true
+	 //        );
+			
+		// 	shape.noFill();
+		// 	shape.stroke = '#fff';
+		// 	shape.linewidth = 40;
+
+		// 	shape.translation.set(center.x, center.y);
+			
+			
+
+		// 	var start = function(onComplete) {
+		// 		reset();
+		// 		animateIn.start();
+		// 	}
+
+		// 	var reset = function(){
+		// 		shape.beginning = 0;
+		// 		shape.ending = 0;
+		// 	}
+
+		// 	var animateIn = new TWEEN.Tween(shape)
+		// 		.to({ending:1.5, beginning:1}, duration * 0.5)
+		// 		.easing(Easing.Sinusoidal.Out)
+		// 		.onComplete(function() {
+		// 			reset();
+		// 		});
+
+
+
+			
+
+		// 	var published = {
+		// 		start:start,
+		// 		reset:reset,
+		// 		name:'squiggle'
+		// 	}
+
+		// 	reset();
+
+		// 	animations[published.name] = published;
+		// 	return published;
+
+		// })()
+
+
+
+
+        
+		
+        var thread;
+
+        // window.setInterval(function(){
+        //     trigger('pulseThread');
+        // }, 1000);
+
+
+		$(document).ready(function(){
+
+			two.bind('update', function(frameCount) {
+				// console.log('update');
+                TWEEN.update();
+	           
+                       
+                if(thread){
+                    thread.update(frameCount);
+                }
+		
+
+	      	}).play();
+
+		});
+
+
+        $(window).bind('mousedown', dragStart);
+
+
+
+		$(window).bind('keydown', function(e, d) {
+
+	        if (e.metaKey || e.ctrlKey) {
+	          return;
+	        }
+
+	        e.preventDefault();
+	        var code = e.which || d;
+	        var i;
+
+	        switch (code) {
+	        	case 81:
+		            i = 'horizontalWipe';
+                    samples.closedHiHat.play();
+		            break;
+		        case 87:
+		            i = 'verticalWipe';
+                    samples.openHiHat.play();
+		            break;
+                case 69:
+                    i = 'circularZoom';
+                    samples.kick.play();
+                    break;
+                case 82:
+                    i = 'pew';
+                    samples.clap.play();
+                    break;
+
+
+                //
+                case 78:
+                    i = 'pulseThread';
+                    break;
+                case 77:
+                    i = 'jitterThread';
+                    break;
+	        }
+
+	        trigger(i)
+            trigger('jitterThread')
+	    });
+
+
+	    function trigger(i){
+	    	animations[i].start();
+            
+	    }
+
+
+	    function makeNgon(w, h, s){
+	    	var shape = this.makePolygon(
+				_.map(_.range(s), function(i) {
+					var percent = i / s;
+					var theta = TWO_PI * percent - Math.PI / 2;
+					var x = w * Math.cos(theta);
+					var y = h * Math.sin(theta);
+					return new Two.Anchor(x, y);
+				})
+			);
+
+			return shape
+	    }
+
+        function randomColor(){
+            return colors[Math.floor(Math.random()*colors.length)];
+        }
+
+
+	</script>
+	</body>
 </html>
