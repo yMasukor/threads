@@ -5,8 +5,14 @@
 	<script src="lib/tween.min.js"></script>
     <script src="lib/tsw.js"></script>
 	<script src="lib/two.js"></script>
+
+	<script src="https://cdn.socket.io/socket.io-1.3.3.js"></script>
+
+	<script></script>
 	
-    <script src="threads-alt.js"></script>
+	
+
+
 	</head>
 	<body>
 
@@ -17,138 +23,158 @@
         var width = $(window).width(), height = $(window).height();
         var center = {x: width/2, y:height/2}
 
-        var duration = 1000;
-        var animations = {}
-        var Easing = TWEEN.Easing;
-
-        var colors=[
-            //Cool Grey
-            '#263238', 
-            '#ECEFF1', 
-            '#607D8B', 
-            //Reds
-            '#F44336', 
-            '#B71C1C', 
-            '#FF8A80', 
-            //Pinks
-            '#E91E63', 
-            '#880E4F', 
-            '#FF80AB', 
-            //Purples
-            '#9C27B0', 
-            '#4A148C', 
-            '#EA80FC', 
-            //Deep Purple
-            '#673AB7', 
-            '#311B92', 
-            '#B388FF', 
-            //Indigo
-            '#3F51B5', 
-            '#1A237E', 
-            '#8C9EFF',
-            //Blue
-            '#2196F3', 
-            '#0D47A1', 
-            '#82B1FF',
-            //Light Blue
-            '#03A9F4', 
-            '#01579B', 
-            '#80D8FF',
-            //Cyan
-            '#00BCD4', 
-            '#006064', 
-            '#84FFFF',
-            //Teal
-            '#009688', 
-            '#004D40', 
-            '#A7FFEB',
-            //Green
-            '#4CAF50', 
-            '#1B5E20', 
-            '#B9F6CA',
-            //Light Green
-            '#8BC34A', 
-            '#33691E', 
-            '#CCFF90',
-            //Lime
-            '#CDDC39', 
-            '#827717', 
-            '#F4FF81',
-            //Yellow
-            '#FFEB3B', 
-            '#F57F17', 
-            '#FFFF8D', 
-            //Amber
-            '#FFC107', 
-            '#FF6F00', 
-            '#FFE57F', 
-            //Orange
-            '#3F51B5', 
-            '#1A237E', 
-            '#8C9EFF', 
-            //Deep Orange
-            '#FF5722', 
-            '#BF360C', 
-            '#FF9E80', 
-            //Brown
-            '#795548', 
-            '#3E2723', 
-            '#BCAAA4', 
-            //White
-            '#FFFFFF' 
-            ]
-
-
-
-
-        var backgroundColors = [
-            
-
-        ]
-
-
-        var samples = {
-            clap:'samples/808/Clap.mp3',
-            closedHiHat:'samples/808/ClosedHihat.mp3',
-            cymbal:'samples/808/CYmbal.mp3',
-            hiConga:'samples/808/HiConga.mp3',
-            hiTom:'samples/808/HiTom.mp3',
-            kick:'samples/808/KickDrum.mp3',
-            lowConga:'samples/808/LowConga.mp3',
-            lowTom:'samples/808/LowTom.mp3',
-            midConga:'samples/808/MidConga.mp3',
-            midTom:'samples/808/MidTom.mp3',
-            openHiHat:'samples/808/OpenHihat.mp3',
-            snare:'samples/808/SnareDrum.mp3',
-        }
-        
-
-
-        tsw.load(samples, function (response) {
-            
-
-            for(key in response){
-                var sampleBuffer = response[key];
-                var sampleNode = tsw.bufferBox(sampleBuffer);
-
-                //connect each sample note to the gain
-                tsw.connect(sampleNode, tsw.speakers);
-
-                response[key] = sampleNode;
-            }
-
-            samples = response;
-        });
-
-
-
-		var two = new Two({
+        var two = new Two({
 			fullscreen: true,
 			type: Two.Types.canvas,
 		}).appendTo(document.body);
 
 
-		two.renderer.domElement.style.background = randomColor();
+        var sixteenthNoteDuration = 125;
+
+        var duration = sixteenthNoteDuration*16;
+        var animations = {}
+        var Easing = TWEEN.Easing;
+
+        var socket = io();
+
+
+
+        
+		var beatCount = 0;
+		var barCount = 0;
+        
+
+        // var colors=[
+        //     //Cool Grey
+        //     '#263238', 
+        //     '#ECEFF1', 
+        //     '#607D8B', 
+        //     //Reds
+        //     '#F44336', 
+        //     '#B71C1C', 
+        //     '#FF8A80', 
+        //     //Pinks
+        //     '#E91E63', 
+        //     '#880E4F', 
+        //     '#FF80AB', 
+        //     //Purples
+        //     '#9C27B0', 
+        //     '#4A148C', 
+        //     '#EA80FC', 
+        //     //Deep Purple
+        //     '#673AB7', 
+        //     '#311B92', 
+        //     '#B388FF', 
+        //     //Indigo
+        //     '#3F51B5', 
+        //     '#1A237E', 
+        //     '#8C9EFF',
+        //     //Blue
+        //     '#2196F3', 
+        //     '#0D47A1', 
+        //     '#82B1FF',
+        //     //Light Blue
+        //     '#03A9F4', 
+        //     '#01579B', 
+        //     '#80D8FF',
+        //     //Cyan
+        //     '#00BCD4', 
+        //     '#006064', 
+        //     '#84FFFF',
+        //     //Teal
+        //     '#009688', 
+        //     '#004D40', 
+        //     '#A7FFEB',
+        //     //Green
+        //     '#4CAF50', 
+        //     '#1B5E20', 
+        //     '#B9F6CA',
+        //     //Light Green
+        //     '#8BC34A', 
+        //     '#33691E', 
+        //     '#CCFF90',
+        //     //Lime
+        //     '#CDDC39', 
+        //     '#827717', 
+        //     '#F4FF81',
+        //     //Yellow
+        //     '#FFEB3B', 
+        //     '#F57F17', 
+        //     '#FFFF8D', 
+        //     //Amber
+        //     '#FFC107', 
+        //     '#FF6F00', 
+        //     '#FFE57F', 
+        //     //Orange
+        //     '#3F51B5', 
+        //     '#1A237E', 
+        //     '#8C9EFF', 
+        //     //Deep Orange
+        //     '#FF5722', 
+        //     '#BF360C', 
+        //     '#FF9E80', 
+        //     //Brown
+        //     '#795548', 
+        //     '#3E2723', 
+        //     '#BCAAA4', 
+        //     //White
+        //     '#FFFFFF' 
+        //     ]
+
+
+        var threads = [];
+
+
+        var colors = [
+        	'rgb(217, 82, 31)',
+        	'rgb(143, 74, 45)',
+        	'rgb(255, 108, 87)',
+        	'rgb(255, 126, 138)',
+        	'rgb(227, 190, 141)',
+        	'rgb(255, 255, 255)',
+        	'rgb(0, 0, 20)',
+
+        ]
+
+
+        var backingTrack = {
+
+        }
+
+
+       
+
+        var themes = [
+        	//Orange
+	        {
+	        	back:'rgb(217, 82, 31)',
+	        	mid: 'rgb(143, 74, 45)',
+	        	fore: 'rgb(255, 108, 87)',
+	        	highlight: 'rgb(255, 126, 138)',
+	        	accent: 'rgb(227, 190, 141)',
+	        	light: 'rgb(255, 255, 255)',
+	        	dark: 'rgb(0, 0, 20)'
+	        },
+
+	        //Purple
+	        {
+	        	back:'rgb(39, 6, 54)',
+	        	mid: 'rgb(69, 26, 87)',
+	        	fore: 'rgb(252, 25, 246)',
+	        	highlight: 'rgb(52, 255, 253)',
+	        	accent: 'rgb(133, 102, 193)',
+	        	light: 'rgb(253, 228, 252)',
+	        	dark: 'rgb(255, 255, 255)'
+	        }
+        ]
+
+
+
+
+
+
+
+		
 
 
 		console.log(width, height, center, two.renderer);
@@ -159,475 +185,341 @@
 		
 
 
-        //Background Transitions
-		var horizontalWipe = (function() {
-            var color = randomColor(), startPos = -center.x, endPos = center.x;
-
-			var points = [
-				new Two.Anchor(- center.x, -center.y),
-				new Two.Anchor(center.x, - center.y),
-				new Two.Anchor(center.x, center.y),
-				new Two.Anchor(- center.x, center.y)
-		    ];
-
-		    var shape = two.makePolygon(points);
-
-			shape.noStroke();
-			shape.visible = false;
-			
-			var start = function(onComplete) {
-                color = randomColor();
-
-                if(Math.round(Math.random()) == 0){
-                    startPos = -center.x;
-                    endPos = center.x;
-                }else{
-                    startPos = center.x*1.5;
-                    endPos = center.x;
-                }
-
-				reset();
-                shape.visible = true;
-				animateIn.start();
-			}
-
-			var reset = function(){
-                shape.fill = color;
-				shape.translation.set(startPos, center.y);
-                // shape.visible = false;
-			}
-
-			var animateIn = new TWEEN.Tween(shape.translation)
-				.to({x:endPos}, duration * 0.5)
-				.easing(Easing.Exponential.Out)
-				.onComplete(function() {
-					two.renderer.domElement.style.background = color;
-                    reset();
-
-				});
-
-			var published = {
-				start:start,
-				reset:reset,
-				name:'horizontalWipe'
-			}
-
-			reset();
-
-			animations[published.name] = published;
-			return published;
-
-		})();
-
-
-		var verticalWipe = (function() {
-            var color = randomColor(), startPos = -center.y, endPos = center.y;
-
-            var points = [
-                new Two.Anchor(- center.x, -center.y),
-                new Two.Anchor(center.x, - center.y),
-                new Two.Anchor(center.x, center.y),
-                new Two.Anchor(- center.x, center.y)
-            ];
-
-            var shape = two.makePolygon(points);
-
-            shape.noStroke();
-            shape.visible = false;
-            
-            var start = function(onComplete) {
-                color = randomColor();
-
-                if(Math.round(Math.random()) == 0){
-                    startPos = -center.y;
-                    endPos = center.y;
-                }else{
-                    startPos = center.y*1.5;
-                    endPos = center.y;
-                }
-
-                reset();
-                shape.visible = true;
-                animateIn.start();
-            }
-
-            var reset = function(){
-                shape.fill = color;
-                shape.translation.set(center.x, startPos);
-                // shape.visible = false;
-            }
-
-            var animateIn = new TWEEN.Tween(shape.translation)
-                .to({y:endPos}, duration * 0.5)
-                .easing(Easing.Exponential.Out)
-                .onComplete(function() {
-                    two.renderer.domElement.style.background = color;
-                    reset();
-                });
+        
+
+
+
+
+		var states = [
+			{
+				theme:themes[0],
+
+				//Thread behaviour
+				threadOpts:{
+					//An array of shapes to draw
+					shapes:[
+				        {
+				            color:themes[0].mid,
+				            weight: 1,
+				            yOffset:-100,
+				            filled:true,
+				        },
+
+				        {
+				            color:themes[0].fore,
+				            weight: 3,
+				            yOffset:0,
+				            filled:true,
+				        },
+
+				        {
+				            color:themes[0].light,
+				            weight: 5,
+				            yOffset:100,
+				            filled:true,
+				        }
+				    ]
+				},
+
+				//Cuepoint Behaviour
+				cuepointOpts:{
+					onCreate:function(){
+						//Must return a display object
+						//This references cuepoint object
+				        var circle = two.makeCircle(this.x, this.y, this.size);
+				        circle.fill = state.theme.accent;
+				        circle.noStroke();
+				        circle.scale = 0.1;
+				        return circle;
+					},
+					onTrigger:function(){
+						//Animation for cuepoint trigger
+						//This references cuepoint object
+
+						//Cuepoint Animation
+				        var triggerAnimation = new TWEEN.Tween(this.display)
+				            .to({scale:2, opacity:0}, duration * 0.25)
+				            .easing(Easing.Circular.Out)
+				            .onComplete(function() {
+				                this.scale = 0.1;
+				                this.opacity = 1;
+				            });
+
+				        triggerAnimation.start();
+
+				        //Secondary animations
+				        this.thread.jitter();
+
+				        //Trigger audio for cuepoint
+				        var i = Math.floor((Math.min(this.size, 100)/100)*24);
+				        samples[Object.keys(samples)[i]].play();
+					},
+					onDestroy:function(){
+
+					}
+				}
+			},
+
+
+			{
+				theme:themes[1],
+
+				//Thread behaviour
+				threadOpts:{
+					//An array of shapes to draw
+					shapes:[
+				        {
+				            color:themes[1].mid,
+				            weight: 1,
+				            yOffset:0,
+				            filled:false,
+				        },
+
+				        {
+				            color:themes[1].fore,
+				            weight: 3,
+				            yOffset:0,
+				            filled:false,
+				        },
+
+				        {
+				            color:themes[1].light,
+				            weight: 5,
+				            yOffset:0,
+				            filled:false,
+				        }
+				    ]
+				},
 
-            var published = {
-                start:start,
-                reset:reset,
-                name:'verticalWipe'
-            }
+				//Cuepoint Behaviour
+				cuepointOpts:{
+					onCreate:function(){
+						//Must return a display object
+						//This references cuepoint object
+				        var circle = two.makeCircle(this.x, this.y, this.size);
+				        circle.fill = state.theme.accent;
+				        circle.noStroke();
+				        circle.scale = 0.1;
+				        return circle;
+					},
+					onTrigger:function(){
+						//Animation for cuepoint trigger
+						//This references cuepoint object
 
-            reset();
+						//Cuepoint Animation
+				        var triggerAnimation = new TWEEN.Tween(this.display)
+				            .to({scale:2, opacity:0}, duration * 0.25)
+				            .easing(Easing.Circular.Out)
+				            .onComplete(function() {
+				                this.scale = 0.1;
+				                this.opacity = 1;
+				            });
 
-            animations[published.name] = published;
-            return published;
+				        triggerAnimation.start();
 
-        })();
+				        //Secondary animations
+				        this.thread.jitter();
 
+				        //Trigger audio for cuepoint
+				        var i = Math.floor((Math.min(this.size, 100)/100)*24);
+				        samples[Object.keys(samples)[i]].play();
+					},
+					onDestroy:function(){
 
+					}
+				}
+			},
 
-        var circularZoom = (function() {
-            var color = randomColor(); pos = new Two.Vector(Math.floor(Math.random()*width), Math.floor(Math.random()*height));
-            var shape = two.makeCircle(pos.x,pos.y, width*0.77);
+		]
 
-            shape.noStroke();
-            // shape.visible = false;
-            
-            var start = function(onComplete) {
-                color = randomColor();
 
-                pos.x = Math.floor(Math.random()*width);
-                pos.y = Math.floor(Math.random()*height);
+		var state = states[0];
 
-                reset();
-                shape.visible = true;
-                translateIn.start();
-                scaleIn.start();
 
-                console.log(shape)
-            }
+		two.renderer.domElement.style.background = state.theme.back;
 
-            var reset = function(){
-                shape.fill = color;
-                shape.translation.set(pos.x, pos.y);
-                shape.scale = 0;
-                shape.visible = false;
-            }
 
-            var translateIn = new TWEEN.Tween(shape.translation, shape)
-                .to({x:center.x, y:center.y}, duration * 0.5)
-                .easing(Easing.Exponential.Out)
-                .onComplete(function() {
-                });
 
-            var scaleIn = new TWEEN.Tween(shape)
-                .to({scale:1}, duration * 0.5)
-                .easing(Easing.Exponential.Out)
-                .onComplete(function() {
-                    two.renderer.domElement.style.background = color;
-                    reset();
-                });
 
-            var published = {
-                start:start,
-                reset:reset,
-                name:'circularZoom'
-            }
 
-            reset();
 
-            animations[published.name] = published;
-            return published;
 
-        })();
-
-
-
-
-
-        var pew = (function() {
-            var color = randomColor(); pos = new Two.Vector(Math.floor(Math.random()*width), Math.floor(Math.random()*height));
-
-            
-            var shape 
-            
-
-            // shape.noStroke();
-            // shape.visible = false;
-            
-            var start = function(onComplete) {
-
-                
-                if(Math.round(Math.random())){
-                   shape = two.makePolygon([new Two.Anchor(Math.floor(Math.random()*width), 0), new Two.Anchor(Math.floor(Math.random()*width), height)], true);
-                    shape.subdivide();
-                }else{
-                    shape = two.makePolygon([new Two.Anchor(0, Math.floor(Math.random()*height)), new Two.Anchor(width, Math.floor(Math.random()*height))], true);
-                    shape.subdivide();
-                }
-
-
-                shape.noFill();
-                shape.stroke = '#fff';
-                shape.linewidth = 20;
-                shape.cap = 'round'
-                shape.beginning = 0;
-                shape.ending = 0;
-
-                console.log(shape);
-                
-                var animate = new TWEEN.Tween(shape)
-                .to({beginning:1, ending:1.5}, duration * 0.5)
-                .easing(Easing.Exponential.Out)
-                .onComplete(function() {
-                    shape.remove();
-                });
-
-                animate.start();
-            }
-
-            var reset = function(){
-                
-                
-            }
-
-            
-
-
-            var published = {
-                start:start,
-                reset:reset,
-                name:'pew'
-            }
-
-            // reset();
-
-            animations[published.name] = published;
-            return published;
-
-        })();
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        var jitterThread = (function() {
-            
-
-            var start = function(){
-                if(thread){
-                    thread.jitter(); 
-                }
-                
-            }
-
-            var published = {
-                start:start,
-                name:'jitterThread'
-            }
-
-          
-
-            animations[published.name] = published;
-            return published;
-
-        })();
-
-
-        var pulseThread = (function() {
-            
-
-            var start = function(){
-                if(thread){
-                    thread.pulse(); 
-                }
-                
-            }
-
-            var published = {
-                start:start,
-                name:'pulseThread'
-            }
-
-          
-
-            animations[published.name] = published;
-            return published;
-
-        })();
-
-
-
-
-
-
-		// var squiggle = (function() {
-
-		// 	var shape = two.makeCurve(
-	 //            _.map(_.range(100), function(i) {
-		// 			var percent = i / (100 - 1);
-		// 			var theta = percent * TWO_PI * 1.5 + Math.PI / 2;
-
-		// 			var x = width * percent - width / 2;
-		// 			var y = height / 8 * Math.sin(theta);
-		// 			return new Two.Anchor(x, y);
-	 //            }),
-	 //            true
-	 //        );
-			
-		// 	shape.noFill();
-		// 	shape.stroke = '#fff';
-		// 	shape.linewidth = 40;
-
-		// 	shape.translation.set(center.x, center.y);
-			
-			
-
-		// 	var start = function(onComplete) {
-		// 		reset();
-		// 		animateIn.start();
-		// 	}
-
-		// 	var reset = function(){
-		// 		shape.beginning = 0;
-		// 		shape.ending = 0;
-		// 	}
-
-		// 	var animateIn = new TWEEN.Tween(shape)
-		// 		.to({ending:1.5, beginning:1}, duration * 0.5)
-		// 		.easing(Easing.Sinusoidal.Out)
-		// 		.onComplete(function() {
-		// 			reset();
-		// 		});
-
-
-
-			
-
-		// 	var published = {
-		// 		start:start,
-		// 		reset:reset,
-		// 		name:'squiggle'
-		// 	}
-
-		// 	reset();
-
-		// 	animations[published.name] = published;
-		// 	return published;
-
-		// })()
 
 
 
 
         
-		
-        var thread;
+		function Player(id){
+			this.id = id;
+			this.thread = null;
+			// this.threadOpts = state.threadOpts[0]
+		}
 
-        // window.setInterval(function(){
-        //     trigger('pulseThread');
-        // }, 1000);
+		Player.prototype.dragStart = function(e){
+			console.log('drag start')
+			if(!this.thread){
+				this.thread = new Thread(e.x, e.y);
+				this.thread.shapeOpts = state.threadOpts.shapes;
+				threads.push(this.thread);
+			}else{
+
+
+				console.log(this.thread.state)
+
+				if(this.thread.state == 'recycled'){
+					this.thread.lastPos = new Two.Anchor(0, e.y+10);
+					this.thread.shapeOpts = state.threadOpts.shapes;
+					this.thread.state = 'creating'
+				}
+
+			}
+        }
+
+        Player.prototype.drag = function(e){
+        	if(this.thread.state == 'creating'){
+        		var pos = new Two.Anchor(e.x, e.y);
+            	this.thread.draw(pos);
+        	}
+        	
+        }
+
+        Player.prototype.dragEnd = function(e){
+        	if(this.thread.state == 'creating'){
+	        	var pos = new Two.Anchor(e.x, e.y);
+	            this.thread.endDraw(pos);
+	        }
+        }
+
+
+
+
+
+		var players = {};
+		var threads = [];
+
+        
+		
 
 
 		$(document).ready(function(){
 
+			//bind sockets
+
+			//connect to the server
+			socket.emit('connectViewer');
+
+			socket.on('connected', function(existingPlayers){
+				existingPlayers.forEach(function(playerId){
+					addPlayer(playerId);
+				});
+
+				console.log('viewer connected, existing players', players, existingPlayers);
+			});
+
+			//add player when they connect
+			socket.on('addPlayer', function(playerId){
+				addPlayer(playerId);
+			});
+
+			//recieve player input
+			socket.on('playerUpdate', function(input){
+
+				// console.log('update', input)
+
+				if(input.type == 'start'){
+					players[input.id].dragStart(input);
+				}else if(input.type == 'drag'){
+					players[input.id].drag(input);
+				}else if(input.type == 'end'){
+					players[input.id].dragEnd(input);
+				}
+			});
+
+
+
+			//Listen for tick
+			socket.on('tick', function(beatCount){
+				if(beatCount == 0){
+					console.log('new bar', animations);
+
+					setState(states[Math.floor(Math.random()*states.length)])
+				}
+
+
+				//16th note here
+
+				threads.forEach(function(thread){
+					thread.triggerCuePoints(beatCount)
+				});
+			});
+
+
+
+
+
+
+
 			two.bind('update', function(frameCount) {
-				// console.log('update');
+				//Update animateables
                 TWEEN.update();
 	           
-                       
-                if(thread){
-                    thread.update(frameCount);
-                }
+                threads.forEach(function(thread){
+                	thread.update();
+                });
 		
 
 	      	}).play();
-
 		});
 
 
-        $(window).bind('mousedown', dragStart);
+		function addPlayer(playerId){
+			var player = new Player(playerId);
+			players[playerId] = player;
+
+			console.log('players', players)
+		}
 
 
 
-		$(window).bind('keydown', function(e, d) {
-
-	        if (e.metaKey || e.ctrlKey) {
-	          return;
-	        }
-
-	        e.preventDefault();
-	        var code = e.which || d;
-	        var i;
-
-	        switch (code) {
-	        	case 81:
-		            i = 'horizontalWipe';
-                    samples.closedHiHat.play();
-		            break;
-		        case 87:
-		            i = 'verticalWipe';
-                    samples.openHiHat.play();
-		            break;
-                case 69:
-                    i = 'circularZoom';
-                    samples.kick.play();
-                    break;
-                case 82:
-                    i = 'pew';
-                    samples.clap.play();
-                    break;
 
 
-                //
-                case 78:
-                    i = 'pulseThread';
-                    break;
-                case 77:
-                    i = 'jitterThread';
-                    break;
-	        }
 
-	        trigger(i)
-            trigger('jitterThread')
-	    });
+		function setState(newState){
+
+			state = newState;
+			//update background color
+			animations['horizontalWipe'].start(state.theme.back);
 
 
-	    function trigger(i){
-	    	animations[i].start();
-            
-	    }
+			//update 
+		}
 
 
-	    function makeNgon(w, h, s){
-	    	var shape = this.makePolygon(
-				_.map(_.range(s), function(i) {
-					var percent = i / s;
-					var theta = TWO_PI * percent - Math.PI / 2;
-					var x = w * Math.cos(theta);
-					var y = h * Math.sin(theta);
-					return new Two.Anchor(x, y);
-				})
-			);
 
-			return shape
-	    }
 
-        function randomColor(){
-            return colors[Math.floor(Math.random()*colors.length)];
-        }
+	 //    function makeNgon(w, h, s){
+	 //    	var shape = this.makePolygon(
+		// 		_.map(_.range(s), function(i) {
+		// 			var percent = i / s;
+		// 			var theta = TWO_PI * percent - Math.PI / 2;
+		// 			var x = w * Math.cos(theta);
+		// 			var y = h * Math.sin(theta);
+		// 			return new Two.Anchor(x, y);
+		// 		})
+		// 	);
+
+		// 	return shape
+	 //    }
+
+
 
 
 	</script>
+
+	<script src="CuePoint.js"></script>
+    <script src="threads-alt.js"></script>
+    <script src="metronome.js"></script>
+    <script src="animations.js"></script>
+    <script src="audio.js"></script>
 	</body>
 </html>

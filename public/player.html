@@ -1,242 +1,191 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-<head>
-	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-		<title></title>
-		<meta charset="utf-8">
-
-	<script src="lib/proton-1.0.1.js"></script>
-	<script src="lib/phaser.min.js"></script>
-	<script src="lib/dat.gui.min.js"></script>
-
-	<script src="ParticleSystem.js"></script>
-	<script src="AudioPlayer.js"></script>
-
-	<meta name="mobile-web-app-capable" content="yes">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-
-	<style type="text/css">
-		canvas, body, html{
-			margin: 0px;
-			padding: 0px;
-            position: absolute;
-            top: 0px;
-            left: 0px;
-            right: 0px;
-            bottom:0px;
-            overflow: hidden;
-
-        }
-	</style>
-
-</head>
-	<body>
-		<script>
-
-
-
-			var width, height, game, player, soundManager, bmd, controls
-
-			width = window.innerWidth
-			height = window.innerHeight
-
-
-			var stepCount = 0;
-
-			var bar = {
-				clap:{steps:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], sprites:[]},
-				closedHiHat:{steps:[1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0], sprites:[]},
-				hiConga:{steps:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], sprites:[]},
-				hiTom:{steps:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], sprites:[]},
-				lowConga:{steps:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], sprites:[]},
-				lowTom:{steps:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], sprites:[]},
-				midConga:{steps:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], sprites:[]},
-				midTom:{steps:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], sprites:[]},
-				openHiHat:{steps:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], sprites:[]},
-				snare:{steps:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0], sprites:[]},
-				kick:{steps:[1,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0], sprites:[]}
-			}
-				
-
-
-			game = new Phaser.Game(width, height, Phaser.AUTO, 'phaser-example', { preload: preload, create: create, update: update }, false, false);
-			audioPlayer = new AudioPlayer(game);
-			
-
-			function preload()
-			{
-
-				audioPlayer.load();
-				// game.load.audio('kick', 'samples/808/KickDrum.mp3');
-			}
-
-			function create()
-			{
-
-				audioPlayer.init();
-
-				game.time.events.loop(125, step, this);
-
-
-
-
-
-
-				particleLayer = new ParticleSystem(game, null);
-				particleLayer.init();
-				particleLayer.setState({
-					randomFill:false,
-					fill:'#FFFFFF',
-					minRate:10,
-					maxRate:8,
-					frequency: 0,
-					minLife:'infinity',
-					maxLife:'infinity',
-					driftX:10,
-					driftY:10,
-				});
-
-				bmd = game.make.bitmapData(game.width, game.height);
-				var sprite = game.add.sprite(0,0, bmd);
-				// particleLayer.emitter.emit();
-
-				particleLayer.burst()
-
-
-				
-				for(track in bar){
-
-					bar[track].steps.forEach(function(item, i){
-
-						if(Math.floor(Math.random()*32) == 0){
-							bar[track].steps[i] = 1
-						}
-						else{
-							// bar[track].steps[i] = 0;
-						}
-					});	
-				}
-
-				console.log(bar)
-
-
-
-				var size = width/24
-
-				var circle = game.add.bitmapData(size, size);
-				circle.circle(size/2, size/2, size/4, '#FFFFFF');
-					
-
-				console.log(size)
-				// controls = game.add.sprite(width/2-((16*48)/2), height/2-((2*48)/2));
-
-				controls = game.add.sprite()
-
-				var i=0
-
-				for(track in bar){
-					i++;
-					for(var j=0; j<16; j++){
-						var sprite = controls.addChild(game.make.sprite((j*size)+(width/2 - (size*15)/2),(i*size)+(height/2 - (size*12)/2) , circle));
-
-						if(!bar[track].steps[j]){
-							sprite.on = false;
-							sprite.tint = 0x111111;
-						}
-
-						bar[track].sprites.push(sprite);
-
-						sprite.track = track;
-						sprite.stepIndex = j;
-
-						sprite.anchor.x = 0.5;
-						sprite.anchor.y = 0.5;
-
-						sprite.inputEnabled = true;
-						sprite.input.useHandCursor = true; //if you want a hand cursor
-						sprite.events.onInputDown.add(padPressed, this);
-
-						// console.log('added sprite', bmd)
-					}
-				}
-
-				console.log(controls);
-				// controls.x = width/2 - controls.width/2;
-				// 
-			}	
-
-
-			function update()
-			{
-
-				bmd.fill(0, 0, 0, 0.2);
-				particleLayer.update();
-
-				bmd.drawGroup(particleLayer)
-				
-				// console.log(controls.getBounds())
-// bar[track].sprites[stepCount].scale.setTo(1, 1)
-
-// 				bar[track].sprites[stepCount].scale.setTo(1, 1)
-				
-			}
-
-
-			function render()
-			{
-				
-			}
-
-
-			function padPressed(sprite){
-				console.log(sprite);
-
-				bar[sprite.track].steps[sprite.stepIndex] = !bar[sprite.track].steps[sprite.stepIndex];
-
-				if(bar[sprite.track].steps[sprite.stepIndex]){
-					sprite.on = true;
-					sprite.tint = 0xFFFFFF;
-				}else{
-					sprite.on = false;
-					sprite.tint = 0x111111;
-				}
-			}
-
-
-			function step(){
-				// audioPlayer.play('closedHiHat');
-
-				for(track in bar){
-
-					if(bar[track].steps[stepCount]){
-						audioPlayer.play(track);
-
-						particleLayer.behaviours.attraction.targetPosition.x = bar[track].sprites[stepCount].x;
-						particleLayer.behaviours.attraction.targetPosition.y = bar[track].sprites[stepCount].y;
-					}
-
-					for(var j=0; j<16; j++){
-						var sprite = bar[track].sprites[j];
-
-						if(bar[track].steps[j] && j == stepCount){
-							sprite.scale.setTo(2, 2)
-						}else{
-							sprite.scale.setTo(1, 1)
-						}
-
-					}
-					
-				}
-
-				stepCount++;
-
-				stepCount = stepCount%16;
-				// console.log(stepCount);
-			}
-
-
-			
-		</script>
+	<head>
+	<script src="lib/jquery-2.1.3.min.js"></script>
+	<script src="lib/tween.min.js"></script>
+    <script src="lib/tsw.js"></script>
+	<script src="lib/two.js"></script>
+
+	<script src="https://cdn.socket.io/socket.io-1.3.3.js"></script>
 	
-</body>
+
+
+	</head>
+	<body>
+
+	<script>
+
+		var TWO_PI = Math.PI * 2;
+
+        var width = $(window).width(), height = $(window).height();
+        var center = {x: width/2, y:height/2}
+
+        // var duration = sixteenthNoteDuration*16;
+        var animations = {}
+        var Easing = TWEEN.Easing;
+
+        var socket = io();
+
+
+       
+
+
+
+		var two = new Two({
+			fullscreen: true,
+			type: Two.Types.svg,
+		}).appendTo(document.body);
+
+
+		// two.renderer.domElement.style.background = randomColor();
+
+
+		console.log(width, height, center, two.renderer);
+
+
+
+
+		
+
+
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+		function Player(id){
+			this.id = id;
+			this.thread = null;
+		}
+
+
+
+
+
+
+
+
+
+		var players = [];
+
+
+        
+		
+
+
+		$(document).ready(function(){
+
+			//bind sockets
+
+			//connect to the server
+			socket.emit('connectPlayer');
+
+
+			two.bind('update', function(frameCount) {
+				// console.log('update');
+                TWEEN.update();
+	           
+		
+
+	      	}).play();
+
+	      	$(window).bind('mousedown', dragStart);
+            $(window).bind('mousemove', drag);
+            $(window).bind('mouseup', dragEnd);
+
+            $('body').bind('touchstart', function(event){
+                var e = event.originalEvent
+                dragStart(e.touches[0]);
+                return false;
+            });
+            $('body').bind('touchmove', function(event){
+                var e = event.originalEvent
+                drag(e.touches[0]);
+                return false;
+            });
+            $('body').bind('touchend', function(event){
+
+
+                var e = event.originalEvent
+                 console.log(e);
+                dragEnd(e.changedTouches[0]);
+                return false;
+            });
+
+            $('body').bind('touchcancel', function(event){
+                return false;
+            });
+
+		});
+
+
+
+        var isDragging
+
+        var dragStart = function(e){
+            // e.preventDefault();
+            isDragging = true;
+
+            var input = {
+                type:'start',
+                x:e.clientX,
+                y:e.clientY,
+            }
+
+            socket.emit('playerInput', input);
+
+            
+        }
+
+        var drag = function(e){
+            // e.preventDefault();
+            if(isDragging){
+                var input = {
+                    type:'drag',
+                    x:e.clientX,
+                    y:e.clientY,
+                }
+
+                socket.emit('playerInput', input);
+            }
+
+            return false;
+        }
+
+        var dragEnd = function(e){
+            // e.preventDefault();
+            isDragging = false;
+
+            var input = {
+                type:'end',
+                x:e.clientX,
+                y:e.clientY,
+            }
+
+            socket.emit('playerInput', input);
+
+            return false;
+        }
+
+
+
+	</script>
+	</body>
 </html>

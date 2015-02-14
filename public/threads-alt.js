@@ -1,329 +1,374 @@
 function Thread(x, y){
 
-            this.lastPos = new Two.Anchor(0, y+10);
-            this.lastMouse = new Two.Anchor(x, y);
+    this.lastPos = new Two.Anchor(0, y+10);
+    this.lastInput = new Two.Anchor(x, y);
 
-            this.strokeCount = 5;
-            this.shapes = []
-            this.count = 3;
-        }
+    this.shapeOpts = state.threadOpts.shapes;
 
-        Thread.prototype.draw = function(pos){
+    this.shapes = [];
+    this.cuePoints = {};
 
-
-
-
-            if(this.shapes.length == 0){
-
-
-                // this.shapes = _.map(_.range(5), function(i){
-
-                var count = this.count;
-                for(var i=0; i<count; i++){    
-                    var shape = two.makeCurve([this.lastPos.clone(), pos], true);
-                    shape.stroke = randomColor();
-                    shape.linewidth = Math.random()*20;
-                    shape.cap = 'round'
-                    shape.noFill();
-
-                    _.each(shape.vertices, function(v) {
-                        v.addSelf(shape.translation);
-                        v.velocity = new Two.Vector(0, 0);
-                        v.acc = new Two.Vector(0,0)
-                        v.original = v.clone();
-                    }.bind(this));
-
-                    shape.translation.clear();
-
-                    // shape.beginning = ((1/count)*i);
-                    // shape.ending = (1/count)+((1/count)*i);
-
-                    // shape.beginning = 0-(1/count);
-                    // shape.ending = 0;
-
-                    // console.log('FOO', 1/i+1, i+1)
+    this.count = 3;
+    
+    this.state = 'creating';
+    this.existsFor = 1;
+}
 
 
-                    // var strokeAnimate = new TWEEN.Tween(shape)
-                    //     .to({beginning:1, ending:1}, duration)
-                    //     .easing(Easing.Sinusoidal.Out)
-                    //     .onComplete(function() {
-                    //         this.ending = 0;
-                    //         // console.log('pew')
-                    //         strokeAnimate.repeat('Infinity').start();
-                    //     })
 
-                    
-                    // window.setTimeout(function(){
-                       
-                    // }, (duration*i))
-                    
-                     
-                    this.shapes.push(shape);
-                }
 
-                // }.bind(this))
 
-                console.log(this.shapes)
 
+// CLEAN UP
+Thread.prototype.reset = function(){
+
+    //clean up anything existing
+    _.each(this.shapes, function(shape, i){
+        shape.remove();
+    });
+
+    _.each(this.cuePoints, function(cuepoint, i){
+        cuepoint.destroy();
+    });
+
+    this.shapes = []
+    this.cuePoints = {};
+
+    this.state = 'recycled';
+    this.existsFor = 1;
+}
+
+
+
+
+
+
+
+
+Thread.prototype.draw = function(pos){
+
+    
+    if(this.shapes.length == 0){
+        var shapes = []
+        var lastPos = this.lastPos;
+        //If no shapes exist, create them
+        this.shapeOpts.forEach(function(opts){
+            var shape;
+            
+
+            if(opts.filled){
+                shape = two.makeCurve([new Two.Anchor(-40, height+opts.yOffset+100), new Two.Anchor(-100, height+opts.yOffset+100), lastPos.clone(), pos], false);
+                shape.noStroke();
+                shape.fill = opts.color;
+                shape.filled = true;
             }else{
 
-                _.each(this.shapes, function(shape, i){
-
-                    // console.log('shape', shape)
-                    var lastVert = shape.vertices[shape.vertices.length-1];
-                    lastVert.x = pos.x;
-                    lastVert.y = pos.y;
-
-                }.bind(this));
-
-
-                var velocity = new Two.Vector();
-                velocity.sub(pos, this.lastMouse);
-
-                if(velocity.length() > 10){
-                    velocity.setLength(10);
-                }
-
-                if(pos.distanceTo(this.lastPos) >  100){
-                    _.each(this.shapes, function(shape, i){
-                        var v = pos.clone();
-                        v.original = v.clone();
-                        // velocity.setLength(10+(Math.random()*10));
-                        v.velocity = velocity.clone();
-                        v.acc = new Two.Vector(0, 10-Math.random()*20)
-                        this.lastPos.x = pos.x;
-                        this.lastPos.y = pos.y;
-                        shape.vertices.push(v);  
-                    }.bind(this));
-                }
-
-                
-
-
-                this.lastMouse.x = pos.x;
-                this.lastMouse.y = pos.y;
-
+                shape = two.makeCurve([lastPos.clone(), pos], true);
+                shape.stroke = opts.color;
+                shape.linewidth = opts.weight;
+                shape.cap = 'round'
+                shape.noFill();
             }
-
-
-
-
-
-
-
-
-        }
-
-        Thread.prototype.endDraw = function(pos){
-            pos.x = width;
-            var velocity = new Two.Vector();
-                velocity.sub(pos, this.lastMouse);
-
-                if(velocity.length() > 10){
-                    velocity.setLength(10);
-                }
-
             
-            _.each(this.shapes, function(shape, i){
-                var v = pos.clone();
+
+            //normalise vert translation & add physics properties
+            _.each(shape.vertices, function(v) {
+                v.addSelf(shape.translation);
+                v.velocity = new Two.Vector(0, 0);
+                v.acc = new Two.Vector(0,0)
                 v.original = v.clone();
-                // velocity.setLength(10+(Math.random()*10));
-                v.velocity = velocity.clone();
-                v.acc = new Two.Vector(0, 10-Math.random()*20)
-                this.lastPos.x = pos.x;
-                this.lastPos.y = pos.y;
-
-                shape.vertices.push(v);  
-            }.bind(this));
-        }
-
-        Thread.prototype.update = function(frameCount){
-
-
-            _.each(this.shapes, function(shape, i){
-                _.each(shape.vertices, function(v, i) {
-                    if(v.velocity){
-
-                        accelerateToPoint(v, v.original);
-
-                        v.velocity.addSelf(v.acc);
-
-                        v.velocity.multiplyScalar(0.93);
-                        v.addSelf(v.velocity);
-
-                        v.acc.set(0, 0) 
-                    }
-                });
             });
 
+            shape.translation.clear();
+            shapes.push(shape);
 
-             // var osc = Math.sin(- frameCount / (Math.PI * 8));
+            shape.translation.y = opts.yOffset;
+        });
 
-             // console.log(osc)
+        this.shapes = shapes;
 
-            // _.each(this.line.vertices, function(v, i) {
-                
-            //     v.velocity.multiplyScalar(0.93);
-            //     v.addSelf(v.velocity)
+        console.log(shapes);
 
-            //     if(v.velocity.length() < 0.05){
-            //         v.velocity.setLength(0);
-            //         // if(i%2 == 0){
-            //         //     v.y += osc;
-            //         // }else{
-            //         //     v.y -= osc;
-            //         // }
-                    
-            //     }
-            //     // console.log(v.circle)
-            //     if(v.circle){
-            //         v.circle.translation.x = v.x;
-            //         v.circle.translation.y = v.y;
-            //     }
+    }else{
 
-            // }.bind(this));
+        //Otherwise, push verts to the shapes
 
+        //update position of the last vert with current input position
+        _.each(this.shapes, function(shape, i){
+            var lastVert = shape.vertices[shape.vertices.length-1];
+            lastVert.x = pos.x;
+            lastVert.y = pos.y;
 
-            // _.each(this.strokes, function(v, i) {
-            //     v.vertices = this.line.vertices
-            // }.bind(this));
-        }
-
-
-        // Thread.prototype.
-
-
-        Thread.prototype.jitter = function(){
-
-
-            _.each(this.shapes, function(shape, i){
-                _.each(shape.vertices, function(v, i) {
-                    if(i != 0 && i)
-                        
-                        v.acc.addSelf(new Two.Vector(0, 10-Math.random()*20));
-                });
-            });
-
-        }
-
-
-        Thread.prototype.clear = function(){
-
-
-            _.each(this.shapes, function(shape, i){
-                shape.remove();
-            });
-
-            this.shapes = [];
-
-        }
-
-
-        Thread.prototype.pulse = function(){
-
-            // console.log(pulseLine)
-            // if(!pulseLine){
-            //     var pulseLine = this.line.clone();
-            //     pulseLine.stroke = randomColor();
-            //     pulseLine.subdivide();
-            //     pulseLine.linewidth = Math.random()*50;
-            //     pulseLine.noFill();
-            //     pulseLine.beginning = 0;
-            //     pulseLine.ending = 0;
-            //     pulseLine.cap = 'round'
-
-            // }
-
-            // // var pulseLine = this.pulseLine;
-
-            // function reset(){
-            //     // pulseLine.beginning = 0;
-            //     // pulseLine.ending = 0;
-            //     // pulseLine.remove();
-
-            // }
-
-
-
-            // var pulseIn = new TWEEN.Tween(pulseLine)
-            //     .to({ending:1, beginning:0.5}, duration)
-            //     .easing(Easing.Sinusoidal.Out)
-            //     .onComplete(function() {
-            //         // console.log(this)
-            //         // this.remove();
-            //         pulseOut.start();
-
-            //     });
-
-            // var pulseOut = new TWEEN.Tween(pulseLine)
-            //     .to({ending:1, beginning:1}, duration)
-            //     .easing(Easing.Sinusoidal.In)
-            //     .onComplete(function() {
-            //         // console.log(this)
-            //         this.remove();
-
-            //     });
-
-
-            // pulseIn.start();
-        }
-
-
-
-
-
-        function accelerateToPoint(point, vec){
-
-
-                    // console.log(point, vec);
-                    var dir = new Two.Vector();
-                    dir.sub(point, vec);
-
-                    var distSqrd = dir.lengthSquared();
-
-                    dir.normalize();
-
-
-                    var force = (distSqrd) * 0.0001;
-                    point.acc.subSelf(dir.multiplyScalar(force));
-
-        }
-
-
-
-
-
-        var thread;
-
-        var dragStart = function(e){
-            var x = e.clientX;
-            var y = e.clientY;
-
-            if(!thread){
-                thread = new Thread(x, y);
-            }else{
-                thread.clear();
-                thread.lastPos = new Two.Anchor(0, y+10);
-                thread.lastMouse = new Two.Anchor(x, y);
+            if(shape.filled){
+                var firstVert = shape.vertices[0];
+                firstVert.x = pos.x+40;
+                firstVert.original.x = pos.x+100;
             }
+        });
+
+        //calculate velocity of input
+        var velocity = new Two.Vector();
+        velocity.sub(pos, this.lastInput);
+
+        //velocity.multiplyScalar(0.5);
+
+
+        if(pos.distanceTo(this.lastPos) >  50){
+            //if add vert condition is met, add it to each shape 
+
+            //create the new vert from the current input position
+            var v = pos.clone();
+             //add velocity
+
+            _.each(this.shapes, function(shape, i){
+                var cv = v.clone(); //clone the new vert so we can apply separate properties to it
+                cv.original = v.clone(); //save it's original position
+                cv.velocity = velocity.clone();
+                cv.acc = new Two.Vector(0, 10-Math.random()*20); //give it some random force
+                shape.vertices.push(cv);  
+            });
+
+            this.lastPos.x = pos.x;
+            this.lastPos.y = pos.y;
+
+
+            if(Math.round(Math.random()) == 0){
+                //if Cuepoint conditions met, also add a cuepoint at this location
+                this.createCuepoint(this.shapes[0].vertices[this.shapes[0].vertices.length-1]);
+            }
+
+        }
+
+        //update last position input
+        this.lastInput.x = pos.x;
+        this.lastInput.y = pos.y;
+    }
+}
+
+
+
+Thread.prototype.endDraw = function(pos){
+    //when input ends, snap the thread to the far end of the screen
+    pos.x = width;
+
+    // if(shape.filled){
+    //     var firstVert = shape.vertices[0];
+    //     firstVert.x = pos.x;
+    //     firstVert.original.x = pos.x;
+    // }
+
+    var velocity = new Two.Vector();
+    velocity.sub(pos, this.lastInput);
+
+    //add the final point
+    var v = pos.clone();
+
+    _.each(this.shapes, function(shape, i){
+        var cv = v.clone(); //clone the new vert so we can apply separate properties to it
+        cv.original = v.clone(); //save it's original position
+        cv.velocity = velocity.clone();
+        cv.acc = new Two.Vector(0, 10-Math.random()*20); //give it some random force
+        shape.vertices.push(cv); 
+    });
+
+    this.lastPos.x = pos.x;
+    this.lastPos.y = pos.y;
+
+
+    //Once drawing is complete, calculate the 
+    this.getCuepointLocations();
+    
+
+    this.state = 'complete';
+}
+
+        
+
+Thread.prototype.getCuepointLocations = function(){
+
+    //get 'length' of the line
+    var length = this.shapes[0].vertices.length;
+    var cuePoints = {} //temp container;
+
+    _.each(this.shapes[0].vertices, function(v, i){
+        if(v.cuePoint){
+            var beatPosition = Math.floor((i/length)*(16*4));
+            cuePoints[beatPosition] = v.cuePoint;
+        }
+    });
+
+    this.cuePoints = cuePoints;
+}
+
+        
+
+
+
+Thread.prototype.createCuepoint = function(vertex){
+    //create a new cuepoint, with the current state options
+    var cuePoint = new CuePoint(vertex.x, vertex.y, vertex.velocity.length()*5, state.cuepointOpts.onCreate, state.cuepointOpts.onTrigger, state.cuepointOpts.onDestroy, this);
+    vertex.cuePoint = cuePoint;
+}
+
+
+Thread.prototype.triggerCuePoints = function(beat){
+
+    if(beat == 0 && this.state == 'complete' || beat == 0 && this.state == 'outgoing'){
+        //Every new bar...
+        if(this.existsFor == 0){
+            this.reset(); //Destroy the thread if it's done
+        }else{
+            this.existsFor--; //Decrement the lifespan of the thread
+        }
+
+    }else if(beat == 56 && this.existsFor == 0){
+        //If the thread is due to be destroyed, animate it out
+        this.state = 'outgoing'
+    }
+
+    //If any cuepoints exist for the current beat, trigger them
+    if(this.cuePoints[beat]){
+        this.cuePoints[beat].trigger();
+    }
+}
+
+
+
+
+
+Thread.prototype.update = function(frameCount){
+
+    var state = this.state;
+    //on every frame...
+    _.each(this.shapes, function(shape, i){
+        //...get every shape...
+        _.each(shape.vertices, function(v, i) {
+            //...and every vert
             
 
-            $(window).bind('mousemove', drag).bind('mouseup', dragEnd);
-        }
+            if(state == 'outgoing' ){
+                // If we're animating out, accelerate each point to the next one
+                var point; 
+                if(i+1 < shape.vertices.length){
+                    point = shape.vertices[i+1]
+                }else{
+                    point = new Two.Vector(v.x+200, v.y);
+                }
+                accelerateToPoint(v, point, 0.01);
+            }else{
 
-        var drag = function(e){
-            var x = e.clientX;
-            var y = e.clientY;
-            var pos = new Two.Anchor(x, y);
-            // pos.set(x, y);
-            thread.draw(pos);
-        }
+                //Otherwise, accelerate them back to their notmal state
+                accelerateToPoint(v, v.original, 0.0001);
+            }
 
-        var dragEnd = function(e){
-            var x = e.clientX;
-            var y = e.clientY;
-            var pos = new Two.Anchor(x, y);
-            thread.endDraw(pos);
-           $(window).unbind('mousemove').unbind('mouseup');
-        }
+
+            // PHYSICS
+
+            // Add acc to vel
+            v.velocity.addSelf(v.acc);
+
+            // Limit velocity
+            if(v.velocity.length() > 30){
+                v.velocity.setLength(30)
+            }else if(v.velocity.length() < 0.3){
+                v.velocity.setLength(0.3)
+            }
+
+            // Decay vel
+            v.velocity.multiplyScalar(0.94);
+
+            //Calculate position
+            v.addSelf(v.velocity);
+
+            //Reset acc
+            v.acc.set(0, 0);
+
+            if(v.cuePoint){
+                v.cuePoint.display.translation.x = v.x;
+                v.cuePoint.display.translation.y = v.y;
+            } 
+
+        
+        });
+    });
+}
+
+
+
+
+
+Thread.prototype.jitter = function(){
+    _.each(this.shapes, function(shape, i){
+        _.each(shape.vertices, function(v, i) {
+            if(i != 0 && i)
+                v.acc.addSelf(new Two.Vector(0, 5-Math.random()*10));
+        });
+    });
+}
+
+
+
+
+
+
+
+function accelerateToPoint(point, vec, forceMult){
+
+            var dir = new Two.Vector();
+            dir.sub(point, vec);
+
+            var distSqrd = dir.lengthSquared();
+
+
+
+            dir.normalize();
+
+            var force = (distSqrd) * forceMult;
+
+            point.acc.subSelf(dir.multiplyScalar(force));
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
