@@ -12,7 +12,7 @@ var beatCount = 0;
 var barCount = 0;
 
 var players = [];
-var viewerId;
+var viewers = [];
 
 app.set('port', (process.env.PORT || 5000));
 app.use(express.static(__dirname + '/public'));
@@ -24,7 +24,11 @@ io.on('connection', function(socket){
 	socket.on('connectPlayer', function(){
 		//user joined
 		io.to(socket.id).emit('connected', socket.id);
-		io.to(viewerId).emit('addPlayer', socket.id);
+
+		viewers.forEach(function(viewerId){
+			io.to(viewerId).emit('addPlayer', socket.id);
+		});
+		
 		console.log('player connected');
 		players.push(socket.id);
 	});
@@ -35,10 +39,17 @@ io.on('connection', function(socket){
 			console.log('removing player')
 			players.splice(players.indexOf(socket.id), 1);
 		}else{
-			// viewerId = null;
-			clearInterval(interval);
-			beatCount = 0;
-			barCount = 0;
+
+			console.log('removing player')
+			viewers.splice(viewers.indexOf(socket.id), 1);
+
+			if(viewers.length == 0){
+				clearInterval(interval);
+				beatCount = 0;
+				barCount = 0;
+				interval = null;
+			}
+			
 		}
 
 		console.log('disconnected', players)
@@ -47,21 +58,25 @@ io.on('connection', function(socket){
 
 	socket.on('connectViewer', function(){
 		//user joined - add to active players, and update everyone
-		viewerId = socket.id
+		viewers.push(socket.id)
 		io.to(socket.id).emit('connected', players);
 	
 		console.log('viewer connected', players)
 
 
+		if(!interval){
+			interval = setInterval(function(){
 
-		interval = setInterval(function(){
+				io.sockets.emit('tick', beatCount);
 
-			io.sockets.emit('tick', beatCount);
+				beatCount++;
+				beatCount = beatCount%(16*4)
 
-			beatCount++;
-			beatCount = beatCount%(16*4)
+				console.log('beat')
 
-		}, sixteenthNoteDuration);
+			}, sixteenthNoteDuration);
+		}
+		
 
 	});
 	
@@ -80,8 +95,9 @@ io.on('connection', function(socket){
 		}
 		
 
-
-		io.to(viewerId).emit('playerUpdate', update);
+		viewers.forEach(function(viewerId){
+			io.to(viewerId).emit('playerUpdate', update);
+		});
 
 	});
 
