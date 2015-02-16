@@ -5,7 +5,11 @@ var io = require('socket.io')(http);
 
 
 
+
 var interval
+var sixteenthNoteDuration = 140;
+var beatCount = 0;
+var barCount = 0;
 
 var players = [];
 var viewerId;
@@ -33,6 +37,8 @@ io.on('connection', function(socket){
 		}else{
 			// viewerId = null;
 			clearInterval(interval);
+			beatCount = 0;
+			barCount = 0;
 		}
 
 		console.log('disconnected', players)
@@ -90,9 +96,7 @@ io.on('connection', function(socket){
 
 
 
-var sixteenthNoteDuration = 140;
-var beatCount = 0;
-var barCount = 0;
+
 
 
 
