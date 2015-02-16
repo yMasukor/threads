@@ -5,7 +5,7 @@ var io = require('socket.io')(http);
 
 
 
-
+var interval
 
 var players = [];
 var viewerId;
@@ -30,6 +30,9 @@ io.on('connection', function(socket){
 		if(players.indexOf(socket.id) > -1){
 			console.log('removing player')
 			players.splice(players.indexOf(socket.id), 1);
+		}else{
+			// viewerId = null;
+			clearInterval(interval);
 		}
 
 		console.log('disconnected', players)
@@ -42,6 +45,18 @@ io.on('connection', function(socket){
 		io.to(socket.id).emit('connected', players);
 	
 		console.log('viewer connected', players)
+
+
+
+		interval = setInterval(function(){
+
+			io.sockets.emit('tick', beatCount);
+
+			beatCount++;
+			beatCount = beatCount%(16*4)
+
+		}, sixteenthNoteDuration);
+
 	});
 	
 
@@ -79,14 +94,7 @@ var sixteenthNoteDuration = 140;
 var beatCount = 0;
 var barCount = 0;
 
-setInterval(function(){
 
-	io.sockets.emit('tick', beatCount);
-
-	beatCount++;
-	beatCount = beatCount%(16*4)
-
-}, sixteenthNoteDuration);
 
 
 
