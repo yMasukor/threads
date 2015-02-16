@@ -6,6 +6,12 @@
     <script src="lib/tsw.js"></script>
 	<script src="lib/two.js"></script>
 
+
+
+	<script src="states/themes.js"></script>
+	<script src="states/state-one.js"></script>
+	<script src="states/state-two.js"></script>
+
 	<script src="https://cdn.socket.io/socket.io-1.3.3.js"></script>
 
 	<script></script>
@@ -23,13 +29,10 @@
         var width = $(window).width(), height = $(window).height();
         var center = {x: width/2, y:height/2}
 
-        var two = new Two({
-			fullscreen: true,
-			type: Two.Types.canvas,
-		}).appendTo(document.body);
+        
 
 
-        var sixteenthNoteDuration = 125;
+        var sixteenthNoteDuration = 140;
 
         var duration = sixteenthNoteDuration*16;
         var animations = {}
@@ -44,351 +47,469 @@
 		var barCount = 0;
         
 
-        // var colors=[
-        //     //Cool Grey
-        //     '#263238', 
-        //     '#ECEFF1', 
-        //     '#607D8B', 
-        //     //Reds
-        //     '#F44336', 
-        //     '#B71C1C', 
-        //     '#FF8A80', 
-        //     //Pinks
-        //     '#E91E63', 
-        //     '#880E4F', 
-        //     '#FF80AB', 
-        //     //Purples
-        //     '#9C27B0', 
-        //     '#4A148C', 
-        //     '#EA80FC', 
-        //     //Deep Purple
-        //     '#673AB7', 
-        //     '#311B92', 
-        //     '#B388FF', 
-        //     //Indigo
-        //     '#3F51B5', 
-        //     '#1A237E', 
-        //     '#8C9EFF',
-        //     //Blue
-        //     '#2196F3', 
-        //     '#0D47A1', 
-        //     '#82B1FF',
-        //     //Light Blue
-        //     '#03A9F4', 
-        //     '#01579B', 
-        //     '#80D8FF',
-        //     //Cyan
-        //     '#00BCD4', 
-        //     '#006064', 
-        //     '#84FFFF',
-        //     //Teal
-        //     '#009688', 
-        //     '#004D40', 
-        //     '#A7FFEB',
-        //     //Green
-        //     '#4CAF50', 
-        //     '#1B5E20', 
-        //     '#B9F6CA',
-        //     //Light Green
-        //     '#8BC34A', 
-        //     '#33691E', 
-        //     '#CCFF90',
-        //     //Lime
-        //     '#CDDC39', 
-        //     '#827717', 
-        //     '#F4FF81',
-        //     //Yellow
-        //     '#FFEB3B', 
-        //     '#F57F17', 
-        //     '#FFFF8D', 
-        //     //Amber
-        //     '#FFC107', 
-        //     '#FF6F00', 
-        //     '#FFE57F', 
-        //     //Orange
-        //     '#3F51B5', 
-        //     '#1A237E', 
-        //     '#8C9EFF', 
-        //     //Deep Orange
-        //     '#FF5722', 
-        //     '#BF360C', 
-        //     '#FF9E80', 
-        //     //Brown
-        //     '#795548', 
-        //     '#3E2723', 
-        //     '#BCAAA4', 
-        //     //White
-        //     '#FFFFFF' 
-        //     ]
-
-
-        var threads = [];
-
-
-        var colors = [
-        	'rgb(217, 82, 31)',
-        	'rgb(143, 74, 45)',
-        	'rgb(255, 108, 87)',
-        	'rgb(255, 126, 138)',
-        	'rgb(227, 190, 141)',
-        	'rgb(255, 255, 255)',
-        	'rgb(0, 0, 20)',
-
-        ]
-
-
-        var backingTrack = {
-
-        }
-
-
-       
-
-        var themes = [
-        	//Orange
-	        {
-	        	back:'rgb(217, 82, 31)',
-	        	mid: 'rgb(143, 74, 45)',
-	        	fore: 'rgb(255, 108, 87)',
-	        	highlight: 'rgb(255, 126, 138)',
-	        	accent: 'rgb(227, 190, 141)',
-	        	light: 'rgb(255, 255, 255)',
-	        	dark: 'rgb(0, 0, 20)'
-	        },
-
-	        //Purple
-	        {
-	        	back:'rgb(39, 6, 54)',
-	        	mid: 'rgb(69, 26, 87)',
-	        	fore: 'rgb(252, 25, 246)',
-	        	highlight: 'rgb(52, 255, 253)',
-	        	accent: 'rgb(133, 102, 193)',
-	        	light: 'rgb(253, 228, 252)',
-	        	dark: 'rgb(255, 255, 255)'
-	        }
-        ]
 
 
 
 
-
-
-
-		
-
-
-		console.log(width, height, center, two.renderer);
-
-
-
-
-		
-
-
-        
-
-
-
-
-		var states = [
-			{
-				theme:themes[0],
-
-				//Thread behaviour
-				threadOpts:{
-					//An array of shapes to draw
-					shapes:[
-				        {
-				            color:themes[0].mid,
-				            weight: 1,
-				            yOffset:-100,
-				            filled:true,
-				        },
-
-				        {
-				            color:themes[0].fore,
-				            weight: 3,
-				            yOffset:0,
-				            filled:true,
-				        },
-
-				        {
-				            color:themes[0].light,
-				            weight: 5,
-				            yOffset:100,
-				            filled:true,
-				        }
-				    ]
-				},
-
-				//Cuepoint Behaviour
-				cuepointOpts:{
-					onCreate:function(){
-						//Must return a display object
-						//This references cuepoint object
-				        var circle = two.makeCircle(this.x, this.y, this.size);
-				        circle.fill = state.theme.accent;
-				        circle.noStroke();
-				        circle.scale = 0.1;
-				        return circle;
-					},
-					onTrigger:function(){
-						//Animation for cuepoint trigger
-						//This references cuepoint object
-
-						//Cuepoint Animation
-				        var triggerAnimation = new TWEEN.Tween(this.display)
-				            .to({scale:2, opacity:0}, duration * 0.25)
-				            .easing(Easing.Circular.Out)
-				            .onComplete(function() {
-				                this.scale = 0.1;
-				                this.opacity = 1;
-				            });
-
-				        triggerAnimation.start();
-
-				        //Secondary animations
-				        this.thread.jitter();
-
-				        //Trigger audio for cuepoint
-				        var i = Math.floor((Math.min(this.size, 100)/100)*24);
-				        samples[Object.keys(samples)[i]].play();
-					},
-					onDestroy:function(){
-
-					}
-				}
-			},
-
-
-			{
-				theme:themes[1],
-
-				//Thread behaviour
-				threadOpts:{
-					//An array of shapes to draw
-					shapes:[
-				        {
-				            color:themes[1].mid,
-				            weight: 1,
-				            yOffset:0,
-				            filled:false,
-				        },
-
-				        {
-				            color:themes[1].fore,
-				            weight: 3,
-				            yOffset:0,
-				            filled:false,
-				        },
-
-				        {
-				            color:themes[1].light,
-				            weight: 5,
-				            yOffset:0,
-				            filled:false,
-				        }
-				    ]
-				},
-
-				//Cuepoint Behaviour
-				cuepointOpts:{
-					onCreate:function(){
-						//Must return a display object
-						//This references cuepoint object
-				        var circle = two.makeCircle(this.x, this.y, this.size);
-				        circle.fill = state.theme.accent;
-				        circle.noStroke();
-				        circle.scale = 0.1;
-				        return circle;
-					},
-					onTrigger:function(){
-						//Animation for cuepoint trigger
-						//This references cuepoint object
-
-						//Cuepoint Animation
-				        var triggerAnimation = new TWEEN.Tween(this.display)
-				            .to({scale:2, opacity:0}, duration * 0.25)
-				            .easing(Easing.Circular.Out)
-				            .onComplete(function() {
-				                this.scale = 0.1;
-				                this.opacity = 1;
-				            });
-
-				        triggerAnimation.start();
-
-				        //Secondary animations
-				        this.thread.jitter();
-
-				        //Trigger audio for cuepoint
-				        var i = Math.floor((Math.min(this.size, 100)/100)*24);
-				        samples[Object.keys(samples)[i]].play();
-					},
-					onDestroy:function(){
-
-					}
-				}
-			},
-
-		]
-
-
+		var states = [stateTwo]
 		var state = states[0];
 
+
+
+		//Create Two instance
+		var two = new Two({
+			fullscreen: true,
+			type: Two.Types.canvas,
+		}).appendTo(document.body);
 
 		two.renderer.domElement.style.background = state.theme.back;
 
 
+		//Create layers
+		var backgroundLayer = two.makeGroup();
+		var threadLayer = two.makeGroup();
 
 
+		var samplesLoaded = false;
 
-
-
-
+		var threadStatus = 'empty';
 
 
 
         
-		function Player(id){
-			this.id = id;
-			this.thread = null;
-			// this.threadOpts = state.threadOpts[0]
-		}
 
-		Player.prototype.dragStart = function(e){
-			console.log('drag start')
-			if(!this.thread){
-				this.thread = new Thread(e.x, e.y);
-				this.thread.shapeOpts = state.threadOpts.shapes;
-				threads.push(this.thread);
-			}else{
+		var activeBackingTrack = [
+			
+			//01
+			['timer', 'strike'],
+			//02
+			[],
+			//03
+			['moon', 'strike'],
+			//04
+			[],
+			//05
+			['piston2', 'strike'],
+			//06
+			[],
+			//07
+			['moon', 'strike'],
+			//08
+			['timer'],
+			//09
+			['strike'],
+			//10
+			[],
+			//11
+			['moon', 'timer'],
+			//12
+			[],
+			//13
+			['piston2'],
+			//14
+			[],
+			//15
+			['moon'],
+			//16
+			['strike'],
 
 
-				console.log(this.thread.state)
+			
+			//01
+			['timer', 'strike'],
+			//02
+			[],
+			//03
+			['moon', 'strike'],
+			//04
+			[],
+			//05
+			['piston2', 'strike'],
+			//06
+			[],
+			//07
+			[],
+			//08
+			['timer'],
+			//09
+			['strike'],
+			//10
+			[],
+			//11
+			['moon','timer'],
+			//12
+			[],
+			//13
+			['piston2'],
+			//14
+			['timer'],
+			//15
+			['moon'],
+			//16
+			['strike'],
 
-				if(this.thread.state == 'recycled'){
-					this.thread.lastPos = new Two.Anchor(0, e.y+10);
-					this.thread.shapeOpts = state.threadOpts.shapes;
-					this.thread.state = 'creating'
-				}
+			//01
+			['timer', 'strike'],
+			//02
+			[],
+			//03
+			['moon', 'strike'],
+			//04
+			[],
+			//05
+			['piston2', 'strike'],
+			//06
+			[],
+			//07
+			['moon', 'strike'],
+			//08
+			['timer'],
+			//09
+			['strike'],
+			//10
+			[],
+			//11
+			['moon', 'timer'],
+			//12
+			[],
+			//13
+			['piston2'],
+			//14
+			[],
+			//15
+			['moon'],
+			//16
+			['strike'],
 
-			}
-        }
 
-        Player.prototype.drag = function(e){
-        	if(this.thread.state == 'creating'){
-        		var pos = new Two.Anchor(e.x, e.y);
-            	this.thread.draw(pos);
-        	}
-        	
-        }
+			
+			//01
+			['timer', 'strike'],
+			//02
+			[],
+			//03
+			['moon', 'strike'],
+			//04
+			[],
+			//05
+			['piston2', 'strike'],
+			//06
+			[],
+			//07
+			[],
+			//08
+			['timer'],
+			//09
+			['strike'],
+			//10
+			[],
+			//11
+			['moon','timer'],
+			//12
+			[],
+			//13
+			['piston2'],
+			//14
+			['timer'],
+			//15
+			['moon'],
+			//16
+			['strike'],
 
-        Player.prototype.dragEnd = function(e){
-        	if(this.thread.state == 'creating'){
-	        	var pos = new Two.Anchor(e.x, e.y);
-	            this.thread.endDraw(pos);
-	        }
-        }
+		]
+
+
+
+
+
+
+
+		var backingTrack = [
+			
+			//01
+			[],
+			//02
+			[],
+			//03
+			['moon'],
+			//04
+			[],
+			//05
+			['piston2'],
+			//06
+			[],
+			//07
+			['moon'],
+			//08
+			[],
+			//09
+			[],
+			//10
+			[],
+			//11
+			['moon'],
+			//12
+			[],
+			//13
+			['piston2'],
+			//14
+			[],
+			//15
+			['moon'],
+			//16
+			[],
+
+
+			
+			//01
+			[],
+			//02
+			[],
+			//03
+			['moon'],
+			//04
+			[],
+			//05
+			['piston2'],
+			//06
+			[],
+			//07
+			[],
+			//08
+			[],
+			//09
+			[],
+			//10
+			[],
+			//11
+			['moon'],
+			//12
+			[],
+			//13
+			['piston2'],
+			//14
+			[],
+			//15
+			['moon'],
+			//16
+			[],
+
+			//01
+			[],
+			//02
+			[],
+			//03
+			['moon'],
+			//04
+			[],
+			//05
+			['piston2'],
+			//06
+			[],
+			//07
+			['moon'],
+			//08
+			[],
+			//09
+			[],
+			//10
+			[],
+			//11
+			['moon'],
+			//12
+			[],
+			//13
+			['piston2'],
+			//14
+			[],
+			//15
+			['moon'],
+			//16
+			[],
+
+
+			
+			//01
+			[],
+			//02
+			[],
+			//03
+			['moon'],
+			//04
+			[],
+			//05
+			['piston2'],
+			//06
+			[],
+			//07
+			[],
+			//08
+			[],
+			//09
+			[],
+			//10
+			[],
+			//11
+			['moon'],
+			//12
+			[],
+			//13
+			['piston2'],
+			//14
+			[],
+			//15
+			['moon'],
+			//16
+			[]
+
+		]
+
+
+
+
+
+
+
+		var idleBackingTrack = [
+			
+			//01
+			[],
+			//02
+			[],
+			//03
+			['strike'],
+			//04
+			[],
+			//05
+			[],
+			//06
+			[],
+			//07
+			['moon'],
+			//08
+			[],
+			//09
+			['strike'],
+			//10
+			[],
+			//11
+			['strike'],
+			//12
+			[],
+			//13
+			[],
+			//14
+			['strike'],
+			//15
+			[],
+			//16
+			[],
+
+
+			
+			//01
+			['strike'],
+			//02
+			[],
+			//03
+			['strike'],
+			//04
+			[],
+			//05
+			[],
+			//06
+			[],
+			//07
+			['moon'],
+			//08
+			[],
+			//09
+			['strike'],
+			//10
+			[],
+			//11
+			['strike'],
+			//12
+			[],
+			//13
+			[],
+			//14
+			['strike'],
+			//15
+			[],
+			//16
+			[],
+
+			//01
+			[],
+			//02
+			[],
+			//03
+			['strike'],
+			//04
+			[],
+			//05
+			[],
+			//06
+			[],
+			//07
+			['moon'],
+			//08
+			[],
+			//09
+			['strike'],
+			//10
+			[],
+			//11
+			['strike'],
+			//12
+			[],
+			//13
+			[],
+			//14
+			['strike'],
+			//15
+			[],
+			//16
+			[],
+
+
+			
+			//01
+			['strike'],
+			//02
+			[],
+			//03
+			['strike'],
+			//04
+			[],
+			//05
+			[],
+			//06
+			[],
+			//07
+			['moon'],
+			//08
+			[],
+			//09
+			['strike'],
+			//10
+			[],
+			//11
+			['strike'],
+			//12
+			[],
+			//13
+			[],
+			//14
+			['strike'],
+			//15
+			[],
+			//16
+			[],
+
+		]
+		
 
 
 
@@ -446,12 +567,74 @@
 				}
 
 
-				//16th note here
+				if(samplesLoaded){
+					if(threadStatus == 'drawing'){
+						// console.log('beatCount', beatCount)
+						backingTrack[beatCount].forEach(function(sample){
+							// console.log(sample)
+							namedSamples[sample].play();
+
+
+						});
+
+					}else if(threadStatus == 'playing'){
+						activeBackingTrack[beatCount].forEach(function(sample){
+							// console.log(sample)
+							namedSamples[sample].play();
+
+
+						});
+					}else{
+						idleBackingTrack[beatCount].forEach(function(sample){
+							// console.log(sample)
+							namedSamples[sample].play();
+
+
+						});
+					}
+				}
 
 				threads.forEach(function(thread){
 					thread.triggerCuePoints(beatCount)
 				});
 			});
+
+
+
+
+
+
+
+
+
+
+			var sliceWidth = width * 2.5 / bufferLength;
+			var x = 0;
+			var points = [new Two.Anchor(width, 0), new Two.Anchor(0, 0)];
+
+			for(var i=0; i<bufferLength; i++){
+				
+
+		        var v = dataArray[i] * 2;
+		        var y = v //* height/2;
+
+		        var point = new Two.Anchor(x, y);
+		        // if(i === 0) {
+		        //   canvasCtx.moveTo(x, y);
+		        // } else {
+		        //   canvasCtx.lineTo(x, y);
+		        // }
+
+		        points.push(point);
+		        x += sliceWidth;
+
+
+			}
+
+
+			var shape = two.makeCurve(points, false);
+            shape.noStroke();
+            shape.fill = state.theme.highlight;
 
 
 
@@ -466,9 +649,45 @@
                 threads.forEach(function(thread){
                 	thread.update();
                 });
+
+                analyser.getByteFrequencyData(dataArray);
+                // console.log(dataArray);
 		
 
+
+                for(var i=0; i<bufferLength; i++){
+
+                	var point = shape.vertices[i+2];
+
+                	var v = dataArray[i] * 2;
+		        	var y = v //* height/2;
+
+		       		point.y = y;
+
+		       		// console.log(y)
+
+                };
+
+
 	      	}).play();
+
+
+
+
+
+
+
+
+			// DEBUG PLAYER
+			addPlayer('foobar');
+			$(window).bind('mousedown', dragStart);
+            $(window).bind('mousemove', drag);
+            $(window).bind('mouseup', dragEnd);
+            
+
+
+
+
 		});
 
 
@@ -513,9 +732,57 @@
 
 
 
+		var isDragging
+
+        var dragStart = function(e){
+            // e.preventDefault();
+            isDragging = true;
+
+            var input = {
+                type:'start',
+                x:e.clientX,
+                y:e.clientY,
+            }
+
+            players['foobar'].dragStart(input);
+
+            
+        }
+
+        var drag = function(e){
+            // e.preventDefault();
+            if(isDragging){
+                var input = {
+                    type:'drag',
+                    x:e.clientX,
+                    y:e.clientY,
+                }
+
+                players['foobar'].drag(input);
+            }
+
+            return false;
+        }
+
+        var dragEnd = function(e){
+            // e.preventDefault();
+            isDragging = false;
+
+            var input = {
+                type:'end',
+                x:e.clientX,
+                y:e.clientY,
+            }
+
+            players['foobar'].dragEnd(input);
+
+            return false;
+        }
+
 
 	</script>
 
+	<script src="Player.js"></script>
 	<script src="CuePoint.js"></script>
     <script src="threads-alt.js"></script>
     <script src="metronome.js"></script>

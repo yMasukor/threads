@@ -74,7 +74,7 @@ io.on('connection', function(socket){
 
 
 
-var sixteenthNoteDuration = 125;
+var sixteenthNoteDuration = 140;
 var beatCount = 0;
 var barCount = 0;
 

@@ -36,6 +36,8 @@ Thread.prototype.reset = function(){
 
     this.state = 'recycled';
     this.existsFor = 1;
+
+    threadStatus = 'empty'
 }
 
 
@@ -46,6 +48,8 @@ Thread.prototype.reset = function(){
 
 
 Thread.prototype.draw = function(pos){
+
+    threadStatus = 'drawing'
 
     
     if(this.shapes.length == 0){
@@ -83,6 +87,7 @@ Thread.prototype.draw = function(pos){
             shapes.push(shape);
 
             shape.translation.y = opts.yOffset;
+            shape.parent = threadLayer;
         });
 
         this.shapes = shapes;
@@ -132,9 +137,11 @@ Thread.prototype.draw = function(pos){
             this.lastPos.y = pos.y;
 
 
-            if(Math.round(Math.random()) == 0){
-                //if Cuepoint conditions met, also add a cuepoint at this location
+            if(Math.floor(Math.random()) == 0){
+                // console.log(beatCount, beatCount%4)
                 this.createCuepoint(this.shapes[0].vertices[this.shapes[0].vertices.length-1]);
+                //if Cuepoint conditions met, also add a cuepoint at this location
+                
             }
 
         }
@@ -148,6 +155,8 @@ Thread.prototype.draw = function(pos){
 
 
 Thread.prototype.endDraw = function(pos){
+
+    threadStatus = 'playing'
     //when input ends, snap the thread to the far end of the screen
     pos.x = width;
 
@@ -228,7 +237,10 @@ Thread.prototype.triggerCuePoints = function(beat){
 
     //If any cuepoints exist for the current beat, trigger them
     if(this.cuePoints[beat]){
-        this.cuePoints[beat].trigger();
+
+        if(beat%2 == 0 || Math.round(Math.random())==0){
+            this.cuePoints[beat].trigger();
+        }
     }
 }
 

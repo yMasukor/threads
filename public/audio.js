@@ -1,5 +1,13 @@
  
 
+
+    
+    var audioContext = tsw.context();
+    var analyser = audioContext.createAnalyser();
+    var gain = tsw.gain(1)
+
+    var namedSamples = {}
+
     var samples = [];
 
     var samplesToLoad = {
@@ -33,6 +41,8 @@
     
 
 
+
+
     tsw.load(samplesToLoad, function (response) {
         
 
@@ -41,9 +51,25 @@
             var sampleNode = tsw.bufferBox(sampleBuffer);
 
             //connect each sample note to the gain
-            tsw.connect(sampleNode, tsw.speakers);
+            tsw.connect(sampleNode, gain);
+
 
             samples.push(sampleNode);
+            namedSamples[key] = sampleNode
         }
 
+        samplesLoaded = true
+
     });
+
+    console.log(gain);
+    gain.output.connect(analyser);
+
+
+    analyser.connect(tsw.speakers)
+    analyser.fftSize = 256;
+
+    var bufferLength = analyser.frequencyBinCount;
+    var dataArray = new Uint8Array(bufferLength);
+
+    console.log(audioContext, tsw.speakers)
