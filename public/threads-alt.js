@@ -130,7 +130,7 @@ Thread.prototype.draw = function(pos){
         //velocity.multiplyScalar(0.5);
 
 
-        if(pos.distanceTo(this.lastPos) >  100){
+        if(pos.distanceTo(this.lastPos) >  200){
             //if add vert condition is met, add it to each shape 
 
             //create the new vert from the current input position
