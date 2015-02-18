@@ -7,9 +7,16 @@ var io = require('socket.io')(http);
 
 
 var interval
-var sixteenthNoteDuration = 140;
-var beatCount = 0;
-var barCount = 0;
+
+
+var loopDuration = 12000
+var barsPerLoop = 4
+var beatsPerBar = 4
+var ticksPerBeat = 4
+var tickDuration = ((loopDuration/barsPerLoop)/beatsPerBar)/ticksPerBeat
+
+var tickCount = 0;
+
 
 var players = [];
 var viewers = [];
@@ -67,14 +74,14 @@ io.on('connection', function(socket){
 		if(!interval){
 			interval = setInterval(function(){
 
-				io.sockets.emit('tick', beatCount);
+				io.sockets.emit('tick', tickCount);
 
-				beatCount++;
-				beatCount = beatCount%(16*4)
+				tickCount++;
+				tickCount = tickCount%(beatsPerBar*barsPerLoop*ticksPerBeat)
 
-				console.log('beat')
+				// console.log('tick')
 
-			}, sixteenthNoteDuration);
+			}, tickDuration);
 		}
 		
 
@@ -125,5 +132,5 @@ io.on('connection', function(socket){
 
 
 http.listen(app.get('port'), function(){
-	console.log('listening on *:3000');
+	console.log('listening on *:5000');
 });

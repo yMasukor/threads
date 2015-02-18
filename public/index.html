@@ -32,9 +32,15 @@
         
 
 
-        var sixteenthNoteDuration = 140;
+        var loopDuration = 12000
+		var barsPerLoop = 4
+		var beatsPerBar = 4
+		var ticksPerBeat = 4
+		var tickDuration = ((loopDuration/barsPerLoop)/beatsPerBar)/ticksPerBeat
 
-        var duration = sixteenthNoteDuration*16;
+        var duration = tickDuration*ticksPerBeat;
+
+
         var animations = {}
         var Easing = TWEEN.Easing;
 
@@ -45,7 +51,7 @@
         
 		var beatCount = 0;
 		var barCount = 0;
-        
+       	var backingTrack = {playing:false} 
 
 
 
@@ -71,152 +77,14 @@
 
 
 		var samplesLoaded = false;
-
-		var threadStatus = 'empty';
+		// var backingTrackPlaying = false;
+		// var threadStatus = 'empty';
 
 
 
         
 
-		var activeBackingTrack = [
-			
-			//01
-			['timer', 'strike'],
-			//02
-			[],
-			//03
-			['moon', 'strike'],
-			//04
-			[],
-			//05
-			['piston2', 'strike'],
-			//06
-			[],
-			//07
-			['moon', 'strike'],
-			//08
-			['timer'],
-			//09
-			['strike'],
-			//10
-			[],
-			//11
-			['moon', 'timer'],
-			//12
-			[],
-			//13
-			['piston2'],
-			//14
-			[],
-			//15
-			['moon'],
-			//16
-			['strike'],
-
-
-			
-			//01
-			['timer', 'strike'],
-			//02
-			[],
-			//03
-			['moon', 'strike'],
-			//04
-			[],
-			//05
-			['piston2', 'strike'],
-			//06
-			[],
-			//07
-			[],
-			//08
-			['timer'],
-			//09
-			['strike'],
-			//10
-			[],
-			//11
-			['moon','timer'],
-			//12
-			[],
-			//13
-			['piston2'],
-			//14
-			['timer'],
-			//15
-			['moon'],
-			//16
-			['strike'],
-
-			//01
-			['timer', 'strike'],
-			//02
-			[],
-			//03
-			['moon', 'strike'],
-			//04
-			[],
-			//05
-			['piston2', 'strike'],
-			//06
-			[],
-			//07
-			['moon', 'strike'],
-			//08
-			['timer'],
-			//09
-			['strike'],
-			//10
-			[],
-			//11
-			['moon', 'timer'],
-			//12
-			[],
-			//13
-			['piston2'],
-			//14
-			[],
-			//15
-			['moon'],
-			//16
-			['strike'],
-
-
-			
-			//01
-			['timer', 'strike'],
-			//02
-			[],
-			//03
-			['moon', 'strike'],
-			//04
-			[],
-			//05
-			['piston2', 'strike'],
-			//06
-			[],
-			//07
-			[],
-			//08
-			['timer'],
-			//09
-			['strike'],
-			//10
-			[],
-			//11
-			['moon','timer'],
-			//12
-			[],
-			//13
-			['piston2'],
-			//14
-			['timer'],
-			//15
-			['moon'],
-			//16
-			['strike'],
-
-		]
+		
 
 
 
@@ -224,145 +92,7 @@
 
 
 
-		var backingTrack = [
-			
-			//01
-			[],
-			//02
-			[],
-			//03
-			['moon'],
-			//04
-			[],
-			//05
-			['piston2'],
-			//06
-			[],
-			//07
-			['moon'],
-			//08
-			[],
-			//09
-			[],
-			//10
-			[],
-			//11
-			['moon'],
-			//12
-			[],
-			//13
-			['piston2'],
-			//14
-			[],
-			//15
-			['moon'],
-			//16
-			[],
-
-
-			
-			//01
-			[],
-			//02
-			[],
-			//03
-			['moon'],
-			//04
-			[],
-			//05
-			['piston2'],
-			//06
-			[],
-			//07
-			[],
-			//08
-			[],
-			//09
-			[],
-			//10
-			[],
-			//11
-			['moon'],
-			//12
-			[],
-			//13
-			['piston2'],
-			//14
-			[],
-			//15
-			['moon'],
-			//16
-			[],
-
-			//01
-			[],
-			//02
-			[],
-			//03
-			['moon'],
-			//04
-			[],
-			//05
-			['piston2'],
-			//06
-			[],
-			//07
-			['moon'],
-			//08
-			[],
-			//09
-			[],
-			//10
-			[],
-			//11
-			['moon'],
-			//12
-			[],
-			//13
-			['piston2'],
-			//14
-			[],
-			//15
-			['moon'],
-			//16
-			[],
-
-
-			
-			//01
-			[],
-			//02
-			[],
-			//03
-			['moon'],
-			//04
-			[],
-			//05
-			['piston2'],
-			//06
-			[],
-			//07
-			[],
-			//08
-			[],
-			//09
-			[],
-			//10
-			[],
-			//11
-			['moon'],
-			//12
-			[],
-			//13
-			['piston2'],
-			//14
-			[],
-			//15
-			['moon'],
-			//16
-			[]
-
-		]
+		
 
 
 
@@ -370,145 +100,6 @@
 
 
 
-		var idleBackingTrack = [
-			
-			//01
-			[],
-			//02
-			[],
-			//03
-			['strike'],
-			//04
-			[],
-			//05
-			[],
-			//06
-			[],
-			//07
-			['moon'],
-			//08
-			[],
-			//09
-			['strike'],
-			//10
-			[],
-			//11
-			['strike'],
-			//12
-			[],
-			//13
-			[],
-			//14
-			['strike'],
-			//15
-			[],
-			//16
-			[],
-
-
-			
-			//01
-			['strike'],
-			//02
-			[],
-			//03
-			['strike'],
-			//04
-			[],
-			//05
-			[],
-			//06
-			[],
-			//07
-			['moon'],
-			//08
-			[],
-			//09
-			['strike'],
-			//10
-			[],
-			//11
-			['strike'],
-			//12
-			[],
-			//13
-			[],
-			//14
-			['strike'],
-			//15
-			[],
-			//16
-			[],
-
-			//01
-			[],
-			//02
-			[],
-			//03
-			['strike'],
-			//04
-			[],
-			//05
-			[],
-			//06
-			[],
-			//07
-			['moon'],
-			//08
-			[],
-			//09
-			['strike'],
-			//10
-			[],
-			//11
-			['strike'],
-			//12
-			[],
-			//13
-			[],
-			//14
-			['strike'],
-			//15
-			[],
-			//16
-			[],
-
-
-			
-			//01
-			['strike'],
-			//02
-			[],
-			//03
-			['strike'],
-			//04
-			[],
-			//05
-			[],
-			//06
-			[],
-			//07
-			['moon'],
-			//08
-			[],
-			//09
-			['strike'],
-			//10
-			[],
-			//11
-			['strike'],
-			//12
-			[],
-			//13
-			[],
-			//14
-			['strike'],
-			//15
-			[],
-			//16
-			[],
-
-		]
 		
 
 
@@ -559,44 +150,26 @@
 
 
 			//Listen for tick
-			socket.on('tick', function(beatCount){
-				if(beatCount == 0){
-					console.log('new bar', animations);
+			socket.on('tick', function(tickCount){
+				// console.log('tick', tickCount);
+				if(tickCount == 0 && !backingTrack.playing){
+					// console.log('new loop');
 
-					setState(states[Math.floor(Math.random()*states.length)])
+					playBackingTrack();
+
+					// setState(states[Math.floor(Math.random()*states.length)])
 				}
 
-
-				if(samplesLoaded){
-					if(threadStatus == 'drawing'){
-						// console.log('beatCount', beatCount)
-						backingTrack[beatCount].forEach(function(sample){
-							// console.log(sample)
-							namedSamples[sample].play();
-
-
-						});
-
-					}else if(threadStatus == 'playing'){
-						activeBackingTrack[beatCount].forEach(function(sample){
-							// console.log(sample)
-							namedSamples[sample].play();
-
-
-						});
-					}else{
-						idleBackingTrack[beatCount].forEach(function(sample){
-							// console.log(sample)
-							namedSamples[sample].play();
-
-
-						});
-					}
-				}
 
 				threads.forEach(function(thread){
-					thread.triggerCuePoints(beatCount)
+					thread.triggerCuePoints(tickCount)
 				});
+
+				if(Math.floor(Math.random()*16) == 0){
+
+					backgroundTextures[Math.floor(Math.random()*backgroundTextures.length)].play();
+
+				}
 			});
 
 
@@ -714,6 +287,43 @@
 		}
 
 
+
+
+		$(document).on('threadStateChanged', function(e, thread, state){
+
+			console.log('thread state changed', thread, state);
+
+			if(state == 'empty'){
+
+				backingTrack.chords.gainNode.gain(1)
+				backingTrack.drums.gainNode.gain(0)
+				backingTrack.synth.gainNode.gain(0)
+
+
+
+			}else if(state == 'drawing'){
+
+				backingTrack.chords.gainNode.gain(1)
+				backingTrack.drums.gainNode.gain(0)
+				backingTrack.synth.gainNode.gain(1)
+
+				samples['synthPad1'].play();
+
+			}else if(state == 'playing'){
+
+				backingTrack.chords.gainNode.gain(1)
+				backingTrack.drums.gainNode.gain(1)
+				backingTrack.synth.gainNode.gain(1)
+
+				samples['synthPad1'].stop();
+
+			}else if(state == 'ending'){
+				samples['trickle1'].play();
+			}
+
+
+
+		});
 
 
 	 //    function makeNgon(w, h, s){

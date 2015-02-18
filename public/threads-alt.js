@@ -10,8 +10,11 @@ function Thread(x, y){
 
     this.count = 3;
     
-    this.state = 'creating';
+    this.state = 'drawing';
+    $( document ).trigger( "threadStateChanged", [ this, "drawing" ] );
     this.existsFor = 1;
+    this.willAnimateOut = false;
+    // $( document ).trigger( "threadStateChanged", [ this, "empty" ] );
 }
 
 
@@ -23,9 +26,12 @@ function Thread(x, y){
 Thread.prototype.reset = function(){
 
     //clean up anything existing
-    _.each(this.shapes, function(shape, i){
-        shape.remove();
-    });
+    // _.each(this.shapes, function(shape, i){
+    //     console.log('')
+    //     shape.remove();
+    // });
+
+    two.remove(this.shapes);
 
     _.each(this.cuePoints, function(cuepoint, i){
         cuepoint.destroy();
@@ -34,10 +40,11 @@ Thread.prototype.reset = function(){
     this.shapes = []
     this.cuePoints = {};
 
-    this.state = 'recycled';
+    this.state = 'empty';
     this.existsFor = 1;
-
-    threadStatus = 'empty'
+    this.willAnimateOut = false;
+    // threadStatus = 'empty'
+    $(document).trigger( "threadStateChanged", [ this, "empty" ] );
 }
 
 
@@ -49,7 +56,12 @@ Thread.prototype.reset = function(){
 
 Thread.prototype.draw = function(pos){
 
-    threadStatus = 'drawing'
+    // threadStatus = 'drawing'
+    if(this.state != 'drawing'){
+        this.state = 'drawing';
+        $( document ).trigger( "threadStateChanged", [ this, "drawing" ] );
+    }
+   
 
     
     if(this.shapes.length == 0){
@@ -118,7 +130,7 @@ Thread.prototype.draw = function(pos){
         //velocity.multiplyScalar(0.5);
 
 
-        if(pos.distanceTo(this.lastPos) >  50){
+        if(pos.distanceTo(this.lastPos) >  100){
             //if add vert condition is met, add it to each shape 
 
             //create the new vert from the current input position
@@ -156,7 +168,9 @@ Thread.prototype.draw = function(pos){
 
 Thread.prototype.endDraw = function(pos){
 
-    threadStatus = 'playing'
+    // threadStatus = 'playing'
+
+    $( document ).trigger( "threadStateChanged", [ this, "playing" ] );
     //when input ends, snap the thread to the far end of the screen
     pos.x = width;
 
@@ -188,7 +202,7 @@ Thread.prototype.endDraw = function(pos){
     this.getCuepointLocations();
     
 
-    this.state = 'complete';
+    this.state = 'playing';
 }
 
         
@@ -220,26 +234,31 @@ Thread.prototype.createCuepoint = function(vertex){
 }
 
 
-Thread.prototype.triggerCuePoints = function(beat){
+Thread.prototype.triggerCuePoints = function(tick){
 
-    if(beat == 0 && this.state == 'complete' || beat == 0 && this.state == 'outgoing'){
+    if(tick == 0 && this.state == 'playing'){
         //Every new bar...
+
+        console.log('FOOOOO', this.existsFor, tick)
+
         if(this.existsFor == 0){
+
             this.reset(); //Destroy the thread if it's done
         }else{
             this.existsFor--; //Decrement the lifespan of the thread
         }
 
-    }else if(beat == 56 && this.existsFor == 0){
+    }else if(tick == 56 && this.existsFor == 0){
         //If the thread is due to be destroyed, animate it out
-        this.state = 'outgoing'
+        this.willAnimateOut = true;
+        $( document ).trigger( "threadStateChanged", [ this, "ending" ] );
     }
 
     //If any cuepoints exist for the current beat, trigger them
-    if(this.cuePoints[beat]){
+    if(this.cuePoints[tick]){
 
-        if(beat%2 == 0 || Math.round(Math.random())==0){
-            this.cuePoints[beat].trigger();
+        if(tick%2 == 0 || Math.round(Math.random())==0){
+            this.cuePoints[tick].trigger();
         }
     }
 }
@@ -250,7 +269,7 @@ Thread.prototype.triggerCuePoints = function(beat){
 
 Thread.prototype.update = function(frameCount){
 
-    var state = this.state;
+    var willAnimateOut = this.willAnimateOut;
     //on every frame...
     _.each(this.shapes, function(shape, i){
         //...get every shape...
@@ -258,7 +277,7 @@ Thread.prototype.update = function(frameCount){
             //...and every vert
             
 
-            if(state == 'outgoing' ){
+            if(willAnimateOut ){
                 // If we're animating out, accelerate each point to the next one
                 var point; 
                 if(i+1 < shape.vertices.length){

@@ -65,7 +65,7 @@ var stateOne =
 
 	        //Trigger audio for cuepoint
 	        var i = Math.floor((Math.min(this.size, 100)/100)*24);
-	        samples[Object.keys(samples)[i]].play();
+	        // samples[Object.keys(samples)[i]].play();
 		},
 		onDestroy:function(){
 

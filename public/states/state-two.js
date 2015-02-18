@@ -63,8 +63,14 @@ var stateTwo =
 
 	        //Trigger audio for cuepoint
 	        
-	        	var i = Math.floor((Math.min(this.y, height)/height)*24);
-	        	samples[Object.keys(samples)[i]].play();
+        	var i = Math.floor((Math.min(this.y, height)/height)*triggerables.length);
+        	triggerables[i].play();
+
+        	if(Math.floor(Math.random()*8) == 0){
+
+				vocals[Math.floor(Math.random()*vocals.length)].play();
+
+			}
 	        
 	        
 		},
