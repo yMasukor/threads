@@ -1,23 +1,24 @@
-function Thread(x, y){
-
-    this.lastPos = new Two.Anchor(0, y+10);
-    this.lastInput = new Two.Anchor(x, y);
-
-    this.shapeOpts = state.threadOpts.shapes;
-
+function Thread(opts){
     this.shapes = [];
     this.cuePoints = {};
 
-    this.count = 3;
+    this.setOpts(opts);
     
-    this.state = 'drawing';
-    $( document ).trigger( "threadStateChanged", [ this, "drawing" ] );
     this.existsFor = 1;
     this.willAnimateOut = false;
-    // $( document ).trigger( "threadStateChanged", [ this, "empty" ] );
+    this.state = 'empty';
+
+
 }
 
+Thread.prototype.setOpts = function(opts){
+    this.shapeOpts = opts.shapes;
+    this.cuepointOpts = opts.cuepointOpts;
 
+    this.onStartDraw = opts.playbackOpts.onDraw;
+    this.onStartPlay = opts.playbackOpts.onPlay;
+    this.onEndPlay = opts.playbackOpts.onEnd;
+}
 
 
 
@@ -44,23 +45,26 @@ Thread.prototype.reset = function(){
     this.existsFor = 1;
     this.willAnimateOut = false;
     // threadStatus = 'empty'
-    $(document).trigger( "threadStateChanged", [ this, "empty" ] );
+    this.onEndPlay();
 }
 
 
 
 
-
+Thread.prototype.startDraw = function(x, y){
+    this.lastPos = new Two.Anchor(0, y+10);
+    this.lastInput = new Two.Anchor(x, y);
+    this.state = 'drawing';
+    this.onStartDraw();
+}
 
 
 
 Thread.prototype.draw = function(pos){
 
-    // threadStatus = 'drawing'
-    if(this.state != 'drawing'){
-        this.state = 'drawing';
-        $( document ).trigger( "threadStateChanged", [ this, "drawing" ] );
-    }
+
+    
+  
    
 
     
@@ -130,7 +134,7 @@ Thread.prototype.draw = function(pos){
         //velocity.multiplyScalar(0.5);
 
 
-        if(pos.distanceTo(this.lastPos) >  200){
+        if(pos.distanceTo(this.lastPos) >  100){
             //if add vert condition is met, add it to each shape 
 
             //create the new vert from the current input position
@@ -149,7 +153,7 @@ Thread.prototype.draw = function(pos){
             this.lastPos.y = pos.y;
 
 
-            if(Math.floor(Math.random()) == 0){
+            if(Math.floor(Math.random()*4) == 0){
                 // console.log(beatCount, beatCount%4)
                 this.createCuepoint(this.shapes[0].vertices[this.shapes[0].vertices.length-1]);
                 //if Cuepoint conditions met, also add a cuepoint at this location
@@ -201,8 +205,8 @@ Thread.prototype.endDraw = function(pos){
     //Once drawing is complete, calculate the 
     this.getCuepointLocations();
     
-
-    this.state = 'playing';
+    this.state = 'playing'
+    this.onStartPlay();
 }
 
         
@@ -229,7 +233,7 @@ Thread.prototype.getCuepointLocations = function(){
 
 Thread.prototype.createCuepoint = function(vertex){
     //create a new cuepoint, with the current state options
-    var cuePoint = new CuePoint(vertex.x, vertex.y, vertex.velocity.length()*5, state.cuepointOpts.onCreate, state.cuepointOpts.onTrigger, state.cuepointOpts.onDestroy, this);
+    var cuePoint = new CuePoint(vertex.x, vertex.y, vertex.velocity.length()*5, this.cuepointOpts.onCreate, this.cuepointOpts.onTrigger, this.cuepointOpts.onDestroy, this);
     vertex.cuePoint = cuePoint;
 }
 
@@ -237,12 +241,7 @@ Thread.prototype.createCuepoint = function(vertex){
 Thread.prototype.triggerCuePoints = function(tick){
 
     if(tick == 0 && this.state == 'playing'){
-        //Every new bar...
-
-        console.log('FOOOOO', this.existsFor, tick)
-
         if(this.existsFor == 0){
-
             this.reset(); //Destroy the thread if it's done
         }else{
             this.existsFor--; //Decrement the lifespan of the thread
@@ -251,7 +250,7 @@ Thread.prototype.triggerCuePoints = function(tick){
     }else if(tick == 56 && this.existsFor == 0){
         //If the thread is due to be destroyed, animate it out
         this.willAnimateOut = true;
-        $( document ).trigger( "threadStateChanged", [ this, "ending" ] );
+        
     }
 
     //If any cuepoints exist for the current beat, trigger them
@@ -315,8 +314,11 @@ Thread.prototype.update = function(frameCount){
             v.acc.set(0, 0);
 
             if(v.cuePoint){
-                v.cuePoint.display.translation.x = v.x;
-                v.cuePoint.display.translation.y = v.y;
+                if(v.cuePoint.display){
+                    v.cuePoint.display.translation.x = v.x;
+                    v.cuePoint.display.translation.y = v.y;
+                }
+                
             } 
 
         

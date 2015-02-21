@@ -8,7 +8,8 @@
 
 	<script src="https://cdn.socket.io/socket.io-1.3.3.js"></script>
 	
-
+    <script src="threads-alt.js"></script>
+    <script src="CuePoint.js"></script>
 
 	</head>
 	<body>
@@ -28,12 +29,18 @@
 
 
        
+        var loopDuration = 12000
+        var barsPerLoop = 4
+        var beatsPerBar = 4
+        var ticksPerBeat = 4
+        var tickDuration = ((loopDuration/barsPerLoop)/beatsPerBar)/ticksPerBeat
 
+        var duration = tickDuration*ticksPerBeat;
 
 
 		var two = new Two({
 			fullscreen: true,
-			type: Two.Types.svg,
+			type: Two.Types.canvas,
 		}).appendTo(document.body);
 
 
@@ -70,10 +77,85 @@
 
 
         
-		function Player(id){
-			this.id = id;
-			this.thread = null;
-		}
+		// function Player(id){
+		// 	this.id = id;
+		// 	this.thread = null;
+		// }
+
+        var threadLayer = two.makeGroup();
+
+        var threadOpts = {
+            //An array of shapes to draw
+            shapes:[
+
+                {
+                    color:'#000000',
+                    weight: 1,
+                    yOffset:0,
+                    filled:false,
+                }
+            ],
+
+
+            //Cuepoint Behaviour
+            cuepointOpts:{
+                onCreate:function(){
+                    //Must return a display object
+                    //This references cuepoint object
+                    // console.log(this.size)
+
+                    this.size = this.size/10
+                    var circle = two.makeRectangle(this.x, this.y, 10, 10);
+                    circle.fill = '#000000';
+                    circle.noStroke();
+                    circle.scale = 1 ;
+                    return circle;
+                },
+                onTrigger:function(){
+                    //Animation for cuepoint trigger
+                    //This references cuepoint object
+
+                    //Cuepoint Animation
+                    // var triggerAnimation = new TWEEN.Tween(this.display)
+                    //     .to({scale:2, opacity:0}, duration * 0.25)
+                    //     .easing(Easing.Circular.Out)
+                    //     .onComplete(function() {
+                    //         this.scale = 0.1;
+                    //         this.opacity = 1;
+                    //     });
+
+                    // triggerAnimation.start();
+
+                    //Secondary animations
+                    this.thread.jitter();
+
+                    //Trigger audio for cuepoint
+                    
+                    
+                },
+                onDestroy:function(){
+
+                }
+            },
+
+
+            //Playback Behaviour
+            playbackOpts:{
+                onDraw:function(){
+                    
+                },
+                onPlay:function(){
+                    
+                },
+                onEnd:function(){
+                    
+                }
+
+            }
+        }
+
+
+        thread = new Thread(threadOpts);
 
 
 
@@ -81,9 +163,6 @@
 
 
 
-
-
-		var players = [];
 
 
         
@@ -98,9 +177,24 @@
 			socket.emit('connectPlayer');
 
 
+
+            socket.on('tick', function(tickCount){
+                // console.log('tick', tickCount);
+
+
+
+                console.log('tick', tickCount);  
+                thread.triggerCuePoints(tickCount)
+                
+
+
+            });
+
+
 			two.bind('update', function(frameCount) {
 				// console.log('update');
                 TWEEN.update();
+                thread.update();
 	           
 		
 
@@ -151,6 +245,11 @@
 
             socket.emit('playerInput', input);
 
+            if(thread.state == 'empty'){
+                thread.setOpts(threadOpts);
+                thread.startDraw(input.x, input.y)
+            }
+
             
         }
 
@@ -164,7 +263,16 @@
                 }
 
                 socket.emit('playerInput', input);
+
+                if(thread.state == 'drawing'){
+                    var pos = new Two.Anchor(input.x, input.y);
+                    thread.draw(pos);
+                }
             }
+
+            
+            
+
 
             return false;
         }
@@ -180,6 +288,11 @@
             }
 
             socket.emit('playerInput', input);
+
+            if(thread.state == 'drawing'){
+                var pos = new Two.Anchor(input.x, input.y);
+                thread.endDraw(pos);
+            }
 
             return false;
         }

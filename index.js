@@ -45,9 +45,13 @@ io.on('connection', function(socket){
 		if(players.indexOf(socket.id) > -1){
 			console.log('removing player')
 			players.splice(players.indexOf(socket.id), 1);
+
+			viewers.forEach(function(viewerId){
+				io.to(viewerId).emit('removePlayer', socket.id);
+			});
 		}else{
 
-			console.log('removing player')
+			// console.log('removing player')
 			viewers.splice(viewers.indexOf(socket.id), 1);
 
 			if(viewers.length == 0){
