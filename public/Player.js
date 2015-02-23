@@ -1,32 +1,43 @@
-function Player(id){
+// console.log(paper, g.paperScope, paper == g.paperScope, foo);
+
+
+function Player(id, index){
 	this.id = id;
+	this.index = index; //_.size(players);
+	this.thread = new Thread();
 
-	this.playerIndex = _.size(players);
+	// console.log('player index is', this.playerIndex);
 
-	console.log('player index is', this.playerIndex);
-
-	this.thread = new Thread(state.players[this.playerIndex].threadOpts);
-	threads.push(this.thread);
+	// this.thread = new Thread(state.players[this.playerIndex].threadOpts);
+	// threads.push(this.thread);
 }
 
 Player.prototype.dragStart = function(e){
-	if(this.thread.state == 'empty'){
-		this.thread.setOpts(state.players[this.playerIndex].threadOpts);
-		this.thread.startDraw(e.x, e.y)
+	
+	
+	if(this.thread.state == 'ready'){
+		this.thread.setOpts(state.players[this.index].threadOpts);
+		this.thread.startDraw(e);
+		
+	}else if(this.thread.state == 'drawing'){
+		this.thread.draw(e);
 	}
+	
 	
 }
 
 Player.prototype.drag = function(e){
+
+	// console.log('drawing', this.thread);
 	if(this.thread.state == 'drawing'){
-		var pos = new Two.Anchor(e.x, e.y);
-	    this.thread.draw(pos);
+		this.thread.draw(e);
 	}
 }
 
 Player.prototype.dragEnd = function(e){
-	if(this.thread.state == 'drawing'){
-	 	var pos = new Two.Anchor(e.x, e.y);
-	    this.thread.endDraw(pos);
-	}
+	// console.log('end thread', e);
+	this.thread.endDraw(e);
+
 }
+
+// THREADS.Player = Player;

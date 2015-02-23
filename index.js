@@ -49,7 +49,7 @@ io.on('connection', function(socket){
 			viewers.forEach(function(viewerId){
 				io.to(viewerId).emit('removePlayer', socket.id);
 			});
-		}else{
+		}else if(viewers.indexOf(socket.id) > -1){
 
 			// console.log('removing player')
 			viewers.splice(viewers.indexOf(socket.id), 1);
@@ -93,21 +93,15 @@ io.on('connection', function(socket){
 	
 
 	socket.on('playerInput', function(input){
-		
-		var update = {
-			id:socket.id,
-			x:input.x,
-			y:input.y,
-			type:input.type
-		}
 
-		if(input.type == 'end'){
-			console.log(update)
-		}
-		
+		console.log('input', input.point.x);
+		input.id = socket.id
+
+
+		// 
 
 		viewers.forEach(function(viewerId){
-			io.to(viewerId).emit('playerUpdate', update);
+			io.to(viewerId).emit('playerUpdate', input);
 		});
 
 	});

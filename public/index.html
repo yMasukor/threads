@@ -4,96 +4,98 @@
 	<script src="lib/jquery-2.1.3.min.js"></script>
 	<script src="lib/tween.min.js"></script>
     <script src="lib/tsw.js"></script>
-	<script src="lib/two.js"></script>
+    <script src="lib/underscore.js"></script>
+	<script src="lib/paper-full.js"></script>
 
 
 
 	
 	<script src="https://cdn.socket.io/socket.io-1.3.3.js"></script>
 
-	<script src="Player.js"></script>
+	
+	<script src="audio.js"></script>
+
 	<script src="CuePoint.js"></script>
-    <script src="threads-alt.js"></script>
+	<script src="Thread.js"></script>
+	<script src="Player.js"></script>
+	<script src="backgroundLayer.js"></script>
+<!--    
     <script src="metronome.js"></script>
-    <script src="animations.js"></script>
-    <script src="audio.js"></script>
+    <script src="animations.js"></script> -->
+    
 
     <script src="states/themes.js"></script>
+    <script src="states/state-two.js"></script>
 	<script src="states/state-one.js"></script>
-	<script src="states/state-two.js"></script>
+
+
 	
-	
+
+
 
 
 	</head>
 	<body>
 
-	<script>
+
+	<canvas id="myCanvas" resize keepalive="true" ></canvas>
+
+
+	<script type="text/javascript">
+
+
+
+		
+
+
+		
+	</script>
+
+
+	<script type="text/javascript" >
+
+		paper.install(window);
 
 		var TWO_PI = Math.PI * 2;
 
-        var width = $(window).width(), height = $(window).height();
-        var center = {x: width/2, y:height/2}
+		
 
-        
-
-
-        var loopDuration = 12000
-		var barsPerLoop = 4
-		var beatsPerBar = 4
-		var ticksPerBeat = 4
-		var tickDuration = ((loopDuration/barsPerLoop)/beatsPerBar)/ticksPerBeat
-
-        var duration = tickDuration*ticksPerBeat;
+		var players = {},
+		loopDuration = 120000,
+		barsPerLoop = 4,
+		beatsPerBar = 4,
+		ticksPerBeat = 4,
+		tickDuration = ((loopDuration/barsPerLoop)/beatsPerBar)/ticksPerBeat,
+		duration = tickDuration*ticksPerBeat,
 
 
-        var animations = {}
-        var Easing = TWEEN.Easing;
+		socket = io(),
 
-        var socket = io();
+		backingTrack = {
+			playing:false,
+		},
 
+		// this.themes = themes
+		// this.states = [stateTwo]
+		// this.state = this.states[0]
 
+		samples,
+		backgroundTextures,
+		triggerables,
+		vocals,
+		beatCount
 
-        
-		var beatCount = 0;
-		var barCount = 0;
-       	var backingTrack = {playing:false} 
-
-
-
-
-
-		var states = [stateTwo]
-		var state = states[0];
-
-
-
-		//Create Two instance
-		var two = new Two({
-			fullscreen: true,
-			type: Two.Types.canvas,
-		}).appendTo(document.body);
-
-		two.renderer.domElement.style.background = state.theme.back;
+			
+		
 
 
-		//Create layers
-		var backgroundLayer = two.makeGroup();
-		var threadLayer = two.makeGroup();
-
-
-		var samplesLoaded = false;
-		// var backingTrackPlaying = false;
-		// var threadStatus = 'empty';
-
-
-
-        
+		var state = stateTwo,
+		samplesLoaded = false;
 
 		
 
 
-
+		var background;
 
 
 
@@ -104,16 +106,7 @@
 
 
 
-
-
 		
-
-
-
-
-
-		var players = {};
-		var threads = [];
 
         
 		
@@ -121,7 +114,10 @@
 
 		$(document).ready(function(){
 
-			//bind sockets
+			
+			paper.setup('myCanvas')
+			var tool = new Tool();
+			loadAudio();
 
 			//connect to the server
 			socket.emit('connectViewer');
@@ -138,6 +134,7 @@
 
 			//add player when they connect
 			socket.on('addPlayer', function(playerId){
+				console.log('player connected');
 				addPlayer(playerId);
 			});
 
@@ -149,13 +146,19 @@
 			//recieve player input
 			socket.on('playerUpdate', function(input){
 
-				// console.log('update', input)
+				console.log('update', input)
+				input.tool = tool;
 
-				if(input.type == 'start'){
+				input.point = new Point(input.point.x*view.bounds.width, input.point.y*view.bounds.height);
+				input.delta = new Point(input.delta.x*view.bounds.width, input.delta.y*view.bounds.height);
+				
+				
+
+				if(input.type == 'mousedown'){
 					players[input.id].dragStart(input);
-				}else if(input.type == 'drag'){
+				}else if(input.type == 'mousedrag'){
 					players[input.id].drag(input);
-				}else if(input.type == 'end'){
+				}else if(input.type == 'mouseup'){
 					players[input.id].dragEnd(input);
 				}
 			});
@@ -165,20 +168,24 @@
 			//Listen for tick
 			socket.on('tick', function(tickCount){
 				// console.log('tick', tickCount);
+
+
 				if(tickCount == 0 && !backingTrack.playing){
 					playBackingTrack();
 				}
 
 
-				threads.forEach(function(thread){
-					thread.triggerCuePoints(tickCount)
+				_.each(players, function(player){
+					player.thread.triggerCuePoints(tickCount)
 				});
 
+
 				if(Math.floor(Math.random()*16) == 0){
-
 					backgroundTextures[Math.floor(Math.random()*backgroundTextures.length)].play();
-
 				}
+
+				analyser.getByteTimeDomainData(dataArray);
+
 			});
 
 
@@ -190,92 +197,87 @@
 
 
 
-			var sliceWidth = width * 2.5 / bufferLength;
-			var x = 0;
-			var points = [new Two.Anchor(width, 0), new Two.Anchor(0, 0)];
 
-			for(var i=0; i<bufferLength; i++){
+
+
+			background = new Shape.Rectangle(new Point(0,0), view.size);
+			background.fillColor = '#84FFFF';
+			visualiser.create();
+
+
+
+
+
+			view.onFrame = function(e) {
+				_.each(players, function(player){
+					player.thread.update(e);
+				});
+
+				TWEEN.update();
+
+
+				visualiser.update();
+
 				
-
-		        var v = dataArray[i] * 2;
-		        var y = v //* height/2;
-
-		        var point = new Two.Anchor(x, y);
-		        // if(i === 0) {
-		        //   canvasCtx.moveTo(x, y);
-		        // } else {
-		        //   canvasCtx.lineTo(x, y);
-		        // }
-
-		        points.push(point);
-		        x += sliceWidth;
-
-
+				
 			}
 
 
-			var shape = two.makeCurve(points, false);
-            shape.noStroke();
-            shape.fill = state.theme.highlight;
 
 
 
+			// DEBUG PLAYER\
 
+			// window.setTimeout(function(){
+			// 	
+			// }, 1000)
+			
 
+            // addPlayer('foobar');
 
+			tool.onMouseDown =  function(e) {
+				players['foobar'].dragStart(e);
+			}
 
-			two.bind('update', function(frameCount) {
-				//Update animateables
-                TWEEN.update();
-	           
-                threads.forEach(function(thread){
-                	thread.update();
-                });
+			tool.onMouseDrag =  function(e) {
+				players['foobar'].drag(e);
+			}
 
-                analyser.getByteFrequencyData(dataArray);
-                // console.log(dataArray);
-		
-
-
-                for(var i=0; i<bufferLength; i++){
-
-                	var point = shape.vertices[i+2];
-
-                	var v = dataArray[i] * 2;
-		        	var y = v //* height/2;
-
-		       		point.y = y;
-
-		       		// console.log(y)
-
-                };
-
-
-	      	}).play();
-
-
-
-
-
-
-
-
-			// DEBUG PLAYER
-			addPlayer('foobar');
-			$(window).bind('mousedown', dragStart);
-            $(window).bind('mousemove', drag);
-            $(window).bind('mouseup', dragEnd);
-            
-
-
+			tool.onMouseUp =  function(e) {
+				players['foobar'].dragEnd(e);
+			}
 
 
 		});
 
 
+		// var backgroundVisualiser;
+
+		// function makeBackground(){
+
+		// 	// 
+		// 	// 
+		// 	// var points = [new Two.Anchor(width, 0), new Two.Anchor(0, 0)];
+
+			
+
+
+
+		// }
+
+
+
+
+
+
+
+
 		function addPlayer(playerId){
-			if(_.size(players) < 2){
-				var player = new Player(playerId);
+			var playerCount = _.size(players)
+			if(playerCount < 2){
+				console.log('adding player', playerId);
+
+				var player = new Player(playerId, playerCount);
 				players[playerId] = player;
 			}else{
 				console.log('both players connected');
@@ -291,7 +293,7 @@
 
 			state = newState;
 			//update background color
-			animations['horizontalWipe'].start(state.theme.back);
+			// animations['horizontalWipe'].start(state.theme.back);
 
 
 			//update 
@@ -300,108 +302,20 @@
 
 
 
-		$(document).on('threadStateChanged', function(e, thread, state){
-
-			// console.log('thread state changed', thread, state);
-
-
-
-			// if(state == 'empty'){
-
-			// 	backingTrack.chords.gainNode.gain(1)
-			// 	backingTrack.drums.gainNode.gain(0)
-			// 	backingTrack.synth.gainNode.gain(0)
-
-			// }else if(state == 'drawing'){
-
-			// 	backingTrack.chords.gainNode.gain(1)
-			// 	backingTrack.drums.gainNode.gain(0)
-			// 	backingTrack.synth.gainNode.gain(1)
-
-			// 	samples['synthPad1'].play();
-
-			// }else if(state == 'playing'){
-
-			// 	backingTrack.chords.gainNode.gain(1)
-			// 	backingTrack.drums.gainNode.gain(1)
-			// 	backingTrack.synth.gainNode.gain(1)
-
-			// 	samples['synthPad1'].stop();
-
-			// }else if(state == 'ending'){
-			// 	samples['trickle1'].play();
-			// }
-
-		});
-
-
-	 //    function makeNgon(w, h, s){
-	 //    	var shape = this.makePolygon(
-		// 		_.map(_.range(s), function(i) {
-		// 			var percent = i / s;
-		// 			var theta = TWO_PI * percent - Math.PI / 2;
-		// 			var x = w * Math.cos(theta);
-		// 			var y = h * Math.sin(theta);
-		// 			return new Two.Anchor(x, y);
-		// 		})
-		// 	);
-
-		// 	return shape
-	 //    }
-
-
-
-		var isDragging
-
-        var dragStart = function(e){
-            // e.preventDefault();
-            isDragging = true;
-
-            var input = {
-                type:'start',
-                x:e.clientX,
-                y:e.clientY,
-            }
-
-            players['foobar'].dragStart(input);
-
-            
-        }
-
-        var drag = function(e){
-            // e.preventDefault();
-            if(isDragging){
-                var input = {
-                    type:'drag',
-                    x:e.clientX,
-                    y:e.clientY,
-                }
-
-                players['foobar'].drag(input);
-            }
-
-            return false;
-        }
-
-        var dragEnd = function(e){
-            // e.preventDefault();
-            isDragging = false;
-
-            var input = {
-                type:'end',
-                x:e.clientX,
-                y:e.clientY,
-            }
-
-            players['foobar'].dragEnd(input);
-
-            return false;
-        }
-
+		
 
 	</script>
 
 	
+
+
+	
+	
+	
+
+
+
+
 
 	</body>
 </html>

@@ -1,5 +1,439 @@
 <!doctype html>
 <html>
+    <head>
+    <script src="lib/jquery-2.1.3.min.js"></script>
+    <script src="lib/tween.min.js"></script>
+    <script src="lib/tsw.js"></script>
+    <script src="lib/underscore.js"></script>
+    <script src="lib/paper-full.js"></script>
+
+
+
+    
+    <script src="https://cdn.socket.io/socket.io-1.3.3.js"></script>
+
+    
+    <script src="audio.js"></script>
+
+    <script src="CuePoint.js"></script>
+    <script src="Thread.js"></script>
+    <script src="Player.js"></script>
+
+<!--    
+    <script src="metronome.js"></script>
+    <script src="animations.js"></script> -->
+    
+
+    <script src="states/themes.js"></script>
+    <script src="states/state-two.js"></script>
+    <script src="states/state-one.js"></script>
+
+
+    
+
+
+
+
+    </head>
+    <body>
+
+
+    <canvas id="myCanvas" resize></canvas>
+
+
+    <script type="text/javascript">
+
+
+
+        
+
+
+        
+    </script>
+
+
+    <script type="text/javascript" >
+
+        paper.install(window);
+
+        var TWO_PI = Math.PI * 2;
+
+        
+
+        var players = {},
+        loopDuration = 120000,
+        barsPerLoop = 4,
+        beatsPerBar = 4,
+        ticksPerBeat = 4,
+        tickDuration = ((loopDuration/barsPerLoop)/beatsPerBar)/ticksPerBeat,
+        duration = tickDuration*ticksPerBeat,
+
+
+        socket = io(),
+
+        backingTrack = {
+            playing:false,
+        },
+
+        // this.themes = themes
+        // this.states = [stateTwo]
+        // this.state = this.states[0]
+
+        samples,
+        backgroundTextures,
+        triggerables,
+        vocals,
+        beatCount,
+        thread
+
+            
+        
+
+
+        var state = stateTwo,
+        samplesLoaded = false;
+
+        
+
+
+        var background;
+
+
+
+        
+
+        var threadOpts = {
+                //An array of shapes to draw
+                paths:[
+                    {
+                        color:'rgba(0,0,0, 0.5)',
+                        weight: 2,
+                        yOffset:0,
+                        filled:false,
+                    },
+                ],
+
+
+                //Cuepoint Behaviour
+                cuepointOpts:{
+                    onCreate:function(){
+                        // //Must return a display object
+                        // //This references cuepoint object
+
+                        this.size = Math.min(this.size, 100);
+                        var group = new Group();
+
+                        // var circle = new Shape.Circle({
+                        //     center: this.point,
+                        //     radius: 0
+                        // });
+                        // circle.fillColor = '#212121';
+                        // circle.opacity = 0.9;
+
+                        // var animateIn = new TWEEN.Tween(circle)
+                        //     .to({radius:this.size}, duration*0.25)
+                        //     .easing( TWEEN.Easing.Circular.Out)
+                        //     .onComplete(function() {
+    
+                        //     });
+
+                        // animateIn.start();
+
+                        // group.addChild(circle);
+                        return group;
+
+                    },
+                    onTrigger:function(){
+                        //Animation for cuepoint trigger
+                        //This references cuepoint object
+
+                        // this.drawable.fillColor = 'red'
+
+                        // var drawable = this.drawable;
+                        // var startRadius = this.size
+
+                        // var ping = new Shape.Circle({
+                        //     center: drawable.position,
+                        //     radius: 0
+                        // });
+                        // ping.fillColor = '#212121';
+                        // drawable.addChild(ping);    
+
+                        // var pingIn = new TWEEN.Tween(ping)
+                        //     .to({radius:startRadius*10, opacity:0}, duration*0.25)
+                        //     .easing( TWEEN.Easing.Circular.Out)
+                        //     .onComplete(function() {
+                        //         ping.remove();
+                        //     });
+
+                        // pingIn.start();
+
+                  //       //Secondary animations
+                        this.thread.jitter();
+
+                  //       //Trigger audio for cuepoint
+                        
+               //       var i = Math.floor((Math.min(this.y, height)/height)*triggerables.length);
+               //       triggerables[i].play();
+
+               //       if(Math.floor(Math.random()*8) == 0){
+
+                        //  vocals[Math.floor(Math.random()*vocals.length)].play();
+
+                        // }
+                        
+                        
+                    },
+                    onDestroy:function(){
+                        this.drawable.remove();
+                    }
+                },
+
+
+                //Playback Behaviour
+                playbackOpts:{
+                    onStartDraw:function(){
+ 
+                    },
+
+                    onEndDraw:function(){
+
+                    },
+
+                    onPlay:function(){
+                       
+                    },
+                    onEnd:function(){
+
+                    }
+
+                }
+            }
+   
+
+
+
+
+        
+
+
+
+
+
+        
+
+        
+        
+        var thread; 
+
+        $(document).ready(function(){
+
+            
+            paper.setup('myCanvas')
+            var tool = new Tool();
+            thread = new Thread();
+            
+
+            //connect to the server
+            socket.emit('connectPlayer');
+
+
+
+            socket.on('tick', function(tickCount){
+                // console.log('tick', tickCount);
+
+
+
+                // console.log('tick', tickCount);  
+                thread.triggerCuePoints(tickCount)
+                
+
+
+            });
+
+
+
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            view.onFrame = function(e) {
+                thread.update(e);
+                
+
+                TWEEN.update();
+
+
+                
+                
+            }
+
+
+
+
+
+            // DEBUG PLAYER\
+
+            
+            
+
+            // tool.minDistance = 20;
+
+            tool.onMouseDown =  function(e) {
+
+                // console.log('start', e)
+
+                var input = {
+                    point:{x:e.point.x/view.bounds.width, y:e.point.y/view.bounds.height},
+                    delta:{x:e.delta.x/view.bounds.width, y:e.delta.y/view.bounds.height},
+                    type:'mousedown'
+                }
+
+                socket.emit('playerInput', input);
+
+
+
+                if(thread.state == 'ready'){
+                    thread.setOpts(threadOpts);
+                    thread.startDraw(e);
+                    
+                }else if(thread.state == 'drawing'){
+                    thread.draw(e);
+                }
+
+            }
+
+            tool.onMouseDrag =  function(e) {
+
+                // console.log('drag', e.point.x)
+
+                var input = {
+                    point:{x:e.point.x/view.bounds.width, y:e.point.y/view.bounds.height},
+                    delta:{x:e.delta.x/view.bounds.width, y:e.delta.y/view.bounds.height},
+                    type:'mousedrag'
+                }
+
+                socket.emit('playerInput', input);
+                
+
+                if(thread.state == 'drawing'){
+                    thread.draw(e);
+                }
+
+            }
+
+            tool.onMouseUp =  function(e) {
+
+                // console.log('end', e)
+
+                var input = {
+                    point:{x:e.point.x/view.bounds.width, y:e.point.y/view.bounds.height},
+                    delta:{x:e.delta.x/view.bounds.width, y:e.delta.y/view.bounds.height},
+                    type:'mouseup'
+                }
+
+                socket.emit('playerInput', input);
+
+                thread.endDraw(e);
+            }
+
+
+        });
+
+
+        // var backgroundVisualiser;
+
+        // function makeBackground(){
+
+        //  // 
+        //  // 
+        //  // var points = [new Two.Anchor(width, 0), new Two.Anchor(0, 0)];
+
+            
+
+
+
+        // }
+
+
+
+
+
+
+
+
+        function addPlayer(playerId){
+            var playerCount = _.size(players)
+            if(playerCount < 2){
+                var player = new Player(playerId, playerCount);
+                players[playerId] = player;
+            }else{
+                console.log('both players connected');
+            }
+        }
+
+
+
+
+
+
+        function setState(newState){
+
+            state = newState;
+            //update background color
+            // animations['horizontalWipe'].start(state.theme.back);
+
+
+            //update 
+        }
+
+
+
+
+        
+
+    </script>
+
+    
+
+
+    
+    
+    
+
+
+
+
+
+    </body>
+</html>
+
+
+
+
+
+
+
+
+
+<!-- <!doctype html>
+<html>
 	<head>
 	<script src="lib/jquery-2.1.3.min.js"></script>
 	<script src="lib/tween.min.js"></script>
@@ -301,4 +735,4 @@
 
 	</script>
 	</body>
-</html>
+</html> -->

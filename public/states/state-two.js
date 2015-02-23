@@ -1,6 +1,5 @@
 var stateTwo = 
 {
-	theme:themes[1],
 
 
 
@@ -11,60 +10,112 @@ var stateTwo =
 			//Thread behaviour
 			threadOpts:{
 				//An array of shapes to draw
-				shapes:[
-
+				paths:[
 			        {
-			            color:themes[1].fore,
-			            weight: 6,
+			            color:'rgba(255,255,255, 0.5)',
+			            weight: 0,
 			            yOffset:0,
 			            filled:false,
 			        },
 
 			        {
-			            color:themes[1].light,
-			            weight: 9,
+			            color:'rgba(255,255,255, 0.5)',
+			            weight:1,
 			            yOffset:0,
 			            filled:false,
 			        }
+
+			       
+
+			        // {
+			        //     color:'rgba(0,0,0, 0.2)',
+			        //     weight: 1,
+			        //     yOffset:0,
+			        //     filled:false,
+			        // },
+
+			        // {
+			        //     color:'rgba(255,255,255, 0.5)',
+			        //     weight: 1,
+			        //     yOffset:0,
+			        //     filled:false,
+			        // }
+
+			        // ,
+
+			        // {
+			        //     color:'rgba(0,0,0, 0.2)',
+			        //     weight: 1,
+			        //     yOffset:0,
+			        //     filled:false,
+			        // }
 			    ],
 
 
 			    //Cuepoint Behaviour
 				cuepointOpts:{
 					onCreate:function(){
-						//Must return a display object
-						//This references cuepoint object
-						console.log(this.size)
+						// //Must return a display object
+						// //This references cuepoint object
+						this.size = Math.min(this.size, 100);
 
-						this.size = this.size/2
-				        var circle = two.makeCircle(this.x, this.y, this.size);
-				        circle.fill = state.theme.accent;
-				        circle.noStroke();
-				        circle.scale = 0.1;
-				        return circle;
+						var group = new Group();
+
+				  		var circle = new Shape.Circle({
+							center: this.point,
+							radius: 0
+						});
+						circle.fillColor = '#FAFAFA';
+						circle.opacity = 0.9;
+
+
+						var animateIn = new TWEEN.Tween(circle)
+				            .to({radius:this.size}, duration*0.25)
+				            .easing( TWEEN.Easing.Circular.Out)
+				            .onComplete(function() {
+	
+				            });
+
+				        animateIn.start();
+
+				        group.addChild(circle);
+						return group;
+
 					},
 					onTrigger:function(){
 						//Animation for cuepoint trigger
 						//This references cuepoint object
 
-						//Cuepoint Animation
-				        var triggerAnimation = new TWEEN.Tween(this.display)
-				            .to({scale:2, opacity:0}, duration * 0.25)
-				            .easing(Easing.Circular.Out)
+						// this.drawable.fillColor = 'red'
+
+						var drawable = this.drawable;
+						var startRadius = this.size
+
+						var ping = new Shape.Circle({
+							center: drawable.position,
+							radius: 0
+						});
+						ping.fillColor = '#ffffff';
+						drawable.addChild(ping);	
+
+						var pingIn = new TWEEN.Tween(ping)
+				            .to({radius:startRadius*10, opacity:0}, duration*0.25)
+				            .easing( TWEEN.Easing.Circular.Out)
 				            .onComplete(function() {
-				                this.scale = 0.1;
-				                this.opacity = 1;
+				                ping.remove();
 				            });
 
-				        triggerAnimation.start();
+				        pingIn.start();
 
-				        //Secondary animations
+				  //       //Secondary animations
 				        this.thread.jitter();
 
-				        //Trigger audio for cuepoint
+				  //       //Trigger audio for cuepoint
 				        
-			        	var i = Math.floor((Math.min(this.y, height)/height)*triggerables.length);
-			        	triggerables[i].play();
+			        	// var i = Math.floor((Math.min(this.y, view.bounds.height)/view.bounds.height)*triggerables.length);
+
+
+			        	triggerables[Math.floor(Math.random()*triggerables.length)].play();
 
 			        	if(Math.floor(Math.random()*8) == 0){
 
@@ -75,92 +126,150 @@ var stateTwo =
 				        
 					},
 					onDestroy:function(){
-
+						this.drawable.remove();
 					}
 				},
 
 
 				//Playback Behaviour
 				playbackOpts:{
-					onDraw:function(){
+					onStartDraw:function(){
+						
 						backingTrack.synth.gainNode.gain(1)
+						samples.synthPad1.play();
 					},
+
+					onEndDraw:function(){
+						backingTrack.synth.gainNode.gain(1)
+						samples.synthPad1.stop();
+					},
+
 					onPlay:function(){
 						backingTrack.drums.gainNode.gain(1)
 					},
 					onEnd:function(){
 						backingTrack.synth.gainNode.gain(0)
 						backingTrack.drums.gainNode.gain(0)
+						samples.trickle1.play();
 					}
 
 				}
 			}
-
-			
 		},
 
 
 
 
 
-		//Thread opts for player two
+
+
+		//Thread opts for player one
 		{
 			//Thread behaviour
 			threadOpts:{
 				//An array of shapes to draw
-				shapes:[
+				paths:[
 			        {
-			            color:themes[1].mid,
-			            weight: 1,
+			            color:'rgba(255,255,255, 0.5)',
+			            weight: 0,
 			            yOffset:0,
 			            filled:false,
 			        },
 
 			        {
-			            color:themes[1].fore,
-			            weight: 3,
+			            color:'rgba(0,0,0, 0.3)',
+			            weight: 1,
 			            yOffset:0,
 			            filled:false,
-			        },
+			        }
+
+			       
+
+			        // {
+			        //     color:'rgba(0,0,0, 0.2)',
+			        //     weight: 1,
+			        //     yOffset:0,
+			        //     filled:false,
+			        // },
+
+			        // {
+			        //     color:'rgba(255,255,255, 0.5)',
+			        //     weight: 1,
+			        //     yOffset:0,
+			        //     filled:false,
+			        // }
+
+			        // ,
+
+			        // {
+			        //     color:'rgba(0,0,0, 0.2)',
+			        //     weight: 1,
+			        //     yOffset:0,
+			        //     filled:false,
+			        // }
 			    ],
 
 
 			    //Cuepoint Behaviour
 				cuepointOpts:{
 					onCreate:function(){
-						//Must return a display object
-						//This references cuepoint object
-						console.log(this.size)
+						// //Must return a display object
+						// //This references cuepoint object
 
-						this.size = this.size/2
-				        var circle = two.makeCircle(this.x, this.y, this.size);
-				        circle.fill = state.theme.accent;
-				        circle.noStroke();
-				        circle.scale = 0.1;
-				        return circle;
+						this.size = Math.min(this.size, 100);
+						var group = new Group();
+
+				  		var circle = new Shape.Circle({
+							center: this.point,
+							radius: 0
+						});
+						circle.fillColor = '#212121';
+						circle.opacity = 0.9;
+
+						var animateIn = new TWEEN.Tween(circle)
+				            .to({radius:this.size}, duration*0.25)
+				            .easing( TWEEN.Easing.Circular.Out)
+				            .onComplete(function() {
+	
+				            });
+
+				        animateIn.start();
+
+				        group.addChild(circle);
+						return group;
+
 					},
 					onTrigger:function(){
 						//Animation for cuepoint trigger
 						//This references cuepoint object
 
-						//Cuepoint Animation
-				        var triggerAnimation = new TWEEN.Tween(this.display)
-				            .to({scale:2, opacity:0}, duration * 0.25)
-				            .easing(Easing.Circular.Out)
+						// this.drawable.fillColor = 'red'
+
+						var drawable = this.drawable;
+						var startRadius = this.size
+
+						var ping = new Shape.Circle({
+							center: drawable.position,
+							radius: 0
+						});
+						ping.fillColor = '#212121';
+						drawable.addChild(ping);	
+
+						var pingIn = new TWEEN.Tween(ping)
+				            .to({radius:startRadius*10, opacity:0}, duration*0.25)
+				            .easing( TWEEN.Easing.Circular.Out)
 				            .onComplete(function() {
-				                this.scale = 0.1;
-				                this.opacity = 1;
+				                ping.remove();
 				            });
 
-				        triggerAnimation.start();
+				        pingIn.start();
 
-				        //Secondary animations
+				  //       //Secondary animations
 				        this.thread.jitter();
 
-				        //Trigger audio for cuepoint
+				  //       //Trigger audio for cuepoint
 				        
-			        	var i = Math.floor((Math.min(this.y, height)/height)*triggerables.length);
-			        	triggerables[i].play();
+			        	triggerables[Math.floor(Math.random()*triggerables.length)].play();
 
 			        	if(Math.floor(Math.random()*8) == 0){
 
@@ -171,25 +280,44 @@ var stateTwo =
 				        
 					},
 					onDestroy:function(){
-
+						this.drawable.remove();
 					}
 				},
 
+
+				//Playback Behaviour
 				playbackOpts:{
-					onDraw:function(){
+					onStartDraw:function(){
+						
 						backingTrack.synth.gainNode.gain(1)
+						samples.synthPad2.play();
 					},
+
+					onEndDraw:function(){
+						backingTrack.synth.gainNode.gain(1)
+						samples.synthPad2.stop();
+					},
+
 					onPlay:function(){
-						backingTrack.drums.gainNode.gain(1)
+						backingTrack.bass.gainNode.gain(1)
 					},
 					onEnd:function(){
 						backingTrack.synth.gainNode.gain(0)
-						backingTrack.drums.gainNode.gain(0)
+						backingTrack.bass.gainNode.gain(0)
+
+						samples.trickle1.play();
 					}
 
 				}
 			}
 		}
+
+
+
+
+
+		
+		
 	]
 
 
@@ -199,3 +327,4 @@ var stateTwo =
 
 	
 }
+

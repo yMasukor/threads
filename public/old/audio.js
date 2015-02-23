@@ -6,7 +6,7 @@
     var analyser = audioContext.createAnalyser();
     var gain = tsw.gain(1)
 
-    
+    var backgroundTextures, triggerables, vocals
 
     var namedSamples = {}
 
@@ -48,7 +48,6 @@
         backingDrums:'samples/vivid/Drum Loop 1.mp3',
         backingChords:'samples/vivid/Chord Loop.mp3',
         backingSynth:'samples/vivid/Synth Loop 1.mp3',
-        backingBass:'samples/vivid/Bassline.mp3',
 
         bass1:'samples/vivid/Bass 1.mp3',
         bass2:'samples/vivid/Bass 2.mp3',
@@ -56,7 +55,6 @@
         bass4:'samples/vivid/Bass 4-1.mp3',
         bass5:'samples/vivid/Bass 5.mp3',
         bass6:'samples/vivid/Bass 6.mp3',
-
 
         buzz1:'samples/vivid/Buzz 1.mp3',
         buzz2:'samples/vivid/Buzz 2.mp3',
@@ -106,90 +104,87 @@
     
 
 
-    function loadAudio(){
-
-        tsw.load(samplesToLoad, function (response) {
-            for(key in response){
-                console.log(response[key], 'loaded')
-
-                var sampleBuffer = response[key];
-                var sampleNode = tsw.bufferBox(sampleBuffer);
-                var sampleGain = tsw.gain(1);
-                //connect each sample note to the gain
-                tsw.connect(sampleNode, sampleGain, gain);
-
-                sampleNode.gainNode = sampleGain;
-                // samples.push(sampleNode);
-                samples[key] = sampleNode
-            }
 
 
-            backgroundTextures = [
-                samples.buzz1, 
-                samples.buzz2,
-                samples.sound1, 
-                samples.sound2, 
-                samples.sound3,
-                samples.piano1
-            ];
+    tsw.load(samplesToLoad, function (response) {
+        
 
-            vocals = [
-                samples.vocal1,
-                samples.vocal2,
-                samples.vocal3,
-                samples.vocal4,
-                samples.vocal5,
-                samples.vocal6,
-                samples.vocal7,
-                samples.vocal8,
-                samples.vocal9,
-                samples.vocal10,
-                samples.vocal11,
-            ];
+        for(key in response){
+            console.log(response[key], 'loaded')
 
-            triggerables = [
-                samples.chord1,
-                samples.chord2,
-                samples.chord3,
-                samples.chord4,
-                samples.chord5,
-                samples.chord6,
-                samples.chord7,
-                samples.chord8,
+            var sampleBuffer = response[key];
+            var sampleNode = tsw.bufferBox(sampleBuffer);
+            var sampleGain = tsw.gain(1);
+            //connect each sample note to the gain
+            tsw.connect(sampleNode, sampleGain, gain);
 
-                samples.note1,
-                samples.note2,
-                samples.note3,
-                samples.note4,
-
-                samples.bass1,
-                samples.bass2,
-                samples.bass3,
-                samples.bass4,
-                samples.bass5,
-                samples.bass6,
-            ];
-
-            samplesLoaded = true;
+            sampleNode.gainNode = sampleGain;
+            // samples.push(sampleNode);
+            samples[key] = sampleNode
+        }
 
 
-        });
-    }
+        backgroundTextures = [
+            samples.buzz1, 
+            samples.buzz2,
+            samples.sound1, 
+            samples.sound2, 
+            samples.sound3,
+            samples.piano1
+        ];
 
-    
+        vocals = [
+            samples.vocal1,
+            samples.vocal2,
+            samples.vocal3,
+            samples.vocal4,
+            samples.vocal5,
+            samples.vocal6,
+            samples.vocal7,
+            samples.vocal8,
+            samples.vocal9,
+            samples.vocal10,
+            samples.vocal11,
+        ];
 
+        triggerables = [
+            samples.chord1,
+            samples.chord2,
+            samples.chord3,
+            samples.chord4,
+            samples.chord5,
+            samples.chord6,
+            samples.chord7,
+            samples.chord8,
 
+            samples.note1,
+            samples.note2,
+            samples.note3,
+            samples.note4,
+
+            samples.bass1,
+            samples.bass2,
+            samples.bass3,
+            samples.bass4,
+            samples.bass5,
+            samples.bass6,
+        ];
+
+        samplesLoaded = true;
+
+    });
+
+    console.log(gain);
     gain.output.connect(analyser);
 
 
     analyser.connect(tsw.speakers)
-    analyser.fftSize = 2048
-    analyser.smoothingTimeConstant = 0.9;
+    analyser.fftSize = 256;
 
     var bufferLength = analyser.frequencyBinCount;
     var dataArray = new Uint8Array(bufferLength);
 
-    // console.log(audioContext, tsw.speakers)
+    console.log(audioContext, tsw.speakers)
 
 
 
@@ -202,8 +197,6 @@
 
     function playBackingTrack(){
 
-
-
         if(samplesLoaded){
 
 
@@ -212,13 +205,11 @@
             samples['backingDrums'].loop(true).play();
             samples['backingChords'].loop(true).play();
             samples['backingSynth'].loop(true).play();
-            samples['backingBass'].loop(true).play();
 
             backingTrack = {
                 chords:samples['backingChords'],
                 drums:samples['backingDrums'],
                 synth:samples['backingSynth'],
-                bass:samples['backingBass'],
                 playing:true,
             }
 

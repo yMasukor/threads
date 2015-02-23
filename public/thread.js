@@ -1,192 +1,283 @@
-function Thread(x, y){
-            this.line = null;
-            this.lastPos = new Two.Anchor(0, y+10);
-            this.lastMouse = new Two.Anchor(x, y);
-            this.points = [];
+function Thread(opts){
+    this.paths = [];
+    this.lastPoint;
 
-            this.strokes = [];
+    this.cuePoints = {};
+    this.state = 'ready'
+}
 
+Thread.prototype.setOpts = function(opts){
+    //console.log(opts);
+    this.pathOpts = opts.paths;
+    this.cuepointOpts = opts.cuepointOpts;
+
+    this.onStartDraw = opts.playbackOpts.onStartDraw;
+    this.onEndDraw = opts.playbackOpts.onEndDraw;
+    this.onPlay = opts.playbackOpts.onPlay;
+    this.onEnd = opts.playbackOpts.onEnd;
+}
+
+
+
+
+// CLEAN UP
+Thread.prototype.reset = function(){
+
+    this.paths.forEach(function(path){
+        path.drawable.remove();
+        path.drawable = null;
+        path.points = [];
+    });
+
+    _.each(this.cuePoints, function(cuePoint){
+        cuePoint.destroy();
+    });
+
+    this.paths = [];
+    this.cuePoints = {};
+    this.willAnimateOut = false;
+
+    this.state = 'ready'
+
+    console.log('reset', this)
+}
+
+
+
+
+Thread.prototype.startDraw = function(e){
+
+    this.lifespan = 1;
+    this.state = 'drawing'
+
+    this.pathOpts.forEach(function(opts){
+
+        var path = {
+            points:[],
+            drawable:new Path({
+                strokeColor: opts.color,
+                strokeWidth: opts.weight,
+                strokeCap: 'round'
+            })
         }
 
-        Thread.prototype.draw = function(pos){
-            if(!this.line){
-                //start drawing
-                console.log(this.lastPos, pos);
+        this.paths.push(path);
 
-                this.line = two.makeCurve([this.lastPos.clone(), pos], true);
-                this.line.noFill();
-                // this.line.fill = 'rgba(255,255,255, 0.3)'
-                this.line.stroke = 'rgba(0,0,0,0.1)';
-                this.line.linewidth = 2;
-                this.line.cap = 'round'
+        var point1 = new Point(0, e.point.y);
+        point1.dest = point1.clone();
+        point1.vel = new Point(0, 0);
+        point1.acc = new Point(0,0);
+        path.points.push(point1);
 
-                _.each(this.line.vertices, function(v) {
-                    v.addSelf(this.line.translation);
-                    v.velocity = new Two.Vector(0, 0);
-                }.bind(this));
+        var point2 = e.point.clone();
+        point2.dest = e.point.clone();
+        point2.vel = new Point(0, 0);
+        point2.acc = new Point(0,0);
+        path.points.push(point2);
 
-                this.line.translation.clear();
+    }.bind(this))
 
-                this.strokes = _.map(_.range(5), function(){
-                    var stroke = this.line.clone();
-                    stroke.stroke = randomColor();
-                    stroke.linewidth = Math.random()*50;
-                }.bind(this));
-               
+    this.lastPoint = e.point;
+
+    this.onStartDraw();
+}
+
+
+
+Thread.prototype.draw = function(e){
+    
+    //console.log('FOOBAR', this.lastPoint, e.point,  this.lastPoint.getDistance(e.point))
+
+    if(this.lastPoint.getDistance(e.point) > 100){
+
+        
+
+
+        this.paths.forEach(function(path){
+            var point = e.point.clone();
+            point.dest = e.point.clone();
+            point.vel = e.delta;
+            point.acc = new Point(0, 10-Math.random()*20);
+            path.points.push(point);
+        });
+
+        if(Math.floor(Math.random()*2) == 0){
+            this.createCuepoint(this.paths[0].points[this.paths[0].points.length-1]);   
+        }
+        
+
+        this.lastPoint = e.point;
+    }else{
+        this.paths.forEach(function(path){
+            path.points[path.points.length-1].set(e.point.x, e.point.y);
+        })
+    }
+
+}
+
+
+
+Thread.prototype.endDraw = function(e){
+
+    // this.onEndDraw();
+    
+    var point = e.point.clone();
+    point.dest = e.point.clone();
+    point.vel = e.delta;
+
+    this.paths.forEach(function(path){
+        point.acc = new Point(0,0);
+        path.points.push(point);
+    });
+
+    if(e.point.x > view.bounds.width - 100){
+        this.getCuepointLocations();
+        this.state = 'playing' 
+        this.onPlay();
+    }
+
+
+    
+}
+
+
+Thread.prototype.update = function(frameCount){
+
+    var willAnimateOut = this.willAnimateOut;
+
+    this.paths.forEach(function(path){
+
+        path.points.forEach(function(point, i){
+
+            if(willAnimateOut){
+                var nextPoint;
+                if(i+1 < path.points.length){
+                    nextPoint = path.points[i+1]
+                }else{
+                    nextPoint = new Point(point.x+200, point.y);
+                }
+                accelerateToPoint(point, nextPoint, 0.000005);
+
             }else{
-                //continue drawing
-                var lastVert = this.line.vertices[this.line.vertices.length-1];
-                lastVert.x = pos.x;
-                lastVert.y = pos.y;
-
-                //console.log(pos.distanceTo(this.lastPos), pos, this.lastPos);
-
-                var velocity = new Two.Vector();
-                velocity.sub(pos, this.lastMouse);
-
-                if(pos.distanceTo(this.lastPos) > 200 ){
-                    var v = pos.clone();
-                    v.velocity = velocity.clone();
-
-                    if(v.velocity.length() > 20){
-                        v.velocity.setLength(20);
-                    }
-
-                    // console.log(v.velocity)
-
-                    // if(Math.floor(Math.random()*1) == 0){
-                    //     var circle = two.makeCircle(pos.x, pos.y, v.velocity.dot(v.velocity));
-                    //     // var circle = two.makeCircle(pos.x, pos.y, 20);
-                    //     // circle.fill = '#fff;'
-                    //     // circle.noStroke();// = '#fff';
-                        
-                    //     circle.noFill();
-                    //     circle.stroke = '#fff'
-                    //     circle.linewidth = 4;
-
-                    //     circle.scale = 0;
-                    //     v.circle = circle;
-
-
-                    //     var animateIn = new TWEEN.Tween(circle)
-                    //         .to({scale:1, opacity:0}, duration * 4)
-                    //         .easing(Easing.Circular.Out)
-                    //         .onComplete(function() {
-                    //             this.remove();
-                    //         });
-
-                    //     animateIn.start();
-                    // }
-
-                    
-                    this.lastPos.x = pos.x;
-                        this.lastPos.y = pos.y;
-                    this.line.vertices.push(v);  
-
-                   
-
-                    
-                }   
+                accelerateToPoint(point, point.dest, 0.000001)
             }
 
-            this.lastMouse.x = pos.x;
-            this.lastMouse.y = pos.y;
+            // var point; 
+            //     
 
 
+            if(point.vel.length > 20){
+                point.vel.length = 20
+            }else if(point.vel.length < 0.5){
+                point.vel.length = 0.5
+            }
+            
+
+            point.vel = point.vel.add(point.acc);
+            point.vel = point.vel.multiply(0.94);
+
+            var newPoint = point.add(point.vel);
+
+            point.x = newPoint.x;
+            point.y = newPoint.y;
+
+
+            point.acc.set(0, 0)
+
+
+            if(path.drawable.segments.length > i){
+                path.drawable.segments[i].point.set(point.x, point.y);
+            }else{
+                path.drawable.add(point);
+            }
+
+            if(point.cuePoint){
+                point.cuePoint.drawable.position.set(point.x, point.y)
+            }
+        });
+
+        path.drawable.smooth();     
+        
+    });
+}
+
+
+Thread.prototype.createCuepoint = function(point){
+    //create a new cuepoint, with the current state options
+
+    //console.log(point);
+
+    var cuePoint = new CuePoint(point, point.vel.length*point.vel.length*0.1, this.cuepointOpts.onCreate, this.cuepointOpts.onTrigger, this.cuepointOpts.onDestroy, this);
+    point.cuePoint = cuePoint;
+    // this.cuePoints.push(cuePoint);
+}
+
+
+
+
+
+Thread.prototype.getCuepointLocations = function(){
+
+    //get 'length' of the line
+    var length = this.paths[0].points.length;
+    var cuePoints = {} //temp container;
+
+    this.paths[0].points.forEach(function(point, i){
+        if(point.cuePoint){
+            var beatPosition = Math.floor((i/length)*(16*4));
+            cuePoints[beatPosition] = point.cuePoint;
+        }
+    });
+
+    this.cuePoints = cuePoints;
+}
+
+        
+
+
+
+
+
+
+Thread.prototype.triggerCuePoints = function(tick){
+    
+    if(tick == 0 && this.state == 'playing'){
+        if(this.lifespan == 0){
+            this.reset(); //Destroy the thread if it's done
+        }else{
+            this.lifespan--; //Decrement the lifespan of the thread
         }
 
-        Thread.prototype.update = function(frameCount){
+    }else if(tick == 56 && this.lifespan == 0 && this.state == 'playing'){
+        //If the thread is due to be destroyed, animate it out
+        this.willAnimateOut = true;
+        this.onEnd();
+    }
 
-             // var osc = Math.sin(- frameCount / (Math.PI * 8));
+    //If any cuepoints exist for the current beat, trigger them
+    if(this.cuePoints[tick]){
 
-             // console.log(osc)
-
-            _.each(this.line.vertices, function(v, i) {
-                
-                v.velocity.multiplyScalar(0.93);
-                v.addSelf(v.velocity)
-
-                if(v.velocity.length() < 0.05){
-                    v.velocity.setLength(0);
-                    // if(i%2 == 0){
-                    //     v.y += osc;
-                    // }else{
-                    //     v.y -= osc;
-                    // }
-                    
-                }
-                // console.log(v.circle)
-                if(v.circle){
-                    v.circle.translation.x = v.x;
-                    v.circle.translation.y = v.y;
-                }
-
-            }.bind(this));
-
-
-            // _.each(this.strokes, function(v, i) {
-            //     v.vertices = this.line.vertices
-            // }.bind(this));
+        if(tick%2 == 0 || Math.round(Math.random())==0){
+            this.cuePoints[tick].trigger();
         }
+    }
+}
 
 
-        Thread.prototype.jitter = function(){
-            _.each(this.line.vertices, function(v, i) {
-                if(i != 0 && i != this.line.vertices.length-1)
-                    v.velocity.addSelf(new Two.Vector(0, 3-Math.random()*6));
+Thread.prototype.jitter = function(){
 
-            }.bind(this));
-        }
+    this.paths.forEach(function(path){
+        path.points.forEach(function(point){
 
 
-        Thread.prototype.pulse = function(){
+            point.acc = point.acc.add(new Point(0, 10-Math.random()*20))
 
-            // console.log(pulseLine)
-            // if(!pulseLine){
-            //     var pulseLine = this.line.clone();
-            //     pulseLine.stroke = randomColor();
-            //     pulseLine.subdivide();
-            //     pulseLine.linewidth = Math.random()*50;
-            //     pulseLine.noFill();
-            //     pulseLine.beginning = 0;
-            //     pulseLine.ending = 0;
-            //     pulseLine.cap = 'round'
+        });
+    });
 
-            // }
+        
 
-            // // var pulseLine = this.pulseLine;
-
-            // function reset(){
-            //     // pulseLine.beginning = 0;
-            //     // pulseLine.ending = 0;
-            //     // pulseLine.remove();
-
-            // }
-
-
-
-            // var pulseIn = new TWEEN.Tween(pulseLine)
-            //     .to({ending:1, beginning:0.5}, duration)
-            //     .easing(Easing.Sinusoidal.Out)
-            //     .onComplete(function() {
-            //         // console.log(this)
-            //         // this.remove();
-            //         pulseOut.start();
-
-            //     });
-
-            // var pulseOut = new TWEEN.Tween(pulseLine)
-            //     .to({ending:1, beginning:1}, duration)
-            //     .easing(Easing.Sinusoidal.In)
-            //     .onComplete(function() {
-            //         // console.log(this)
-            //         this.remove();
-
-            //     });
-
-
-            // pulseIn.start();
-        }
+}
 
 
 
@@ -198,25 +289,65 @@ function Thread(x, y){
 
 
 
-        var thread;
 
-        var dragStart = function(e){
-            var x = e.clientX;
-            var y = e.clientY;
 
-            thread = new Thread(x, y);
 
-            $(window).bind('mousemove', drag).bind('mouseup', dragEnd);
-        }
 
-        var drag = function(e){
-            var x = e.clientX;
-            var y = e.clientY;
-            var pos = new Two.Anchor(x, y);
-            // pos.set(x, y);
-            thread.draw(pos);
-        }
 
-        var dragEnd = function(e){
-           $(window).unbind('mousemove').unbind('mouseup');
-        }
+function accelerateToPoint(point, dest, forceMult){
+    // console.log(point, dest, forceMult)
+    var dir = point.subtract(dest);
+
+
+    var distSqrd = point.getDistance(dest, true);
+
+    dir.normalize();
+    var force = distSqrd*forceMult;
+
+    point.acc = point.acc.subtract(dir.multiply(force));//(dir.multiplyScalar(force));
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// THREADS.Thread = Thread;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        

@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<title></title>
+		<meta charset="utf-8">
+
+	<script src="lib/proton-1.0.1.js"></script>
+	<script src="lib/phaser.min.js"></script>
+	<script src="lib/dat.gui.min.js"></script>
+
+	<script src="ParticleSystem.js"></script>
+
+	<meta name="mobile-web-app-capable" content="yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+	<style type="text/css">
+		canvas, body, html{
+			margin: 0px;
+			padding: 0px;
+            /*position: absolute;
+            top: 0px;
+            left: 0px;
+            right: 0px;
+            bottom:0px;
+            margin: auto;*/
+        }
+	</style>
+
+</head>
+	<body>
+		<script>
+
+			var particleLayer, bmd, background, filter;
+
+			var width, height
+
+			width = window.innerWidth
+			height = window.innerHeight
+
+
+			var states = [
+				{
+					randomFill:true,
+					fill:'#FFFFFF',
+					minRate:10,
+					maxRate:20,
+					frequency: 0,
+					minLife:'infinity',
+					maxLife:'infinity',
+					driftX:10,
+					driftY:10,
+				},
+
+				{
+					randomFill:false,
+					fill:'#FFFFFF',
+					minEmitAngle:0,
+					maxEmitAngle:360,
+				}
+			]
+
+
+			game = new Phaser.Game(width, height, Phaser.AUTO, 'phaser-example', { preload: preload, create: create, update: update }, false, false);
+
+			
+			function preload()
+			{
+				game.load.script('filterX', 'https://cdn.rawgit.com/photonstorm/phaser/master/filters/BlurX.js');
+
+				game.load.image('target', 'http://192.168.1.7:8888/Sites/threads/public/images/gradient_strip.jpg');
+			}
+
+			function create()
+			{
+
+				//Create background layer
+				background = game.add.sprite(0,0);
+				background.width = width;
+				background.height = height;
+
+				//Create particle layer
+				particleLayer = new ParticleSystem(game, null);
+				particleLayer.init();
+				particleLayer.setState(states[0]);
+
+				particleLayer.burst();
+
+				//Create cuepoint layer
+
+
+				//Bind controls
+				game.input.onDown.add(function(pointer, x, y){
+ 					console.log('down');
+ 					particleLayer.down(pointer, x, y);
+	            });
+
+	            game.input.addMoveCallback(function(pointer, x, y){
+	            	//console.log('moving', x-pointer.lastX, y-pointer.lastY);
+	            	particleLayer.move(pointer, x, y);
+
+					pointer.lastX = x;
+					pointer.lastY = y;
+	            });
+
+	            game.input.onUp.add(function(pointer, x, y){
+	            	console.log('up');
+
+	            	particleLayer.up(pointer, x, y);
+	            });
+
+
+				bmd = game.make.bitmapData(game.width, game.height);
+
+
+				console.log(game)
+				
+
+				//game.stage.filters = [filter];
+
+				// window.setInterval(function(){
+				// 	particleLayer.setState(states[Math.floor(Math.random()*states.length)]);
+
+				// 	//console.log(particleLayer);
+				// 	//
+						
+				// }, 500)
+
+				var sprite = game.add.sprite(0,0, bmd);
+	
+
+    			//sprite.filters = [filter];
+
+    			// console.log(game.input)
+	
+			},
+
+			function ping(){
+				
+			}
+
+
+			function update()
+			{
+
+				// bmd.fill(0, 0, 0, 0.2);
+				
+				
+				particleLayer.update();
+				bmd.drawGroup(particleLayer)
+
+
+				//filter.update();
+				
+				
+			}
+
+
+			function render()
+			{
+				
+			}
+
+
+			function move(pointer, x, y){
+
+	        }
+			
+		</script>
+	
+</body>
+</html>

@@ -1,10 +1,11 @@
-function CuePoint(point, size, onCreate, onTrigger, onDestroy, thread){
+function CuePoint(x, y, size, onCreate, onTrigger, onDestroy, thread){
 
-	this.point = point;
+	this.x = x;
+	this.y = y;
 	this.size = size;
 	this.thread = thread
 
-	this.drawable;
+	this.display;
 	this.onCreate = onCreate;
 	this.onTrigger = onTrigger;
 	this.onDestroy = onDestroy;
@@ -14,7 +15,8 @@ function CuePoint(point, size, onCreate, onTrigger, onDestroy, thread){
 }
 
 CuePoint.prototype.create = function(){
-	this.drawable = this.onCreate();
+	this.display = this.onCreate();
+	console.log(this.display)
 }
 
 CuePoint.prototype.trigger = function(){
@@ -23,6 +25,5 @@ CuePoint.prototype.trigger = function(){
 
 
 CuePoint.prototype.destroy = function(){
-	this.drawable.remove();
+	this.display.remove();
 }
-

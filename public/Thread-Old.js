@@ -6,10 +6,10 @@ function Thread(opts){
     
     this.existsFor = 1;
     this.willAnimateOut = false;
-    this.state = 'empty';
-
-
+    this.state = 'empty'
 }
+
+
 
 Thread.prototype.setOpts = function(opts){
     this.shapeOpts = opts.shapes;
