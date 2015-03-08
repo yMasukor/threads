@@ -11,9 +11,12 @@ function CuePoint(point, size, onCreate, onTrigger, onDestroy, thread){
 
 	this.create();
 
+	// console.log('cuepoint init')
+
 }
 
 CuePoint.prototype.create = function(){
+	// console.log('fuck', this.onCreate)
 	this.drawable = this.onCreate();
 }
 

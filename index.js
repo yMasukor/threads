@@ -21,11 +21,25 @@ var tickCount = 0;
 var players = [];
 var viewers = [];
 
+
+if(!interval){
+			interval = setInterval(function(){
+
+				io.sockets.emit('tick', tickCount);
+
+				tickCount++;
+				tickCount = tickCount%(beatsPerBar*barsPerLoop*ticksPerBeat)
+
+				// console.log('tick')
+
+			}, tickDuration);
+		}
+
 app.set('port', (process.env.PORT || 5000));
 app.use(express.static(__dirname + '/public'));
 
 io.on('connection', function(socket){
-	console.log('a user connected');
+	// console.log('a user connected');
 
 
 	socket.on('connectPlayer', function(){
@@ -51,14 +65,14 @@ io.on('connection', function(socket){
 			});
 		}else if(viewers.indexOf(socket.id) > -1){
 
-			// console.log('removing player')
+			console.log('removing viewer')
 			viewers.splice(viewers.indexOf(socket.id), 1);
 
 			if(viewers.length == 0){
-				clearInterval(interval);
-				beatCount = 0;
-				barCount = 0;
-				interval = null;
+				// clearInterval(interval);
+				// beatCount = 0;
+				// barCount = 0;
+				// interval = null;
 			}
 			
 		}
@@ -75,18 +89,7 @@ io.on('connection', function(socket){
 		console.log('viewer connected', players)
 
 
-		if(!interval){
-			interval = setInterval(function(){
-
-				io.sockets.emit('tick', tickCount);
-
-				tickCount++;
-				tickCount = tickCount%(beatsPerBar*barsPerLoop*ticksPerBeat)
-
-				// console.log('tick')
-
-			}, tickDuration);
-		}
+		
 		
 
 	});
@@ -94,7 +97,7 @@ io.on('connection', function(socket){
 
 	socket.on('playerInput', function(input){
 
-		console.log('input', input.point.x);
+		// console.log('input', input.point.x);
 		input.id = socket.id
 
 

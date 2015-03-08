@@ -31,18 +31,18 @@
 
 	
 	<style type="text/css">
-	*{
-		margin: 0px;
-		padding: 0px;
-	}
+		*{
+			margin: 0px;
+			padding: 0px;
+		}
 
-	canvas{
-		position: absolute;
-		top: 0px;
-		left: 0px;
-		right: 0px;
-		bottom: 0px;
-	}
+		canvas{
+			position: absolute;
+			top: 0px;
+			left: 0px;
+			right: 0px;
+			bottom: 0px;
+		}
 
 	</style>
 
@@ -130,6 +130,8 @@
 
 			
 			paper.setup('myCanvas')
+
+			console.log('PAPER IS', paper)
 			var tool = new Tool();
 			loadAudio();
 
@@ -154,26 +156,39 @@
 
 
 			socket.on('removePlayer', function(playerId){
-				delete players[playerId]
+				players[playerId].thread.state = 'playing';
+				players[playerId].thread.state.lifespan = 0;
+				players[playerId].thread.state.willAnimateOut = true;
+				players[playerId].thread.onReset = function(){
+					delete players[playerId]
+				}
+				// 
 			});
 
 			//recieve player input
 			socket.on('playerUpdate', function(input){
 
-				console.log('update', input)
-				input.tool = tool;
+				
+				var e = {}
+				e.tool = tool;
 
-				input.point = new Point(input.point.x*view.bounds.width, input.point.y*view.bounds.height);
-				input.delta = new Point(input.delta.x*view.bounds.width, input.delta.y*view.bounds.height);
+				// console.log('update', input.delta)
+
+				e.point = new Point(input.point.x*view.bounds.width, input.point.y*view.bounds.height);
+				e.delta = new Point(input.delta.x*view.bounds.width, input.delta.y*view.bounds.height);
 				
-				
+				// console.log('update post scale', input.delta)
 
 				if(input.type == 'mousedown'){
-					players[input.id].dragStart(input);
+					players[input.id].dragStart(e);
 				}else if(input.type == 'mousedrag'){
-					players[input.id].drag(input);
+					players[input.id].drag(e);
 				}else if(input.type == 'mouseup'){
-					players[input.id].dragEnd(input);
+					players[input.id].dragEnd(e);
+				}else if(input.type == 'cuepoint'){
+					console.log('cuepoint recieved')
+					// players[input.id].thread.pushPoint(e);
+					players[input.id].thread.createCuepoint();
 				}
 			});
 

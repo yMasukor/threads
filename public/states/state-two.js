@@ -57,7 +57,13 @@ var stateTwo =
 					onCreate:function(){
 						// //Must return a display object
 						// //This references cuepoint object
-						this.size = Math.min(this.size, 100);
+
+
+
+
+						this.size = Math.max(10, Math.min(this.size, 100));
+
+						console.log('cuepoint created', this.size);
 
 						var group = new Group();
 
@@ -80,6 +86,7 @@ var stateTwo =
 
 				        group.addChild(circle);
 						return group;
+
 
 					},
 					onTrigger:function(){

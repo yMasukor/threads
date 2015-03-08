@@ -4,6 +4,9 @@ function Thread(opts){
 
     this.cuePoints = {};
     this.state = 'ready'
+
+    this.startPoint = new Point(0, view.bounds.height/2);
+    this.target = new Point(view.bounds.width, view.bounds.height/2)
 }
 
 Thread.prototype.setOpts = function(opts){
@@ -15,6 +18,9 @@ Thread.prototype.setOpts = function(opts){
     this.onEndDraw = opts.playbackOpts.onEndDraw;
     this.onPlay = opts.playbackOpts.onPlay;
     this.onEnd = opts.playbackOpts.onEnd;
+    this.onReset = function(){
+
+    }
 }
 
 
@@ -39,7 +45,8 @@ Thread.prototype.reset = function(){
 
     this.state = 'ready'
 
-    console.log('reset', this)
+    this.onReset();
+    console.log('reset', this);
 }
 
 
@@ -63,13 +70,13 @@ Thread.prototype.startDraw = function(e){
 
         this.paths.push(path);
 
-        var point1 = new Point(0, e.point.y);
+        var point1 = this.startPoint.clone();
         point1.dest = point1.clone();
         point1.vel = new Point(0, 0);
         point1.acc = new Point(0,0);
         path.points.push(point1);
 
-        var point2 = e.point.clone();
+        var point2 = new Point(0, e.point.y);
         point2.dest = e.point.clone();
         point2.vel = new Point(0, 0);
         point2.acc = new Point(0,0);
@@ -88,30 +95,43 @@ Thread.prototype.draw = function(e){
     
     //console.log('FOOBAR', this.lastPoint, e.point,  this.lastPoint.getDistance(e.point))
 
-    if(this.lastPoint.getDistance(e.point) > 100){
+    if(this.lastPoint.getDistance(e.point) > 50){
 
         
+        this.pushPoint(e);
+        
+       
+    }else{
+        
+    }
 
+    this.paths.forEach(function(path){
+        path.points[path.points.length-1].set(e.point.x, e.point.y);
+    })
 
-        this.paths.forEach(function(path){
+}
+
+Thread.prototype.pushPoint = function(e){
+
+    this.paths.forEach(function(path){
             var point = e.point.clone();
             point.dest = e.point.clone();
-            point.vel = e.delta;
+            point.vel = e.delta.multiply(10);
+            console.log(e.delta, point.vel)
+            // point.vel.x = 0;
+            point.size = e.delta.length;
             point.acc = new Point(0, 10-Math.random()*20);
             path.points.push(point);
         });
 
-        if(Math.floor(Math.random()*2) == 0){
-            this.createCuepoint(this.paths[0].points[this.paths[0].points.length-1]);   
-        }
+        // if(Math.floor(Math.random()*4) == 0){
+        //       
+        // }
         
 
         this.lastPoint = e.point;
-    }else{
-        this.paths.forEach(function(path){
-            path.points[path.points.length-1].set(e.point.x, e.point.y);
-        })
-    }
+
+        console.log(this.paths[0].points.length, 'points')
 
 }
 
@@ -121,20 +141,29 @@ Thread.prototype.endDraw = function(e){
 
     // this.onEndDraw();
     
-    var point = e.point.clone();
-    point.dest = e.point.clone();
-    point.vel = e.delta;
+    // var point = e.point.clone();
+    // point.dest = e.point.clone();
+    // point.vel = e.delta;
+    // point.vel.x = 0;
 
-    this.paths.forEach(function(path){
-        point.acc = new Point(0,0);
-        path.points.push(point);
-    });
 
-    if(e.point.x > view.bounds.width - 100){
-        this.getCuepointLocations();
-        this.state = 'playing' 
-        this.onPlay();
+
+    if(this.target){
+        var endPoint = new Point(this.target.x, this.target.y);
+        endPoint.dest = endPoint.clone();
+        endPoint.vel = new Point(0,0);
+        endPoint.acc = new Point(0,0);
+
+        this.paths.forEach(function(path){
+            path.points.push(endPoint);
+        });
+
     }
+
+    this.getCuepointLocations();
+    this.state = 'playing' 
+    this.onPlay();
+    
 
 
     
@@ -149,6 +178,8 @@ Thread.prototype.update = function(frameCount){
 
         path.points.forEach(function(point, i){
 
+            
+
             if(willAnimateOut){
                 var nextPoint;
                 if(i+1 < path.points.length){
@@ -156,25 +187,46 @@ Thread.prototype.update = function(frameCount){
                 }else{
                     nextPoint = new Point(point.x+200, point.y);
                 }
+
                 accelerateToPoint(point, nextPoint, 0.000005);
 
-            }else{
+                if(point.getDistance(nextPoint) > 1){
+                    
+                }else{
+                    // point.vel.set(0, 0)
+                }
+                
+
+            }else if(i != 0 && i!=path.points.length){
+
                 accelerateToPoint(point, point.dest, 0.000001)
             }
 
             // var point; 
             //     
+            var maxVel = 20;
+            var minVel = 0.5
 
-
-            if(point.vel.length > 20){
-                point.vel.length = 20
-            }else if(point.vel.length < 0.5){
-                point.vel.length = 0.5
+            if(i == 0 && !willAnimateOut || i == path.points.length-1 && !willAnimateOut){
+                maxVel = 0;
+                minVel = 0;
             }
             
 
+
+
+            if(point.vel.length > maxVel){
+                point.vel.length = maxVel
+            }else if(point.vel.length < minVel){
+                point.vel.length = minVel
+            }
+            
+             if(point.cuePoint){
+                // point.acc = point.acc.multiply(0.1);
+            }
+
             point.vel = point.vel.add(point.acc);
-            point.vel = point.vel.multiply(0.94);
+            point.vel = point.vel.multiply(0.98);
 
             var newPoint = point.add(point.vel);
 
@@ -202,13 +254,19 @@ Thread.prototype.update = function(frameCount){
 }
 
 
-Thread.prototype.createCuepoint = function(point){
+Thread.prototype.createCuepoint = function(){
     //create a new cuepoint, with the current state options
 
-    //console.log(point);
+    var point = this.paths[0].points[this.paths[0].points.length-1];
 
-    var cuePoint = new CuePoint(point, point.vel.length*point.vel.length*0.1, this.cuepointOpts.onCreate, this.cuepointOpts.onTrigger, this.cuepointOpts.onDestroy, this);
-    point.cuePoint = cuePoint;
+    console.log('creating cuepoint', point.vel, point.vel.length);
+
+    if(!point.cuePoint){
+        var cuePoint = new CuePoint(point, (point.size)*0.5, this.cuepointOpts.onCreate, this.cuepointOpts.onTrigger, this.cuepointOpts.onDestroy, this);
+        point.cuePoint = cuePoint;
+    }
+
+    
     // this.cuePoints.push(cuePoint);
 }
 
@@ -270,7 +328,7 @@ Thread.prototype.jitter = function(){
         path.points.forEach(function(point){
 
 
-            point.acc = point.acc.add(new Point(0, 10-Math.random()*20))
+            point.acc = point.acc.add(new Point(0, 5-Math.random()*10))
 
         });
     });
