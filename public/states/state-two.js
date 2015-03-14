@@ -12,15 +12,15 @@ var stateTwo =
 				//An array of shapes to draw
 				paths:[
 			        {
-			            color:'rgba(255,255,255, 0.5)',
+			            color:'rgba(255,255,255, 1)',
 			            weight: 0,
 			            yOffset:0,
 			            filled:false,
 			        },
 
 			        {
-			            color:'rgba(255,255,255, 0.5)',
-			            weight:1,
+			            color:'rgba(255,255,255, 1)',
+			            weight:2,
 			            yOffset:0,
 			            filled:false,
 			        }
@@ -61,7 +61,7 @@ var stateTwo =
 
 
 
-						this.size = Math.max(10, Math.min(this.size, 100));
+						this.size = Math.max(10, Math.min(this.size, 200));
 
 						console.log('cuepoint created', this.size);
 
@@ -71,7 +71,7 @@ var stateTwo =
 							center: this.point,
 							radius: 0
 						});
-						circle.fillColor = '#FAFAFA';
+						circle.fillColor = '#FFF';
 						circle.opacity = 0.9;
 
 
@@ -86,7 +86,7 @@ var stateTwo =
 
 				        group.addChild(circle);
 						return group;
-
+						
 
 					},
 					onTrigger:function(){
@@ -162,7 +162,7 @@ var stateTwo =
 
 					onPlay:function(){
 						complexity.level++;
-						
+
 					},
 					onEnd:function(){
 						complexity.level--;
@@ -205,7 +205,7 @@ var stateTwo =
 
 			        {
 			            color:'rgba(0,0,0, 0.3)',
-			            weight: 1,
+			            weight: 2,
 			            yOffset:0,
 			            filled:false,
 			        }
@@ -243,7 +243,7 @@ var stateTwo =
 						// //Must return a display object
 						// //This references cuepoint object
 
-						this.size = Math.min(this.size, 100);
+						this.size = Math.min(this.size, 200);
 						var group = new Group();
 
 				  		var circle = new Shape.Circle({

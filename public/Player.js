@@ -4,7 +4,9 @@
 function Player(id, index){
 	this.id = id;
 	this.index = index; //_.size(players);
+	this.group = new Group();
 	this.thread = new Thread();
+	this.thread.parent = this.group;
 
 	// console.log('player index is', this.playerIndex);
 

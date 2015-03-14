@@ -4,9 +4,11 @@ function Thread(opts){
 
     this.cuePoints = {};
     this.state = 'ready'
+    this.parent;
 
     this.startPoint = new Point(0, view.bounds.height/2);
-    this.target = new Point(view.bounds.width, view.bounds.height/2)
+    this.target = new Point(view.bounds.width, view.bounds.height/2);
+
 }
 
 Thread.prototype.setOpts = function(opts){
@@ -35,11 +37,13 @@ Thread.prototype.reset = function(){
 
     _.each(this.cuePoints, function(cuePoint){
         cuePoint.destroy();
+        cuePoint = null;
     });
 
     this.paths = [];
     this.cuePoints = {};
     this.willAnimateOut = false;
+    this.parent.removeChildren();
 
     this.state = 'ready'
 
@@ -79,6 +83,8 @@ Thread.prototype.startDraw = function(e){
         point2.vel = new Point(0, 0);
         point2.acc = new Point(0,0);
         path.points.push(point2);
+
+        this.parent.addChild(path.drawable)
 
     }.bind(this))
 

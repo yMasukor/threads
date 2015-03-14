@@ -277,57 +277,7 @@
 
 
 
-            
-
-
-        // var cursor = {
-        //     drawable:null,
-        //     create:function(){
-        //         this.drawable = new Shape.Circle(new Point(0, 0), 50);
-        //         // this.drawable.nofill();
-        //         this.drawable.fillColor = 'rgba(255,255,255,0.2)'
-        //         this.drawable.radius = 0;
-
-        //         console.log('cursor created')
-        //     },
-        //     popIn:function(){
-        //         var circle = this.drawable;
-        //         var animateIn = new TWEEN.Tween(circle)
-        //             .to({radius:72}, 250)
-        //             .easing( TWEEN.Easing.Circular.Out)
-        //             .onComplete(function() {
-
-        //             });
-
-        //         animateIn.start();
-        //     },
-        //     popOut:function(){
-        //         var circle = this.drawable;
-        //         var animateOut = new TWEEN.Tween(circle)
-        //             .to({radius:0}, 250)
-        //             .easing( TWEEN.Easing.Circular.Out)
-        //             .onComplete(function() {
-
-        //             });
-
-        //         animateOut.start();
-        //     },
-        //     move:function(point){
-        //         // console.log('move', point);
-
-        //         // var circle = this.drawable;
-
-        //         // if(true){
-        //         //     var r = (circle.radius)*0.01;
-        //         //     // console.log(r)
-        //         //     circle.radius = circle.radius-r;
-        //         // }
-        //         this.drawable.position.set(point.x, point.y);
-        //     },
-        //     pulse:function(){
-
-        //     }
-        // }
+        var cuepointCount = 0;
         var mouseDown = false;
 
         var cursor = {
@@ -581,6 +531,8 @@
                     });
 
                 hidePrompt.start();
+
+                cuepointCount = 0;
                
             },
 
@@ -810,7 +762,9 @@
                     },
                 ]
 
+                var threadGroup = new Group();
                 thread = new Thread();
+                thread.parent = threadGroup;
                 thread.startPoint.x = 0;
                 cursor.create();  
             });
@@ -1118,9 +1072,13 @@
             if(lastDelta){  
                 if((Math.abs(lastDelta.angleInDegrees-e.delta.angleInDegrees) > 30 && !triggered) || (Math.abs(lastDelta.length-e.delta.length) > 10 && !triggered) || Math.floor(Math.random()*100) == 0){
                     // thread.pushPoint(e);
-                    thread.createCuepoint();
-                    triggered = true;
-                    sendInput(e, 'cuepoint');
+                    if(cuepointCount < 10){
+                        thread.createCuepoint();
+                        triggered = true;
+                        sendInput(e, 'cuepoint'); 
+                        cuepointCount++;   
+                    }
+                    
                 }else{
                     triggered = false;
                 } 

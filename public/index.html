@@ -125,6 +125,10 @@
 			
 			updateBackingTrack();
 
+
+			if(visualiser)
+				visualiser.changeSaturation();
+
 		});
 
 	
@@ -255,8 +259,7 @@
 
 
 
-			background = new Shape.Rectangle(new Point(0,0), view.size);
-			background.fillColor = '#84FFFF';
+			
 			visualiser.create();
 
 
@@ -269,62 +272,11 @@
 				});
 
 				TWEEN.update();
-
-
-				visualiser.update();
-
-				
+				visualiser.update();	
 				
 			}
-
-
-
-
-
-			// DEBUG PLAYER\
-
-			// window.setTimeout(function(){
-			// 	
-			// }, 1000)
-			
-
-            // addPlayer('foobar');
-
-			tool.onMouseDown =  function(e) {
-				players['foobar'].dragStart(e);
-			}
-
-			tool.onMouseDrag =  function(e) {
-				players['foobar'].drag(e);
-			}
-
-			tool.onMouseUp =  function(e) {
-				players['foobar'].dragEnd(e);
-			}
-
 
 		});
-
-
-		// var backgroundVisualiser;
-
-		// function makeBackground(){
-
-		// 	// 
-		// 	// 
-		// 	// var points = [new Two.Anchor(width, 0), new Two.Anchor(0, 0)];
-
-			
-
-
-
-		// }
-
-
-
-
-
-
 
 
 		function addPlayer(playerId){
