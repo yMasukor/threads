@@ -97,7 +97,10 @@
 		backgroundTextures,
 		triggerables,
 		vocals,
-		beatCount
+		beatCount,
+		threadDraws,
+		threadComplete,
+		threadEnds
 
 			
 		
@@ -110,14 +113,21 @@
 
 
 		var background;
-
+		
+		var complexity = {
+			level:0
+		}
 
 
 
 		
+		Object.observe(complexity, function(changes){
+			
+			updateBackingTrack();
 
+		});
 
-
+	
 
 
 		
@@ -201,6 +211,22 @@
 
 				if(tickCount == 0 && !backingTrack.playing){
 					playBackingTrack();
+				}
+
+				if(tickCount == 0 && complexity.level == 0 && backingTrack.playing){
+					if( Math.floor(Math.random()*3) == 0){
+						backingTrack.chords.gainNode.gain(0)
+						backingTrack.drums1.gainNode.gain(1)
+					}else{
+						backingTrack.chords.gainNode.gain(1)
+						backingTrack.drums1.gainNode.gain(0)
+					}
+				}
+
+				if(complexity.level > 1){
+					if(Math.floor(Math.random()*16) == 0){
+						vocals[Math.floor(Math.random()*vocals.length)].play();
+					}
 				}
 
 

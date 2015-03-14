@@ -3,6 +3,7 @@
     <head>
 
      <meta name="viewport" content="width=device-width, minimum-scale=1.0">
+     <meta name="mobile-web-app-capable" content="yes">
 
     <script src="lib/jquery-2.1.3.min.js"></script>
     <script src="lib/tween.min.js"></script>
@@ -114,10 +115,30 @@
         var playbackState = 'empty'
 
         var background;
+        var playerIndex = 0;
 
 
 
         var cursor;
+
+
+
+
+        var themes = [
+            {
+                background:'#0a1519',
+                foreground:'#FFFFFF',
+                highlight:'rgba(255,255,255,0.3)',
+                text: '#263238'
+            },
+            {
+                background:'#ECEFF1',
+                foreground:'#546E7A',
+                highlight:'rgba(84, 110, 122, 0.3)',
+                text: '#CFD8DC'
+            },
+        ]
+
         
 
         var threadOpts = {
@@ -131,7 +152,7 @@
                     },
 
                     {
-                        color:'#fff',
+                        color:themes[playerIndex].foreground,
                         weight: 2,
                         yOffset:0,
                         filled:false,
@@ -152,8 +173,8 @@
                             center: this.point,
                             radius: 0
                         });
-                        circle.fillColor = '#0a1519';
-                        circle.strokeColor = '#ffffff';
+                        circle.fillColor = themes[playerIndex].background;
+                        circle.strokeColor = themes[playerIndex].foreground;
                         circle.strokeWidth = 2;
                         // circle.opacity = 0.9;
 
@@ -183,7 +204,7 @@
                             center: drawable.position,
                             radius: 0
                         });
-                        ping.fillColor = '#ffffff';
+                        ping.fillColor = themes[playerIndex].foreground;
                         drawable.addChild(ping);    
 
                         var pingIn = new TWEEN.Tween(ping)
@@ -243,6 +264,10 @@
                             });
 
                         threadFadeout.start();
+                    },
+
+                    onReset:function(){
+
                     }
 
                 }
@@ -314,7 +339,7 @@
             lastPoint:null,
             delta:null,
             lastState:0,
-            state:'ready',
+            state:'dead',
             endPoint:null,
 
             endDrawable:null,
@@ -332,11 +357,11 @@
                 var drawable = new Group();
 
                 var point = new Shape.Circle(new Point(0, 0), 0);
-                point.fillColor = '#ffffff';
+                point.fillColor = themes[playerIndex].foreground;
                 point.radius = 36;
 
                 var ping = new Shape.Circle(new Point(0, 0), 0);
-                ping.fillColor = '#ffffff';
+                ping.fillColor = themes[playerIndex].foreground;
                 ping.radius = 0;
 
                 
@@ -354,12 +379,12 @@
                 this.endPoint = new Point(view.bounds.width, view.bounds.height/2);
 
                 endTarget = new Shape.Circle(this.endPoint, 0);
-                endTarget.strokeColor = '#ffffff';
+                endTarget.strokeColor = themes[playerIndex].foreground;
                 endTarget.radius = 0;
                 endTarget.strokeWidth = 4;
 
                 endPing = new Shape.Circle(this.endPoint, 0);
-                endPing.fillColor = '#ffffff';
+                endPing.fillColor = themes[playerIndex].foreground;
                 endPing.radius = 0;
 
                 this.endDrawable = endTarget;
@@ -374,7 +399,7 @@
                     point: new Point(96, 8+view.bounds.height/2),
                     justification: 'left',
                     fontSize: 24,
-                    fillColor: '#263238',
+                    fillColor: themes[playerIndex].text,
                     content:'– TOUCH'
                 });
 
@@ -383,7 +408,7 @@
                     point: new Point(view.bounds.width-96, 8+view.bounds.height/2),
                     justification: 'right',
                     fontSize: 24,
-                    fillColor: '#263238',
+                    fillColor: themes[playerIndex].text,
                     content:'COMPLETE –'
                 });
 
@@ -393,11 +418,13 @@
                     point: new Point(view.bounds.width/2, 12+view.bounds.height/2),
                     justification: 'center',
                     fontSize: 48,
-                    fillColor: '#263238',
+                    fillColor: themes[playerIndex].text,
                     content:'– LISTEN –'
                 });
 
                 this.waitPrompt.opacity = 0;
+
+                this.state = 'ready'
             },
 
             ping:function(){
@@ -752,29 +779,54 @@
             
             paper.setup('myCanvas')
             var tool = new Tool();
-            thread = new Thread();
+            
             
 
             
 
             //connect to the server
+            
             socket.emit('connectPlayer');
+            socket.on('connected', function(index){
+                
+                playerIndex = Math.min(1, index-1);
+                // alert(playerIndex)
+                background = new Shape.Rectangle(new Point(0,0), view.size);
+                background.fillColor = themes[playerIndex].background;
 
+                threadOpts.paths = [
+                    {
+                        color:'rgba(0,0,0,0)',
+                        weight: 0,
+                        yOffset:0,
+                        filled:false,
+                    },
 
+                    {
+                        color:themes[playerIndex].foreground,
+                        weight: 2,
+                        yOffset:0,
+                        filled:false,
+                    },
+                ]
+
+                thread = new Thread();
+                thread.startPoint.x = 0;
+                cursor.create();  
+            });
 
             
 
 
-            background = new Shape.Rectangle(new Point(0,0), view.size);
-            background.fillColor = '#0a1519';   
+             
             // backgroundOverlay = new Shape.Rectangle(new Point(0,0), view.size);
             // backgroundOverlay.fillColor = '#ECEFF1';   
 
             // backgroundOverlay.opacity = 0.5; 
 
-            cursor.create();
+            
 
-            thread.startPoint.x = 0;
+            
 
 
             //create cursor;
@@ -794,17 +846,22 @@
                 
                 if(tickCount%16 == 0){
                     if(!mouseDown && cursor.state != 'ended'){
-                        cursor.ping(); 
+                        if(cursor.state != 'dead')
+                            cursor.ping(); 
                     }
                     
                 }
                 
                 // console.log('tick', tickCount);  
-                thread.triggerCuePoints(tickCount)
-                
-                if(thread.state == 'ready' && cursor.state != 'ready'){
-                    cursor.reset();
+                if(thread){
+
+                    thread.triggerCuePoints(tickCount)
+                    if(thread.state == 'ready' && cursor.state != 'ready'){
+                        cursor.reset();
+                    }
                 }
+                
+                
 
 
             });
@@ -823,11 +880,14 @@
 
 
             view.onFrame = function(e) {
-                thread.update(e);
+                if(thread){
+                    thread.update(e);   
+                }
+                
                 
 
                 TWEEN.update();
-                if(cursor){
+                if(cursor.state != 'dead'){
                    cursor.update(); 
                 }
                 
@@ -845,7 +905,7 @@
                 cursor.targetPoint = e.point.clone();
                 mouseDown = true;
 
-                cursor.drawablePoint.strokeColor = 'rgba(255,255,255, 0.3)'
+                cursor.drawablePoint.strokeColor = themes[playerIndex].highlight
                 cursor.drawablePoint.strokeWidth = 24;
 
                 lastPoint = e.point;

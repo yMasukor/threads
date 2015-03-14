@@ -18,9 +18,7 @@ Thread.prototype.setOpts = function(opts){
     this.onEndDraw = opts.playbackOpts.onEndDraw;
     this.onPlay = opts.playbackOpts.onPlay;
     this.onEnd = opts.playbackOpts.onEnd;
-    this.onReset = function(){
-
-    }
+    this.onReset = opts.playbackOpts.onReset;
 }
 
 
@@ -93,7 +91,11 @@ Thread.prototype.startDraw = function(e){
 
 Thread.prototype.draw = function(e){
     
-    //console.log('FOOBAR', this.lastPoint, e.point,  this.lastPoint.getDistance(e.point))
+    console.log('FOOBAR', e.delta.length);
+
+    if(this.drawSound){
+        this.drawSound.gainNode.gain(e.delta.length/50);
+    }
 
     if(this.lastPoint.getDistance(e.point) > 50){
 
@@ -139,7 +141,7 @@ Thread.prototype.pushPoint = function(e){
 
 Thread.prototype.endDraw = function(e){
 
-    // this.onEndDraw();
+    this.onEndDraw();
     
     // var point = e.point.clone();
     // point.dest = e.point.clone();

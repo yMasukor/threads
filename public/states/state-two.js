@@ -141,23 +141,43 @@ var stateTwo =
 				//Playback Behaviour
 				playbackOpts:{
 					onStartDraw:function(){
-						
-						backingTrack.synth.gainNode.gain(1)
-						samples.synthPad1.play();
+						console.log('start draw', this);
+						// backingTrack.synth.gainNode.gain(1)
+						this.drawSound = threadDraws[Math.floor(Math.random()*threadDraws.length)];
+						this.drawSound.play();
+
+
+						complexity.level++;
+
+
 					},
 
 					onEndDraw:function(){
-						backingTrack.synth.gainNode.gain(1)
-						samples.synthPad1.stop();
+						
+						this.drawSound.stop();
+
+						this.completeSound = threadComplete[Math.floor(Math.random()*threadComplete.length)];
+						this.completeSound.play();
 					},
 
 					onPlay:function(){
-						backingTrack.drums.gainNode.gain(1)
+						complexity.level++;
+						
 					},
 					onEnd:function(){
-						backingTrack.synth.gainNode.gain(0)
-						backingTrack.drums.gainNode.gain(0)
-						samples.trickle1.play();
+						complexity.level--;
+						this.endSound = threadEnds[Math.floor(Math.random()*threadEnds.length)];
+						this.endSound.play();
+					},
+
+					onReset:function(){
+
+						
+
+						this.completeSound = threadComplete[Math.floor(Math.random()*threadComplete.length)];
+						this.completeSound.play();
+
+						complexity.level--;
 					}
 
 				}
@@ -278,11 +298,7 @@ var stateTwo =
 				        
 			        	triggerables[Math.floor(Math.random()*triggerables.length)].play();
 
-			        	if(Math.floor(Math.random()*8) == 0){
-
-							vocals[Math.floor(Math.random()*vocals.length)].play();
-
-						}
+			        	
 				        
 				        
 					},
@@ -295,24 +311,43 @@ var stateTwo =
 				//Playback Behaviour
 				playbackOpts:{
 					onStartDraw:function(){
-						
-						backingTrack.synth.gainNode.gain(1)
-						samples.synthPad2.play();
+						console.log('start draw', this);
+						// backingTrack.synth.gainNode.gain(1)
+						this.drawSound = threadDraws[Math.floor(Math.random()*threadDraws.length)];
+						this.drawSound.play();
+
+
+						complexity.level++;
+
+
 					},
 
 					onEndDraw:function(){
-						backingTrack.synth.gainNode.gain(1)
-						samples.synthPad2.stop();
+						
+						this.drawSound.stop();
+
+						this.completeSound = threadComplete[Math.floor(Math.random()*threadComplete.length)];
+						this.completeSound.play();
 					},
 
 					onPlay:function(){
-						backingTrack.bass.gainNode.gain(1)
+						complexity.level++;
+						vocals[Math.floor(Math.random()*vocals.length)].play();
 					},
 					onEnd:function(){
-						backingTrack.synth.gainNode.gain(0)
-						backingTrack.bass.gainNode.gain(0)
+						complexity.level--;
+						this.endSound = threadEnds[Math.floor(Math.random()*threadEnds.length)];
+						this.endSound.play();
+					},
 
-						samples.trickle1.play();
+					onReset:function(){
+
+						
+
+						this.completeSound = threadComplete[Math.floor(Math.random()*threadComplete.length)];
+						this.completeSound.play();
+
+						complexity.level--;
 					}
 
 				}

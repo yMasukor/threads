@@ -44,7 +44,7 @@ io.on('connection', function(socket){
 
 	socket.on('connectPlayer', function(){
 		//user joined
-		io.to(socket.id).emit('connected', socket.id);
+		
 
 		viewers.forEach(function(viewerId){
 			io.to(viewerId).emit('addPlayer', socket.id);
@@ -52,6 +52,8 @@ io.on('connection', function(socket){
 		
 		console.log('player connected');
 		players.push(socket.id);
+
+		io.to(socket.id).emit('connected', players.length);
 	});
 	
 	socket.on('disconnect', function(){
