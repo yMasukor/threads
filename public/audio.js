@@ -240,20 +240,22 @@
 
     gain.output.connect(analyser);
 
-
     analyser.connect(tsw.speakers)
     analyser.fftSize = 2048
     analyser.smoothingTimeConstant = 0.9;
 
-    var bufferLength = analyser.frequencyBinCount;
-    var dataArray = new Uint8Array(bufferLength);
+    
 
     // console.log(audioContext, tsw.speakers)
 
 
 
 
-
+    function createAnalyser(){
+        var bufferLength = analyser.frequencyBinCount;
+        globalState.byteFrequencyData = new Uint8Array(bufferLength);
+        globalState.byteTimeDomainData = new Uint8Array(bufferLength);
+    }
 
 
 
@@ -273,18 +275,14 @@
             samples['backingDrums3'].loop(true).play();
             samples['backingChords'].loop(true).play();
             samples['backingSynth'].loop(true).play();
-            // samples['backingSynth2'].loop(true).play();
             samples['backingBass'].loop(true).play();
 
             backingTrack = {
                 drums1:samples['backingDrums1'],
                 drums2:samples['backingDrums2'],
                 drums3:samples['backingDrums3'],
-
                 chords:samples['backingChords'],
-                
                 synth:samples['backingSynth'],
-                // synth2:samples['backingSynth2'],
                 bass:samples['backingBass'],
                 playing:true,
             }
@@ -321,53 +319,56 @@
 
 
     function updateBackingTrack(){
-        if(complexity.level == 0){
-                //No Threads Active
-                backingTrack.drums1.gainNode.gain(0)
-                backingTrack.drums2.gainNode.gain(0)
-                backingTrack.drums3.gainNode.gain(0)
-                backingTrack.chords.gainNode.gain(1)
-                backingTrack.bass.gainNode.gain(0)
-                backingTrack.synth.gainNode.gain(0)
 
-            }else if(complexity.level == 1){
-                //1 Thread Drawing
-                backingTrack.drums1.gainNode.gain(0)
-                backingTrack.drums2.gainNode.gain(0)
-                backingTrack.drums3.gainNode.gain(0)
-                backingTrack.chords.gainNode.gain(1)
-                backingTrack.bass.gainNode.gain(0)
-                backingTrack.synth.gainNode.gain(1)
+        // console.log('updating track', complexity.level)
+
+        if(globalState.complexity == 0){
+            //No Threads Active
+            backingTrack.drums1.gainNode.gain(0)
+            backingTrack.drums2.gainNode.gain(0)
+            backingTrack.drums3.gainNode.gain(0)
+            backingTrack.chords.gainNode.gain(1)
+            backingTrack.bass.gainNode.gain(0)
+            backingTrack.synth.gainNode.gain(0)
+
+        }else if(globalState.complexity == 1){
+            //1 Thread Drawing
+            backingTrack.drums1.gainNode.gain(0)
+            backingTrack.drums2.gainNode.gain(0)
+            backingTrack.drums3.gainNode.gain(0)
+            backingTrack.chords.gainNode.gain(1)
+            backingTrack.bass.gainNode.gain(0)
+            backingTrack.synth.gainNode.gain(1)
 
 
-            }else if(complexity.level == 2){
-                //2 Threads Drawing OR 1 Thread Playing
-                backingTrack.drums1.gainNode.gain(1)
-                backingTrack.drums2.gainNode.gain(0)
-                backingTrack.drums3.gainNode.gain(0)
-                backingTrack.chords.gainNode.gain(1)
-                backingTrack.bass.gainNode.gain(0)
-                backingTrack.synth.gainNode.gain(1)
+        }else if(globalState.complexity == 2){
+            //2 Threads Drawing OR 1 Thread Playing
+            backingTrack.drums1.gainNode.gain(1)
+            backingTrack.drums2.gainNode.gain(0)
+            backingTrack.drums3.gainNode.gain(0)
+            backingTrack.chords.gainNode.gain(1)
+            backingTrack.bass.gainNode.gain(0)
+            backingTrack.synth.gainNode.gain(1)
 
-            }else if(complexity.level == 3){
-                //1 Thread Drawing, 1 Thread Playing
-                backingTrack.drums1.gainNode.gain(0)
-                backingTrack.drums2.gainNode.gain(1)
-                backingTrack.drums3.gainNode.gain(0)
-                backingTrack.chords.gainNode.gain(1)
-                backingTrack.bass.gainNode.gain(1)
-                backingTrack.synth.gainNode.gain(1)
+        }else if(globalState.complexity == 3){
+            //1 Thread Drawing, 1 Thread Playing
+            backingTrack.drums1.gainNode.gain(0)
+            backingTrack.drums2.gainNode.gain(1)
+            backingTrack.drums3.gainNode.gain(0)
+            backingTrack.chords.gainNode.gain(1)
+            backingTrack.bass.gainNode.gain(1)
+            backingTrack.synth.gainNode.gain(1)
 
-            }else if(complexity.level == 4){
-                //2 Threads Playing
-                backingTrack.drums1.gainNode.gain(0)
-                backingTrack.drums2.gainNode.gain(0)
-                backingTrack.drums3.gainNode.gain(1)
-                backingTrack.chords.gainNode.gain(1)
-                backingTrack.bass.gainNode.gain(1)
-                backingTrack.synth.gainNode.gain(1)
+        }else if(globalState.complexity == 4){
+            //2 Threads Playing
+            backingTrack.drums1.gainNode.gain(0)
+            backingTrack.drums2.gainNode.gain(0)
+            backingTrack.drums3.gainNode.gain(1)
+            backingTrack.chords.gainNode.gain(1)
+            backingTrack.bass.gainNode.gain(1)
+            backingTrack.synth.gainNode.gain(1)
 
-            }
+        }
     }
 
 

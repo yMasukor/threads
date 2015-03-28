@@ -6,6 +6,7 @@
     <script src="lib/tsw.js"></script>
     <script src="lib/underscore.js"></script>
 	<script src="lib/paper-full.js"></script>
+	<script src="lib/proton-1.0.1.js"></script>
 
 
 
@@ -19,18 +20,31 @@
 	<script src="Threads.js"></script>
 	<script src="Player.js"></script>
 	<script src="backgroundLayer.js"></script>
+
 <!--    
     <script src="metronome.js"></script>
     <script src="animations.js"></script> -->
     
 
     <script src="states/themes.js"></script>
+
+    <script src="states/animation-utilities.js"></script>
+
     <script src="states/state-two.js"></script>
 	<script src="states/state-one.js"></script>
 
+	<script src="gridBackground.js"></script>
+	<script src="waveBackground.js"></script>
+	<script src="circleBackground.js"></script>
+	<script src="particleBackground.js"></script>
 
 	
 	<style type="text/css">
+	body{
+		background: #000000;
+		overflow: hidden;
+	}
+
 		*{
 			margin: 0px;
 			padding: 0px;
@@ -42,6 +56,12 @@
 			left: 0px;
 			right: 0px;
 			bottom: 0px;
+			width: 100%;
+			margin: auto;
+		}
+
+		#threadCanvas{
+			background-color: #0D0A0C;
 		}
 
 	</style>
@@ -51,8 +71,10 @@
 	</head>
 	<body>
 
+	
 
-	<canvas id="myCanvas" resize keepalive="true" ></canvas>
+	<canvas id="threadCanvas" width="1280" height="720" keepalive></canvas>
+	<canvas id="bitmapCanvas" width="1280" height="720" keepalive></canvas>
 
 
 	<script type="text/javascript">
@@ -69,6 +91,19 @@
 	<script type="text/javascript" >
 
 		paper.install(window);
+
+
+
+
+		
+
+
+
+
+
+		var proton = new Proton();
+
+		var canvas, context;
 
 		var TWO_PI = Math.PI * 2;
 
@@ -106,7 +141,7 @@
 		
 
 
-		var state = stateTwo,
+		var state = stateOne,
 		samplesLoaded = false;
 
 		
@@ -114,22 +149,35 @@
 
 		var background;
 		
-		var complexity = {
-			level:0
+		var globalState = {
+			complexity:0, //int value from 0 to 5, represents the overall complexity of the system
+			byteFrequencyData:null, //levels data
+			byteTimeDomainData:null, //waveform data
+			averageLevel:0,
+			playerOne:{
+				state:0,
+				completeness:0,
+				cursor:{
+					isDown:false,
+					x:0,
+					y:0
+				}
+			},
+			playerTwo:{
+				state:0,
+				completeness:0,
+				cursor:{
+					isDown:false,
+					x:0,
+					y:0
+				}
+			}
 		}
 
 
 
 		
-		Object.observe(complexity, function(changes){
-			
-			updateBackingTrack();
-
-
-			if(visualiser)
-				visualiser.changeSaturation();
-
-		});
+		
 
 	
 
@@ -143,7 +191,16 @@
 		$(document).ready(function(){
 
 			
-			paper.setup('myCanvas')
+			paper.setup('threadCanvas')
+
+			paper.view.viewSize = new Size(1280, 720)
+
+			$('#threadCanvas').css({'width':'100%', 'height':'auto'})
+
+			console.log(view.bounds.width)
+
+			canvas = document.getElementById('bitmapCanvas');
+			context = canvas.getContext('2d');
 
 			console.log('PAPER IS', paper)
 			var tool = new Tool();
@@ -194,10 +251,14 @@
 				// console.log('update post scale', input.delta)
 
 				if(input.type == 'mousedown'){
+					console.log('mousedown')
 					players[input.id].dragStart(e);
+
 				}else if(input.type == 'mousedrag'){
+					console.log('mousedrag')
 					players[input.id].drag(e);
 				}else if(input.type == 'mouseup'){
+					console.log('mouseup')
 					players[input.id].dragEnd(e);
 				}else if(input.type == 'cuepoint'){
 					console.log('cuepoint recieved')
@@ -214,12 +275,13 @@
 
 
 				if(tickCount == 0 && !backingTrack.playing){
+					createAnalyser();
 					playBackingTrack();
 				}
 
-				if(tickCount == 0 && complexity.level == 0 && backingTrack.playing){
+				if(tickCount == 0 && globalState.complexity == 0 && backingTrack.playing){
 					if( Math.floor(Math.random()*3) == 0){
-						backingTrack.chords.gainNode.gain(0)
+						backingTrack.chords.gainNode.gain(1)
 						backingTrack.drums1.gainNode.gain(1)
 					}else{
 						backingTrack.chords.gainNode.gain(1)
@@ -227,7 +289,7 @@
 					}
 				}
 
-				if(complexity.level > 1){
+				if(globalState.complexity > 1){
 					if(Math.floor(Math.random()*16) == 0){
 						vocals[Math.floor(Math.random()*vocals.length)].play();
 					}
@@ -243,7 +305,7 @@
 					backgroundTextures[Math.floor(Math.random()*backgroundTextures.length)].play();
 				}
 
-				analyser.getByteTimeDomainData(dataArray);
+				analyser.getByteTimeDomainData(globalState.byteTimeDomainData);
 
 			});
 
@@ -260,19 +322,39 @@
 
 
 			
-			visualiser.create();
+			// visualiser.create();
+			window.setTimeout(function(){
+				circleBackground.create();
+			}, 1000);
+			
 
 
-
+			// particleBackground.create();
 
 
 			view.onFrame = function(e) {
+
+				analyser.getByteFrequencyData(globalState.byteFrequencyData);
+				
+				if(globalState.byteFrequencyData){
+					globalState.averageLevel = getAverageVolume(globalState.byteFrequencyData);
+					// console.log('level', globalState.averageLevel);
+				}
+
+				
 				_.each(players, function(player){
 					player.thread.update(e);
 				});
 
 				TWEEN.update();
-				visualiser.update();	
+				// visualiser.update();	
+
+				// gridBackground.update(e.time);
+
+				circleBackground.update();
+				// particleBackground.update();
+
+				proton.update();
 				
 			}
 
@@ -306,6 +388,41 @@
 			//update 
 		}
 
+
+
+
+
+
+		function getAverageVolume(array) {
+	        var values = 0;
+	        var average;
+	 
+	        var length = array.length;
+	 
+	        // get all the frequency amplitudes
+	        for (var i = 0; i < length; i++) {
+	            values += array[i];
+	        }
+	 
+	        average = values / length;
+	        return average;
+	    }
+
+
+
+		Object.observe(globalState, function(changes){
+			
+			if(changes[0].name == 'complexity'){
+				console.log('complexity changed', globalState.complexity);
+				updateBackingTrack();
+			}
+			
+
+
+			// if(waveBackground)
+			// 	waveBackground.changeSaturation();
+
+		});
 
 
 

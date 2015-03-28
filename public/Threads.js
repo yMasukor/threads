@@ -12,7 +12,7 @@ function Thread(opts){
 }
 
 Thread.prototype.setOpts = function(opts){
-    //console.log(opts);
+    ////console.log(opts);
     this.pathOpts = opts.paths;
     this.cuepointOpts = opts.cuepointOpts;
 
@@ -48,7 +48,7 @@ Thread.prototype.reset = function(){
     this.state = 'ready'
 
     this.onReset();
-    console.log('reset', this);
+    //console.log('reset', this);
 }
 
 
@@ -97,7 +97,7 @@ Thread.prototype.startDraw = function(e){
 
 Thread.prototype.draw = function(e){
     
-    console.log('FOOBAR', e.delta.length);
+    ////console.log('FOOBAR', e.delta.length);
 
     if(this.drawSound){
         this.drawSound.gainNode.gain(e.delta.length/50);
@@ -125,7 +125,7 @@ Thread.prototype.pushPoint = function(e){
             var point = e.point.clone();
             point.dest = e.point.clone();
             point.vel = e.delta.multiply(10);
-            console.log(e.delta, point.vel)
+            //console.log(e.delta, point.vel)
             // point.vel.x = 0;
             point.size = e.delta.length;
             point.acc = new Point(0, 10-Math.random()*20);
@@ -139,7 +139,7 @@ Thread.prototype.pushPoint = function(e){
 
         this.lastPoint = e.point;
 
-        console.log(this.paths[0].points.length, 'points')
+        //console.log(this.paths[0].points.length, 'points')
 
 }
 
@@ -155,8 +155,8 @@ Thread.prototype.endDraw = function(e){
     // point.vel.x = 0;
 
 
-
-    if(this.target){
+// this.lastPoint.getDistance(e.point) > 50
+    if(this.target.getDistance(e.point) < 100){
         var endPoint = new Point(this.target.x, this.target.y);
         endPoint.dest = endPoint.clone();
         endPoint.vel = new Point(0,0);
@@ -166,11 +166,18 @@ Thread.prototype.endDraw = function(e){
             path.points.push(endPoint);
         });
 
+        this.getCuepointLocations();
+    
+    if(this.state != 'playing'){
+        this.onPlay();
     }
 
-    this.getCuepointLocations();
     this.state = 'playing' 
-    this.onPlay();
+    
+
+    }
+
+    
     
 
 
@@ -256,7 +263,8 @@ Thread.prototype.update = function(frameCount){
             }
         });
 
-        path.drawable.smooth();     
+        path.drawable.smooth();
+
         
     });
 }
@@ -267,7 +275,7 @@ Thread.prototype.createCuepoint = function(){
 
     var point = this.paths[0].points[this.paths[0].points.length-1];
 
-    console.log('creating cuepoint', point.vel, point.vel.length);
+    //console.log('creating cuepoint', point.vel, point.vel.length);
 
     if(!point.cuePoint){
         var cuePoint = new CuePoint(point, (point.size)*0.5, this.cuepointOpts.onCreate, this.cuepointOpts.onTrigger, this.cuepointOpts.onDestroy, this);
@@ -361,7 +369,7 @@ Thread.prototype.jitter = function(){
 
 
 function accelerateToPoint(point, dest, forceMult){
-    // console.log(point, dest, forceMult)
+    // //console.log(point, dest, forceMult)
     var dir = point.subtract(dest);
 
 

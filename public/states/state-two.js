@@ -204,7 +204,7 @@ var stateTwo =
 			        },
 
 			        {
-			            color:'rgba(0,0,0, 0.3)',
+			            color:'rgba(255,255,255, 1)',
 			            weight: 2,
 			            yOffset:0,
 			            filled:false,
@@ -250,7 +250,7 @@ var stateTwo =
 							center: this.point,
 							radius: 0
 						});
-						circle.fillColor = '#212121';
+						circle.fillColor = '#ffffff';
 						circle.opacity = 0.9;
 
 						var animateIn = new TWEEN.Tween(circle)
@@ -279,7 +279,7 @@ var stateTwo =
 							center: drawable.position,
 							radius: 0
 						});
-						ping.fillColor = '#212121';
+						ping.fillColor = '#ffffff';
 						drawable.addChild(ping);	
 
 						var pingIn = new TWEEN.Tween(ping)
