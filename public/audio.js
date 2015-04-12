@@ -255,6 +255,8 @@
         var bufferLength = analyser.frequencyBinCount;
         globalState.byteFrequencyData = new Uint8Array(bufferLength);
         globalState.byteTimeDomainData = new Uint8Array(bufferLength);
+        analyser.getByteTimeDomainData(globalState.byteTimeDomainData);
+        analyser.getByteFrequencyData(globalState.byteFrequencyData);
     }
 
 

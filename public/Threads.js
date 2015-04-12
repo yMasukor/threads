@@ -70,6 +70,10 @@ Thread.prototype.startDraw = function(e){
             })
         }
 
+        if(opts.blendMode){
+            path.drawable.blendMode = opts.blendMode;
+        }
+
         this.paths.push(path);
 
         var point1 = this.startPoint.clone();
@@ -107,7 +111,7 @@ Thread.prototype.draw = function(e){
 
         
         this.pushPoint(e);
-        
+        // this.jitter();
        
     }else{
         
@@ -121,16 +125,33 @@ Thread.prototype.draw = function(e){
 
 Thread.prototype.pushPoint = function(e){
 
-    this.paths.forEach(function(path){
+    this.paths.forEach(function(path, i){
             var point = e.point.clone();
             point.dest = e.point.clone();
             point.vel = e.delta.multiply(10);
-            //console.log(e.delta, point.vel)
+            // point.vel = point.vel.add(new Point(15-Math.random()*30, 15-Math.random()*30))
+            // console.log(point.vel, i)
             // point.vel.x = 0;
             point.size = e.delta.length;
-            point.acc = new Point(0, 10-Math.random()*20);
+            point.acc = new Point(0,0);
+
+            // point.acc = point.acc.add(new Point(0, 5-Math.random()*10*i))
+            
+
+            
             path.points.push(point);
+            console.log("point pushed", point.vel, i);
         });
+
+
+    this.paths.forEach(function(path){
+        path.points.forEach(function(point){
+
+
+            point.acc = point.acc.add(new Point(0, 0.5-Math.random()*1))
+
+        });
+    });
 
         // if(Math.floor(Math.random()*4) == 0){
         //       
@@ -189,11 +210,11 @@ Thread.prototype.update = function(frameCount){
 
     var willAnimateOut = this.willAnimateOut;
 
-    this.paths.forEach(function(path){
+    this.paths.forEach(function(path, j){
 
         path.points.forEach(function(point, i){
 
-            
+            // console.log("a", point.vel, j);
 
             if(willAnimateOut){
                 var nextPoint;
@@ -217,8 +238,11 @@ Thread.prototype.update = function(frameCount){
                 accelerateToPoint(point, point.dest, 0.000001)
             }
 
+            
             // var point; 
             //     
+
+
             var maxVel = 20;
             var minVel = 0.5
 
@@ -230,11 +254,7 @@ Thread.prototype.update = function(frameCount){
 
 
 
-            if(point.vel.length > maxVel){
-                point.vel.length = maxVel
-            }else if(point.vel.length < minVel){
-                point.vel.length = minVel
-            }
+            
             
              if(point.cuePoint){
                 // point.acc = point.acc.multiply(0.1);
@@ -243,8 +263,22 @@ Thread.prototype.update = function(frameCount){
             point.vel = point.vel.add(point.acc);
             point.vel = point.vel.multiply(0.98);
 
+            // console.log("b", point, j);
+
+            if(point.vel.length > maxVel){
+                point.vel.length = maxVel
+            }else if(point.vel.length < minVel){
+                point.vel.length = minVel
+            }
+
+            
+
+            
+
             var newPoint = point.add(point.vel);
 
+            // console.log("c", newPoint, point.vel, j);
+            
             point.x = newPoint.x;
             point.y = newPoint.y;
 
@@ -253,8 +287,12 @@ Thread.prototype.update = function(frameCount){
 
 
             if(path.drawable.segments.length > i){
+
+                // console.log('existing', j, point);
                 path.drawable.segments[i].point.set(point.x, point.y);
             }else{
+
+                // console.log("add", j, point);
                 path.drawable.add(point);
             }
 

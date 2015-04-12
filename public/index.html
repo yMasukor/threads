@@ -32,6 +32,7 @@
 
     <script src="states/state-two.js"></script>
 	<script src="states/state-one.js"></script>
+	<script src="states/state-three.js"></script>
 
 	<script src="gridBackground.js"></script>
 	<script src="waveBackground.js"></script>
@@ -141,7 +142,7 @@
 		
 
 
-		var state = stateOne,
+		var state = stateThree,
 		samplesLoaded = false;
 
 		
@@ -277,6 +278,7 @@
 				if(tickCount == 0 && !backingTrack.playing){
 					createAnalyser();
 					playBackingTrack();
+					waveBackground.create();
 				}
 
 				if(tickCount == 0 && globalState.complexity == 0 && backingTrack.playing){
@@ -307,6 +309,8 @@
 
 				analyser.getByteTimeDomainData(globalState.byteTimeDomainData);
 
+
+
 			});
 
 
@@ -324,12 +328,15 @@
 			
 			// visualiser.create();
 			window.setTimeout(function(){
-				circleBackground.create();
+				// circleBackground.create();
+				
 			}, 1000);
 			
 
 
 			// particleBackground.create();
+
+			
 
 
 			view.onFrame = function(e) {
@@ -351,9 +358,14 @@
 
 				// gridBackground.update(e.time);
 
-				circleBackground.update();
+				// circleBackground.update();
 				// particleBackground.update();
 
+				if(waveBackground.active){
+					waveBackground.update();
+				}
+
+				
 				proton.update();
 				
 			}
