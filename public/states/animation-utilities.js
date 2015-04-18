@@ -9,7 +9,7 @@ function flicker(shape, length, destination){
         	shape.opacity=Math.random();
 		})
         .onComplete(function() {
-        	shape.fillColor=destination;
+        	// shape.fillColor=destination;
         	shape.opacity = 1
     	});
 

@@ -301,7 +301,7 @@ Thread.prototype.update = function(frameCount){
             }
         });
 
-        path.drawable.smooth();
+        // path.drawable.smooth();
 
         
     });

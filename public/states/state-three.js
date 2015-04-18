@@ -9,20 +9,12 @@ var stateThree =
 				//An array of shapes to draw
 				paths:[
 			        {
-			            color:'rgba(0,0,0,1)',
-			            weight: 10,
-			            yOffset:30,
-			            filled:false,
-			            blendMode:'normal'
-			        },
-
-			        {
-			            color:randomColor(),
-			            weight:10,
+			            color:'rgba(255,255,255,0)',
+			            weight: 1,
 			            yOffset:0,
 			            filled:false,
 			            blendMode:'normal'
-			        }
+			        },
 			    ],
 
 
@@ -30,7 +22,7 @@ var stateThree =
 				cuepointOpts:{
 					onCreate:function(){
 
-						this.size = Math.max(10, Math.min((this.size*this.size)*0.25, 100));
+						this.size = Math.max(10, Math.min((this.size*this.size)*0.5, 200));
 
 						var group = new Group();
 
@@ -62,7 +54,7 @@ var stateThree =
 							center: drawable.position,
 							radius: 0
 						});
-						ping.fillColor = palette.colors[Math.floor(Math.random()*palette.colors.length)];
+						ping.fillColor = palette.light[0];
 						drawable.addChild(ping);	
 
 						var pingIn = new TWEEN.Tween(ping)
@@ -124,6 +116,14 @@ var stateThree =
 						this.endSound = threadEnds[Math.floor(Math.random()*threadEnds.length)];
 						this.endSound.play();
 						globalState.playerOne.state = 3
+						var animateIn = new TWEEN.Tween(globalState.playerOne)
+				            .to({completeness:0}, duration*0.25)
+				            .easing( TWEEN.Easing.Circular.Out)
+				            .onComplete(function() {
+				        });
+
+				        animateIn.start();
+
 					},
 
 					onReset:function(){
@@ -132,6 +132,8 @@ var stateThree =
 						this.completeSound.play();
 						globalState.complexity--;
 						globalState.playerOne.state = 0
+						globalState.playerOne.completeness = 0
+
 					}
 				}
 			}
@@ -147,18 +149,12 @@ var stateThree =
 				//An array of shapes to draw
 				paths:[
 			        {
-			            color:palette.light[0],
-			            weight: 0,
+			            color:'rgba(255,255,255,0)',
+			            weight: 1,
 			            yOffset:0,
 			            filled:false,
+			            blendMode:'normal'
 			        },
-
-			        {
-			            color:palette.light[0],
-			            weight:2,
-			            yOffset:0,
-			            filled:false,
-			        }
 			    ],
 
 
@@ -174,7 +170,8 @@ var stateThree =
 							center: this.point,
 							radius: 0
 						});
-						circle.fillColor = palette.light[0];
+						circle.strokeColor = palette.light[0];
+						circle.strokeWidth = 6;
 
 						var animateIn = new TWEEN.Tween(circle)
 				            .to({radius:this.size}, duration*0.25)
@@ -198,7 +195,7 @@ var stateThree =
 							center: drawable.position,
 							radius: 0
 						});
-						ping.fillColor = palette.colors[Math.floor(Math.random()*palette.colors.length)];
+						ping.fillColor = palette.light[0];
 						drawable.addChild(ping);	
 
 						var pingIn = new TWEEN.Tween(ping)
@@ -258,6 +255,14 @@ var stateThree =
 						this.endSound = threadEnds[Math.floor(Math.random()*threadEnds.length)];
 						this.endSound.play();
 						globalState.playerTwo.state = 3
+
+						var animateIn = new TWEEN.Tween(globalState.playerTwo)
+				            .to({completeness:0}, duration*0.25)
+				            .easing( TWEEN.Easing.Circular.Out)
+				            .onComplete(function() {
+				        });
+
+				        animateIn.start();
 					},
 
 					onReset:function(){
@@ -266,6 +271,9 @@ var stateThree =
 						this.completeSound.play();
 						globalState.complexity--;
 						globalState.playerTwo.state = 0
+						globalState.playerTwo.completeness = 0
+
+
 					}
 				}
 			}
