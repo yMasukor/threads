@@ -276,9 +276,9 @@
 
 
 				if(tickCount == 0 && !backingTrack.playing){
-					createAnalyser();
+					
 					playBackingTrack();
-					waveBackground.create();
+					
 				}
 
 				if(tickCount == 0 && globalState.complexity == 0 && backingTrack.playing){
@@ -307,16 +307,19 @@
 					backgroundTextures[Math.floor(Math.random()*backgroundTextures.length)].play();
 				}
 
+				
 				analyser.getByteTimeDomainData(globalState.byteTimeDomainData);
-
-
+				if(waveBackground.active){
+					waveBackground.pulse()
+				}
 
 			});
 
 
 
 
-
+			createAnalyser();
+			waveBackground.create();
 
 
 
@@ -338,10 +341,15 @@
 
 			
 
-
 			view.onFrame = function(e) {
 
 				analyser.getByteFrequencyData(globalState.byteFrequencyData);
+
+				analyser.getByteTimeDomainData(globalState.byteTimeDomainData);
+				if(waveBackground.active){
+					waveBackground.pulse()
+				}
+
 				
 				if(globalState.byteFrequencyData){
 					globalState.averageLevel = getAverageVolume(globalState.byteFrequencyData);

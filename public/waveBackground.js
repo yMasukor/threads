@@ -1,248 +1,173 @@
-
 var waveBackground = {
-
+	paths:[],
 	active:false,
-	
+	sectionHeight:0,
 	create:function(){
-		var sliceWidth = (view.bounds.width/(analyser.frequencyBinCount/3))*12;
-
-		this.multiplier = 1;
-
-		this.background = new Shape.Rectangle(new Point(0,0), view.size);
-		this.background.fillColor = '#BBDEFB';
-		this.background.fillColor.saturation = 1
-
-		this.treblePath = new Path();
-		this.treblePath.opacity = 0.5;
-		this.treblePath.fillColor = '#FFE082'
-		this.treblePath.fillColor.saturation = 1;
-
-		
 
 
-		this.bassPath = new Path();
-		this.bassPath.opacity = 0.5;
-		this.bassPath.fillColor = '#E3F2FD'
-		this.bassPath.fillColor.saturation = 1;
+		var sliceWidth = (view.bounds.width/(analyser.frequencyBinCount/3));
+		this.sectionHeight = (view.bounds.height/4);
 
-		this.midPath = new Path();
-		this.midPath.opacity = 0.5;
-		this.midPath.fillColor = '#FB8C00'
-		this.midPath.fillColor.saturation = 1;
-
-		
-		this.layers = [this.background, this.bassPath, this.midPath, this.treblePath]
-		
-		this.visualizerPaths = [this.bassPath, this.midPath, this.treblePath];
-
-		// this.visualizerPaths.forEach(function(path){
-		// 	path.add(new Point(view.bounds.bottomRight.x, view.bounds.bottomRight.y));
-		// 	path.add(new Point(view.bounds.bottomLeft.x, view.bounds.bottomLeft.y));
-
-			
-			
-		// });
+		for(var i=0; i<3; i++){
 
 
-		this.bassPath.add(new Point(view.bounds.bottomRight.x, view.bounds.bottomRight.y));
-		this.bassPath.add(new Point(view.bounds.bottomLeft.x, view.bounds.bottomLeft.y));
+			var points = [];
+			var path = new Path();
+			path.opacity = 1;
+			path.fillColor = 'rgba(255, 255, 255, 0)'
+			path.strokeColor = '#ffffff'
+			path,strokeWidth = 2
 
-		this.treblePath.add(new Point(view.bounds.bottomRight.x, view.bounds.bottomRight.y));
-		this.treblePath.add(new Point(view.bounds.bottomLeft.x, view.bounds.bottomLeft.y));
+			if(i==0){
+				points.push(view.bounds.topRight);
+				points.push(new Point(-50, 0));
+
+				for(var j=0; j<Math.floor(globalState.byteFrequencyData.length/3); j++){
+					var x = 0;
+					if(j == 0){
+						var x = -50;
+					}else if(j+1 == Math.floor(globalState.byteFrequencyData.length/3)){
+						var x = view.bounds.width+50;
+					}else{
+						var x = j*sliceWidth;
+					}
+
+					// points.push(new Point(x, (i+1)*this.sectionHeight));
+					points.push(new Point(x, (2)*this.sectionHeight));
+				}
+			}else{
+				points.push(view.bounds.bottomRight);
+				points.push(view.bounds.bottomLeft);
+				for(var j=0; j<Math.floor(globalState.byteFrequencyData.length/3); j++){
+					var x = 0;
+					if(j == 0){
+						var x = 0;
+					}else if(j+1 == Math.floor(globalState.byteFrequencyData.length/3)){
+						var x = view.bounds.width;
+					}else{
+						var x = j*sliceWidth;
+					}
+					// points.push(new Point(x, view.bounds.height - ((i)*this.sectionHeight)));
+					points.push(new Point(x, view.bounds.height - ((2)*this.sectionHeight)));
+				}
+
+				path.opacity = 0;
+			}
+
+			points.forEach(function(point){
+				point.dest = point.clone();
+				point.vel = new Point(0, 0);
+				point.acc = new Point(0, 0);
+
+				path.add(point.clone());
+
+			});
 
 
-		this.midPath.add(new Point(view.bounds.bottomRight.x, 0));
-		this.midPath.add(new Point(view.bounds.bottomLeft.x, 0));
-
-
-
-		
-		var j = 0;
-
-		for(var i=0; i<Math.floor(globalState.byteFrequencyData.length*0.33); i=i+5){
-
-			var v =  (globalState.byteFrequencyData[i]);
-			
-			var x = (j-2) * sliceWidth;
-			var y = (view.bounds.height - ((v-128)*40)) - (view.bounds.height*0.25) ;
-
-			var point = new Point(x, y);
-		 	this.bassPath.add(point);
-
-		 	j++;
-
+			this.paths.push({points:points, path:path});
 		}
-
-		j = 0
-		for(var i=Math.floor(globalState.byteFrequencyData.length*0.33); i<Math.floor(globalState.byteFrequencyData.length*0.66); i=i+5){
-
-			var v =  (globalState.byteFrequencyData[i]);
-			
-			var x = (j-2) * sliceWidth;
-			var y = (view.bounds.height - ((v-128)*40)) - (view.bounds.height*0.5) ;
-
-			var point = new Point(x, y);
-		 	this.midPath.add(point);
-
-		 	j++;
-
-		}
-
-		j = 0
-		for(var i=Math.floor(globalState.byteFrequencyData.length*0.66); i<globalState.byteFrequencyData.length; i=i+5){
-
-			var v =  (globalState.byteFrequencyData[i]);
-			
-			var x = (j-2) * sliceWidth;
-			var y = (view.bounds.height - ((v-128)*40)) - (view.bounds.height*0.75) ;
-
-			var point = new Point(x, y);
-		 	this.treblePath.add(point);
-
-		 	j++;
-
-		}
-
-		// this.midClippingMask = this.bassPath.clone();
-		// this.ghettoHackPath = this.bassPath.clone();
-
-		// this.midClippingMask.fillColor = '#ff0000'
-
-		// this.ghettoHackPath.fillColor = 'rgba(0,0,0,0)'
-		// this.ghettoHackPath.strokeColor = '#fff'
-		// this.ghettoHackPath.strokeWidth = 3;
-
-		// var midClippingGroup = new Group();
-		// midClippingGroup.addChild(this.midClippingMask);
-		// midClippingGroup.addChild(this.midPath);
-
-		// midClippingGroup.clipped = true;
 
 		this.active = true;
+
 
 	},
 
 	update:function(){
 
-		// if()
+		this.paths.forEach(function(shape){
+
+
+
+			shape.points.forEach(function(point, i){
+
+				if(i > 1 ){
+
+					accelerateToPoint(point, point.dest, 0.000001)
+
+					var maxVel = 10;
+		            var minVel = 0
+
+		            point.vel = point.vel.add(point.acc);
+		            point.vel = point.vel.multiply(0.98);
+
+
+		            if(point.vel.length > maxVel){
+		                point.vel.length = maxVel
+		            }else if(point.vel.length < minVel){
+		                point.vel.length = minVel
+		            }
+
+
+		            var newPoint = point.add(point.vel);
+		            
+		            // point.x = newPoint.x;
+		            point.y = newPoint.y;
+
+		            point.acc.set(0, 0)
+
+
+		            if(shape.path.segments.length > i){
+
+		                // console.log('existing', j, point);
+		                shape.path.segments[i].point.set(point.x, point.y);
+		            }
+		        }
+			});
+
+			shape.path.smooth();
+
+			this.paths.forEach(function(shape, i){
+				// hape.path.segments[1].linear = true
+				shape.path.segments[2].linear = true
+				shape.path.segments[3].linear = true
 				
 
-		var j = 0
-		for(var i=0; i<Math.floor(globalState.byteFrequencyData.length*0.33); i=i+10){
-
-			var v =  (globalState.byteFrequencyData[i]);
-			
-			var y = (view.bounds.height - ((v-128)*(1*globalState.complexity+1))) - (view.bounds.height*0.25) ;
-
-			// console.log(j, this.bassPath.segments.length)
-
-			var point = this.bassPath.segments[j+2].point;
-		 	point.y -= ((point.y-y)/60);
-
-		 	// this.midClippingMask.segments[j+2].point.y = point.y;
-		 	// this.ghettoHackPath.segments[j+2].point.y = point.y;
-
-		 	j++;
-
-		}
-
-		j = 0
-		for(var i=Math.floor(globalState.byteFrequencyData.length*0.33); i<Math.floor(globalState.byteFrequencyData.length*0.66); i=i+10){
-
-			var v =  (globalState.byteFrequencyData[i]);
-			
-			
-			var y = (view.bounds.height - ((v-128)*(2*globalState.complexity+1))) - (view.bounds.height*(0.5)) ;
+			});
 
 
-			var point = this.midPath.segments[j+2].point;
-		 	point.y -= ((point.y-y)/60);
+			// for(var j=0; j<Math.floor(globalState.byteFrequencyData.length/3); j++){
 
-		 	j++;
+			// 	// var d = globalState.byteFrequencyData[(i*Math.floor(globalState.byteFrequencyData.length/3))+j]
+			// 	// d = (d/analyser.maxDecibels);
 
-		}
+			// 	// var y = d*10
 
-		j = 0
-		for(var i=Math.floor(globalState.byteFrequencyData.length*0.66); i<globalState.byteFrequencyData.length; i=i+10){
+			// 	// if(d != null){
+			// 	// 	var point = path.segments[j+2].point;
+			// 	// 	if(i == 0){
 
-			var v =  (globalState.byteFrequencyData[i]);
-			
-			
-			var y = (view.bounds.height - ((v-128)*(2*globalState.complexity+1))) - (view.bounds.height*(0.75))
+			// 	// 		point.y = ((i+1)*this.sectionHeight) + y
+			// 	// 	}else{
 
-			var point = this.treblePath.segments[j+2].point;
-		 	point.y -= ((point.y-y)/60);
-
-		 	j++;
-
-		}
-
-
-
-	    this.visualizerPaths.forEach(function(path){
-	    	path.smooth();
-	    });
-
-	    // this.ghettoHackPath.bringToFront();
+			// 	// 		point.y = (view.bounds.height - ((i)*this.sectionHeight)) + y
+			// 	// 	}
+			// 	// }
+			// }
+		}.bind(this));
 	},
 
-	changeSaturation:function(){
+	pulse:function(){
+		this.paths.forEach(function(shape, i){
 
+			shape.points.forEach(function(point, j){
 
-		if(globalState.complexity == 0){	
+				point.acc = new Point(0, (globalState.byteTimeDomainData[(i*Math.floor(globalState.byteTimeDomainData.length/3))+j]-128)*0.05);
+			});
 
-			animateSaturation(this.background, 0);
-			animateSaturation(this.treblePath, 0);
-			animateSaturation(this.midPath, 0);
-			animateSaturation(this.bassPath, 0);
-
-		}else if(globalState.complexity == 1){
-
-			animateSaturation(this.background, 0);
-			animateSaturation(this.treblePath, 0);
-			animateSaturation(this.midPath, 1);
-			animateSaturation(this.bassPath, 0);
-
-		}else if(globalState.complexity == 2){
-
-			animateSaturation(this.background, 0);
-			animateSaturation(this.treblePath, 1);
-			animateSaturation(this.midPath, 1);
-			animateSaturation(this.bassPath, 0);
-
-		}else if(globalState.complexity == 3){
-
-			animateSaturation(this.background, 0);
-			animateSaturation(this.treblePath, 1);
-			animateSaturation(this.midPath, 1);
-			animateSaturation(this.bassPath, 1);
-
-		}else if(globalState.complexity > 3){
-
-			animateSaturation(this.background, 1);
-			animateSaturation(this.treblePath, 1);
-			animateSaturation(this.midPath, 1);
-			animateSaturation(this.bassPath, 1);
-
-		}
-
+		});
 	}
 }
 
 
 
-function animateSaturation(path, target){
+function accelerateToPoint(point, dest, forceMult){
+    // //console.log(point, dest, forceMult)
+    var dir = point.subtract(dest);
 
-	var tween = new TWEEN.Tween(path.fillColor)
-        .to({saturation:target}, 500)
-        .easing( TWEEN.Easing.Circular.Out)
-        .onComplete(function() {
-            
-        });
+    var distSqrd = point.getDistance(dest, true);
 
-    tween.start();
+    dir.normalize();
+    var force = distSqrd*forceMult;
 
+    point.acc = point.acc.subtract(dir.multiply(force));//(dir.multiplyScalar(force));
 }
-
-
-

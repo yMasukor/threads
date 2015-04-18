@@ -241,7 +241,7 @@
     gain.output.connect(analyser);
 
     analyser.connect(tsw.speakers)
-    analyser.fftSize = 2048
+    analyser.fftSize = 128
     analyser.smoothingTimeConstant = 0.9;
 
     
