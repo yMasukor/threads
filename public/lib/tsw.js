@@ -964,18 +964,30 @@
 
             node.play = function (time) {
                 var that = this;
+                
+                console.log("starting, should loop ", bufferShouldLoop);
 
                 sourceNode = tsw.context().createBufferSource();
                 sourceNode.buffer = bufferWaitingArea;
 
-                sourceNode.loop = bufferShouldLoop;
+                //THIS DOESN"T WORK FOR SOME REASON IN CHROME.
+                // sourceNode.loop = bufferShouldLoop;
                 this.paused = false;
 
                 tsw.connect(sourceNode, node.output);
 
                 sourceNode.onended = function () {
+                    
+                    console.log("ended", bufferShouldLoop);
                     if (!that.paused) {
                         that.position(0);
+                        
+                    }
+                    
+                    // HACK FOR LOOPING
+                    if(bufferShouldLoop){
+                        console.log("Ended & should loop");
+                        that.play();
                     }
                 };
 

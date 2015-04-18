@@ -279,6 +279,17 @@
             samples['backingSynth'].loop(true).play();
             samples['backingBass'].loop(true).play();
 
+            console.log("FOOBAR", samples['backingDrums1'] );
+            samples['backingDrums1'].loop = true;
+            samples['backingDrums2'].loop = true;
+            samples['backingDrums3'].loop = true;
+            samples['backingChords'].loop = true;
+            samples['backingSynth'].loop = true;
+            samples['backingBass'].loop = true;
+            
+            // samples['backingDrums1'].onE
+            
+            
             backingTrack = {
                 drums1:samples['backingDrums1'],
                 drums2:samples['backingDrums2'],

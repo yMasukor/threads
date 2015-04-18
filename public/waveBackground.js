@@ -2,13 +2,15 @@ var waveBackground = {
 	paths:[],
 	active:false,
 	sectionHeight:0,
+	count:3,
+	
 	create:function(){
 
 
-		var sliceWidth = (view.bounds.width/(analyser.frequencyBinCount/3));
-		this.sectionHeight = (view.bounds.height/4);
+		var sliceWidth = (view.bounds.width/(analyser.frequencyBinCount/count));
+		this.sectionHeight = (view.bounds.height/count+1);
 
-		for(var i=0; i<3; i++){
+		for(var i=0; i<count; i++){
 
 
 			var points = [];
@@ -16,17 +18,17 @@ var waveBackground = {
 			path.opacity = 1;
 			path.fillColor = 'rgba(255, 255, 255, 0)'
 			path.strokeColor = '#ffffff'
-			path,strokeWidth = 2
+			path.strokeWidth = 2
 
-			if(i==0){
+			if(false){
 				points.push(view.bounds.topRight);
 				points.push(new Point(-50, 0));
 
-				for(var j=0; j<Math.floor(globalState.byteFrequencyData.length/3); j++){
+				for(var j=0; j<Math.floor(globalState.byteFrequencyData.length/count); j++){
 					var x = 0;
 					if(j == 0){
 						var x = -50;
-					}else if(j+1 == Math.floor(globalState.byteFrequencyData.length/3)){
+					}else if(j+1 == Math.floor(globalState.byteFrequencyData.length/count)){
 						var x = view.bounds.width+50;
 					}else{
 						var x = j*sliceWidth;
@@ -37,21 +39,23 @@ var waveBackground = {
 				}
 			}else{
 				points.push(view.bounds.bottomRight);
-				points.push(view.bounds.bottomLeft);
-				for(var j=0; j<Math.floor(globalState.byteFrequencyData.length/3); j++){
+				// points.push(view.bounds.bottomLeft);
+			    points.push(new Point(-50, view.bounds.bottomLeft.y));
+			    
+				for(var j=0; j<Math.floor(globalState.byteFrequencyData.length/count); j++){
 					var x = 0;
 					if(j == 0){
 						var x = 0;
-					}else if(j+1 == Math.floor(globalState.byteFrequencyData.length/3)){
+					}else if(j+1 == Math.floor(globalState.byteFrequencyData.length/count)){
 						var x = view.bounds.width;
 					}else{
 						var x = j*sliceWidth;
 					}
 					// points.push(new Point(x, view.bounds.height - ((i)*this.sectionHeight)));
-					points.push(new Point(x, view.bounds.height - ((2)*this.sectionHeight)));
+					points.push(new Point(x, view.bounds.height - ((i+1)*this.sectionHeight)));
 				}
 
-				path.opacity = 0;
+				// path.opacity = 0;
 			}
 
 			points.forEach(function(point){
@@ -151,7 +155,7 @@ var waveBackground = {
 
 			shape.points.forEach(function(point, j){
 
-				point.acc = new Point(0, (globalState.byteTimeDomainData[(i*Math.floor(globalState.byteTimeDomainData.length/3))+j]-128)*0.05);
+				point.acc = new Point(0, (globalState.byteTimeDomainData[(i*Math.floor(globalState.byteTimeDomainData.length/count))+j]-128)*0.05);
 			});
 
 		});
