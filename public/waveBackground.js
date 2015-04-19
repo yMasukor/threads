@@ -2,26 +2,19 @@ var waveBackground = {
 	paths:[],
 	active:false,
 	sectionHeight:0,
-	count:9,
+	count:7,
 
 
-	themes:[
-		{
-			primary:'rgba(255, 46, 46, 0.8)',
-
-			secondary:[
-				'rgba(255, 46, 46, 0.8)',
-				'rgba(153, 26, 108, 0.8)',
-				'rgba(255, 255, 74, 0.8)',
-				'rgba(255, 92, 151, 0.8)',
-				'rgba(175, 4, 4, 0.8)',
-			],
-			background:'rgba(255, 254, 202, 1)'
-		}
-	],
 	activeTheme:0,
+
+	group:null,
 	
-	create:function(){
+	create:function(theme){
+
+		this.theme = theme;
+
+		this.group = new Group();
+		this.group.visible = false;
 
 		var count = this.count;
 		var activeTheme = this.activeTheme;
@@ -29,13 +22,17 @@ var waveBackground = {
 		var sliceWidth = ((view.bounds.width+600)/(analyser.frequencyBinCount/count));
 		this.sectionHeight = (view.bounds.height/(count+1));
 		this.background = new Shape.Rectangle(new Point(0,0), view.size);
-		this.background.fillColor = this.themes[activeTheme].background;
+		this.background.fillColor = theme.background;
+
+		this.group.addChild(this.background);
+
 
 		for(var i=0; i<count; i++){
 
 
 			var points = [];
 			var path = new Path();
+			this.group.addChild(path);
 			path.opacity = 1;
 			
 			// path.strokeColor = '#ffffff'
@@ -44,14 +41,14 @@ var waveBackground = {
 			if(i == Math.floor(count/2)){
 				//complexity 0
 				complexity = 0;
-				path.fillColor = this.themes[activeTheme].secondary[Math.floor(Math.random()*this.themes[activeTheme].secondary.length)];
+				path.fillColor = theme.secondary[Math.floor(Math.random()*theme.secondary.length)];
 			}else if(i%2 == 0){
 				//complexity full
 				complexity = 2;
-				path.fillColor = this.themes[activeTheme].secondary[Math.floor(Math.random()*this.themes[activeTheme].secondary.length)];
+				path.fillColor = theme.secondary[Math.floor(Math.random()*theme.secondary.length)];
 			}else{
 				complexity = 1;
-				path.fillColor = this.themes[activeTheme].secondary[Math.floor(Math.random()*this.themes[activeTheme].secondary.length)];
+				path.fillColor = theme.secondary[Math.floor(Math.random()*theme.secondary.length)];
 			}
 
 			if(false){
@@ -94,7 +91,9 @@ var waveBackground = {
 			this.paths.push({points:points, path:path, complexity:complexity});
 		}
 
-		this.active = true;
+		waveForeground.create();
+
+		
 
 
 	},
@@ -127,16 +126,13 @@ var waveBackground = {
 
 
 		            var newPoint = point.add(point.vel);
-		            
-		            // point.x = newPoint.x;
+
 		            point.y = newPoint.y;
 
 		            point.acc.set(0, 0)
 
 
 		            if(shape.path.segments.length > i){
-
-		                // console.log('existing', j, point);
 		                shape.path.segments[i].point.set(point.x, point.y);
 		            }
 		        }
@@ -146,50 +142,286 @@ var waveBackground = {
 
 			this.paths.forEach(function(shape, i){
 				shape.path.segments[0].linear = true;
-				// shape.path.segments[1].handleOut = new Point(0,0);
-				// shape.path.segments[1].handleIn = new Point(0,0);
-				// shape.path.segments[2].handleIn = new Point(0,0);
-				// shape.path.segments[2].handleOut = new Point(0,0);
-				// shape.path.segments[2].linear = true
-				// shape.path.segments[3].linear = true
-				
 
 			});
 
 			shape.path.smooth();
 
 
-			if(shape.complexity == 1){
-				shape.path.opacity = globalState.playerOne.completeness;
-			}else if(shape.complexity == 2){
-				shape.path.opacity = globalState.playerTwo.completeness;
+			if(globalState.players.length >  0){
+				globalState.players.forEach(function(player, i){
+					if(shape.complexity == i+1){
+						shape.path.opacity = player.completeness;
+					}
+				});
+			}else{
+				if(shape.complexity == 1 || shape.complexity == 2){
+					shape.path.opacity = 0;
+				}
+			}
+			
+
+			if(shape.path.opacity == 0){
+				shape.path.fillColor = this.theme.secondary[Math.floor(Math.random()*this.theme.secondary.length)];
 			}
 
 		}.bind(this));
+
+		waveForeground.update();
+
 	},
 
 	pulse:function(){
 		var count = this.count;
 		this.paths.forEach(function(shape, i){
 
-			
-				shape.points.forEach(function(point, j){
-					if(Math.round(Math.random()) == 0){
-						if(shape.complexity == 2){
-							point.acc = new Point(0, (globalState.byteTimeDomainData[(i*Math.floor(globalState.byteFrequencyData.length/count))+j]-128)*(((globalState.complexity+1)/6)*0.5)*-1);
-						}else{
-							point.acc = new Point(0, (globalState.byteTimeDomainData[(i*Math.floor(globalState.byteFrequencyData.length/count))+j]-128)*(((globalState.complexity+1)/6)*0.5));
-						}
+			shape.points.forEach(function(point, j){
+				if(Math.round(Math.random()) == 0){
+					if(shape.complexity == 2){
+						point.acc = new Point(0, (globalState.byteTimeDomainData[(i*Math.floor(globalState.byteFrequencyData.length/count))+j]-128)*(((globalState.complexity+1)/6)*0.5)*-1);
+					}else{
+						point.acc = new Point(0, (globalState.byteTimeDomainData[(i*Math.floor(globalState.byteFrequencyData.length/count))+j]-128)*(((globalState.complexity+1)/6)*0.5));
 					}
-					
-				});
-			
+				}
+			});
+		});
+	},
 
-			
+
+	start:function(){
+		this.group.visible = true;
+		this.active = true;
+		waveForeground.start();
+	},
+
+	pause:function(){
+
+		this.group.visible = false;
+		this.active = false;
+		waveForeground.pause();
+
+	},
+
+
+	transitionOut:function(target){
+
+		var tempMask = new Shape.Circle(new Point(0,view.bounds.height/2), 0);
+		tempMask.fillColor = '#ffffff';
+
+		this.group.addChild(tempMask);
+
+		var out = new TWEEN.Tween(tempMask)
+	        .to({radius:view.bounds.width*1.5}, duration*0.125)
+	        .easing( TWEEN.Easing.Circular.Out)
+	        .onComplete(function() {
+	            tempMask.remove();
+	            this.pause();
+
+	            currentScene = scenes[target]; 
+
+	            currentScene.background.transitionIn(tempMask.fillColor);
+	            // switchScene(0, tempMask.fillColor);
+
+	        }.bind(this));
+
+	    out.start();
+	},
+
+	transitionIn:function(fromColor){
+
+		this.setTheme(currentScene.theme);
+		this.start();
+
+
+		var tempMask = new Shape.Rectangle(new Point(0,0), view.size);
+		tempMask.fillColor = fromColor;
+
+		this.group.addChild(tempMask);
+
+
+
+	    var fadeOut = new TWEEN.Tween(tempMask)
+	        .to({opacity:0}, duration*0.125)
+	        .easing( TWEEN.Easing.Circular.Out)
+	        .onComplete(function() {
+	            tempMask.remove();
+	        });
+
+	    fadeOut.start();
+
+	},
+
+
+	setTheme(theme){
+		this.theme = theme;
+
+		this.background.fillColor = theme.background;
+
+		this.paths.forEach(function(shape){
+
+			shape.path.fillColor = theme.secondary[Math.floor(Math.random()*theme.secondary.length)];
 
 		});
+
 	}
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+var waveForeground = {
+
+	playerAttractors:[],
+	playerEmitters:[],
+	renderer:null,
+	emitter:null,
+	active:false,
+
+	create:function(){
+		
+		var emitter = new Proton.Emitter();
+		emitter.rate = new Proton.Rate(Proton.getSpan(10, 60), 0.1);
+		emitter.addInitialize(new Proton.Radius(2, 10));
+		emitter.addInitialize(new Proton.Velocity(Proton.getSpan(0, 1), Proton.getSpan(0, 360), 'polar'));
+		emitter.addBehaviour(new Proton.Color(['ffffff']));
+		emitter.addBehaviour(new Proton.Alpha(0.8, 0));
+		emitter.addBehaviour(new Proton.CrossZone(new Proton.RectZone(0, 0, view.bounds.width, view.bounds.height), 'cross'));
+
+		emitter.addInitialize(new Proton.Position(new Proton.RectZone(0, 0, view.bounds.width, view.bounds.height)));
+
+		emitter.addBehaviour(new Proton.RandomDrift(10, 10, .2));
+
+		emitter.addBehaviour({
+					initialize : function(particle) {
+						particle.tha = Math.random() * Math.PI;
+						particle.thaSpeed = 0.015 * Math.random() + 0.005;
+					},
+
+					applyBehaviour : function(particle) {
+						particle.tha += particle.thaSpeed;
+						particle.alpha = Math.abs(Math.cos(particle.tha));
+					}
+				});
+
+
+		proton.addEmitter(emitter);
+		
+		this.emitter = emitter;
+
+
+		
+
+
+
+		for(var i=0; i<2; i++){
+
+			var attractor = new Proton.Attraction({x:view.bounds.width,y:view.bounds.height},0, view.bounds.width*2);
+			this.emitter.addBehaviour(attractor);
+			this.playerAttractors.push(attractor);
+
+
+			var pEmitter = new Proton.Emitter();
+			pEmitter.rate = new Proton.Rate(Proton.getSpan(2, 4), 0.05); 
+			pEmitter.addInitialize(new Proton.Radius(1, 4));
+			pEmitter.addInitialize(new Proton.Velocity(Proton.getSpan(1, 0), Proton.getSpan(0, 360), 'polar'));
+			pEmitter.addInitialize(new Proton.Life(1, 0));
+			pEmitter.addBehaviour(new Proton.Color('ffffff'));
+			pEmitter.addBehaviour(new Proton.Alpha(1, 0));
+			pEmitter.addBehaviour(new Proton.CrossZone(new Proton.RectZone(0, 0, view.bounds.width, view.bounds.height), 'cross'));
+
+			
+			
+			proton.addEmitter(pEmitter);
+			pEmitter.isEmitting = false;
+
+			this.playerEmitters.push(pEmitter);
+			
+
+		};
+
+
+		
+
+
+		this.renderer = new Proton.Renderer('canvas', proton, canvas);
+		// this.resume();
+
+	},
+
+	update:function(){
+
+		if(this.active){
+			globalState.players.forEach(function(player, i){
+				if(this.playerAttractors.length > 0){
+					var attractor = this.playerAttractors[i];
+
+					if(player.cursor.isDown){
+						console.log("ATTRRACTING")
+						attractor.force = 1000;
+						attractor.targetPosition.x = player.cursor.x;
+						attractor.targetPosition.y = player.cursor.y;
+					}else{
+						attractor.force = 0;
+					}
+				}
+
+				if(this.playerEmitters.length > 0){
+					var pEmitter = this.playerEmitters[i];
+
+					if(player.cursor.isDown){
+
+						if(!pEmitter.isEmitting){
+							pEmitter.emit();
+							pEmitter.isEmitting = true;
+						}
+
+						
+						
+						pEmitter.p.x = player.cursor.x;
+						pEmitter.p.y = player.cursor.y;	
+							;
+					}else{
+						pEmitter.stopEmit();
+						pEmitter.isEmitting = false;
+					}
+					
+				}
+
+
+			}.bind(this));
+		}
+	},
+
+
+	pause:function(){
+		this.emitter.removeAllParticles();
+		this.renderer.stop();
+		this.active = false;
+	},
+
+	start:function(){
+		this.emitter.emit('once');
+		this.renderer.start();
+		this.active = true;
+	}
+}
+
+
 
 
 

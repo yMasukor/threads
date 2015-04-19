@@ -10,7 +10,7 @@ var stateThree =
 				paths:[
 			        {
 			            color:'rgba(255,255,255,0)',
-			            weight: 1,
+			            weight: 3,
 			            yOffset:0,
 			            filled:false,
 			            blendMode:'normal'
@@ -30,7 +30,8 @@ var stateThree =
 							center: this.point,
 							radius: this.size
 						});
-						circle.fillColor = palette.light[0];
+						circle.strokeColor = palette.light[0];
+						circle.strokeWidth = 6;
 
 						var animateIn = new TWEEN.Tween(circle)
 				            .to({radius:this.size}, duration*0.25)
@@ -92,8 +93,8 @@ var stateThree =
 						this.drawSound = threadDraws[Math.floor(Math.random()*threadDraws.length)];
 						this.drawSound.play();
 						
-						globalState.complexity++;
-						globalState.playerOne.state = 1
+						// globalState.complexity++;
+						// globalState.players[0].state = 1
 
 
 					},
@@ -106,23 +107,26 @@ var stateThree =
 
 					onPlay:function(){
 						console.log('start play player one');
-						globalState.complexity++;
-						globalState.playerOne.state = 2
+						// globalState.complexity++;
+						// globalState.players[0].state = 2
 					},
 
 					onEnd:function(){
 						console.log('end play player one');
-						globalState.complexity--;
+						
 						this.endSound = threadEnds[Math.floor(Math.random()*threadEnds.length)];
 						this.endSound.play();
-						globalState.playerOne.state = 3
-						var animateIn = new TWEEN.Tween(globalState.playerOne)
-				            .to({completeness:0}, duration*0.25)
-				            .easing( TWEEN.Easing.Circular.Out)
-				            .onComplete(function() {
-				        });
 
-				        animateIn.start();
+						// globalState.complexity--;
+						// globalState.players[0].state = 3
+
+						// var completnessTween = new TWEEN.Tween(globalState.players[0])
+				  //           .to({completeness:0}, duration*0.25)
+				  //           .easing( TWEEN.Easing.Circular.Out)
+				  //           .onComplete(function() {
+				  //       });
+
+				  //       completnessTween.start();
 
 					},
 
@@ -130,9 +134,9 @@ var stateThree =
 						console.log('reset player one');
 						this.completeSound = threadComplete[Math.floor(Math.random()*threadComplete.length)];
 						this.completeSound.play();
-						globalState.complexity--;
-						globalState.playerOne.state = 0
-						globalState.playerOne.completeness = 0
+						// globalState.complexity--;
+						// globalState.players[0].state = 0
+						// globalState.players[0].completeness = 0
 
 					}
 				}
@@ -233,8 +237,8 @@ var stateThree =
 						this.drawSound = threadDraws[Math.floor(Math.random()*threadDraws.length)];
 						this.drawSound.play();
 						
-						globalState.complexity++;
-						globalState.playerTwo.state = 1
+						// globalState.complexity++;
+						// globalState.players[1].state = 1
 					},
 
 					onEndDraw:function(){
@@ -245,33 +249,33 @@ var stateThree =
 
 					onPlay:function(){
 						console.log('start play player two');
-						globalState.complexity++;
-						globalState.playerTwo.state = 2
+						// globalState.complexity++;
+						// globalState.players[1].state = 2
 					},
 
 					onEnd:function(){
 						console.log('end play player two');
-						globalState.complexity--;
+						// globalState.complexity--;
 						this.endSound = threadEnds[Math.floor(Math.random()*threadEnds.length)];
 						this.endSound.play();
-						globalState.playerTwo.state = 3
+						// globalState.players[1].state = 3
 
-						var animateIn = new TWEEN.Tween(globalState.playerTwo)
-				            .to({completeness:0}, duration*0.25)
-				            .easing( TWEEN.Easing.Circular.Out)
-				            .onComplete(function() {
-				        });
+						// var animateIn = new TWEEN.Tween(globalState.players[1])
+				  //           .to({completeness:0}, duration*0.25)
+				  //           .easing( TWEEN.Easing.Circular.Out)
+				  //           .onComplete(function() {
+				  //       });
 
-				        animateIn.start();
+				  //       animateIn.start();
 					},
 
 					onReset:function(){
 						console.log('reset player two');
 						this.completeSound = threadComplete[Math.floor(Math.random()*threadComplete.length)];
 						this.completeSound.play();
-						globalState.complexity--;
-						globalState.playerTwo.state = 0
-						globalState.playerTwo.completeness = 0
+						// globalState.complexity--;
+						// globalState.players[1].state = 0
+						// globalState.players[1].completeness = 0
 
 
 					}

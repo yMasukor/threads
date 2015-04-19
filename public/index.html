@@ -142,8 +142,8 @@
 		
 
 
-		var state = stateThree,
-		samplesLoaded = false;
+		// var state;
+		var samplesLoaded = false;
 
 		
 
@@ -155,31 +155,32 @@
 			byteFrequencyData:null, //levels data
 			byteTimeDomainData:null, //waveform data
 			averageLevel:0,
-			playerOne:{
-				state:0,
-				completeness:0,
-				cursor:{
-					isDown:false,
-					x:0,
-					y:0
-				}
-			},
-			playerTwo:{
-				state:0,
-				completeness:0,
-				cursor:{
-					isDown:false,
-					x:0,
-					y:0
-				}
-			}
+
+			players:[
+			],
+			playerIdMap:{},
 		}
 
 
+		var nextSceneIndex = 0;
 
-		
-		
+		var currentScene;
 
+		var scenes = [
+			{
+				background: waveBackground,
+				state: stateThree,
+				theme: themes[0],
+			},
+
+			{
+				background: waveBackground,
+				state: stateThree,
+				theme: themes[1],
+			}
+		]
+		
+		// var scenes = []
 	
 
 
@@ -218,8 +219,6 @@
 				console.log('viewer connected, existing players', players, existingPlayers);
 			});
 
-
-
 			//add player when they connect
 			socket.on('addPlayer', function(playerId){
 				console.log('player connected');
@@ -228,19 +227,26 @@
 
 
 			socket.on('removePlayer', function(playerId){
-				players[playerId].thread.state = 'playing';
-				players[playerId].thread.state.lifespan = 0;
-				players[playerId].thread.state.willAnimateOut = true;
-				players[playerId].thread.onReset = function(){
-					delete players[playerId]
+				var index = globalState.playerIdMap[playerId]
+				var player = globalState.players[index];
+
+				player.thread.state = 'playing';
+				player.thread.state.lifespan = 0;
+				player.thread.state.willAnimateOut = true;
+				player.thread.onReset = function(){
+					globalState.playerIdMap = null;
+					globalState.players.splice(index, 1);
+
+					globalState.players.forEach(function(player, i){
+
+						globalState.playerIdMap[player.id] = i;
+					});
 				}
 				// 
 			});
 
 			//recieve player input
 			socket.on('playerUpdate', function(input){
-
-				
 				var e = {}
 				e.tool = tool;
 
@@ -251,20 +257,24 @@
 				
 				// console.log('update post scale', input.delta)
 
+				var player = globalState.players[globalState.playerIdMap[input.id]];
+
+				console.log("UPDATING", player, input.id, globalState.playerIdMap[input.id], globalState.playerIdMap);
+
 				if(input.type == 'mousedown'){
 					console.log('mousedown')
-					players[input.id].dragStart(e);
+					player.dragStart(e);
 
 				}else if(input.type == 'mousedrag'){
 					console.log('mousedrag')
-					players[input.id].drag(e);
+					player.drag(e);
 				}else if(input.type == 'mouseup'){
 					console.log('mouseup')
-					players[input.id].dragEnd(e);
+					player.dragEnd(e);
 				}else if(input.type == 'cuepoint'){
 					console.log('cuepoint recieved')
 					// players[input.id].thread.pushPoint(e);
-					players[input.id].thread.createCuepoint();
+					player.thread.createCuepoint();
 				}
 			});
 
@@ -274,10 +284,11 @@
 			socket.on('tick', function(tickCount){
 				// console.log('tick', tickCount);
 
-
 				if(tickCount == 0 && !backingTrack.playing){
 					
 					playBackingTrack();
+
+					
 					
 				}
 
@@ -297,31 +308,44 @@
 					}
 				}
 
+				if(tickCount == 0){
+					switchScene(nextSceneIndex%scenes.length);
+				}
 
-				_.each(players, function(player){
+
+				globalState.players.forEach(function(player){
 					player.thread.triggerCuePoints(tickCount)
 				});
 
 
-				if(Math.floor(Math.random()*16) == 0){
+				if(Math.floor(Math.random()*16) == 0 && backgroundTextures){
 					backgroundTextures[Math.floor(Math.random()*backgroundTextures.length)].play();
 				}
 
 				
+
+
+
+
 				analyser.getByteTimeDomainData(globalState.byteTimeDomainData);
+
 				if(waveBackground.active){
 					waveBackground.pulse()
 				}
-
 			});
 
 
 
 
 			createAnalyser();
-			waveBackground.create();
 
 
+
+			waveBackground.create(themes[0]);
+			
+
+
+			// setScene(0);
 
 
 
@@ -352,45 +376,46 @@
 
 				
 				if(globalState.byteFrequencyData){
-					globalState.averageLevel = getAverageVolume(globalState.byteFrequencyData);
+					// globalState.averageLevel = getAverageVolume(globalState.byteFrequencyData);
 					// console.log('level', globalState.averageLevel);
 				}
 
-				
-				_.each(players, function(player){
+				globalState.players.forEach(function(player){
 					player.thread.update(e);
 				});
 
+
+
 				TWEEN.update();
-				// visualiser.update();	
 
-				// gridBackground.update(e.time);
-
-				// circleBackground.update();
-				// particleBackground.update();
+				proton.update();
 
 				if(waveBackground.active){
 					waveBackground.update();
+					
 				}
-
-				
-				proton.update();
-				
 			}
-
 		});
 
 
 		function addPlayer(playerId){
-			var playerCount = _.size(players)
+
+
+			var playerCount = globalState.players.length;
 			if(playerCount < 2){
 				console.log('adding player', playerId);
 
 				var player = new Player(playerId, playerCount);
-				players[playerId] = player;
+				// players[playerId] = player;
+				globalState.playerIdMap[playerId] = playerCount;
+				globalState.players.push(player);
+
+
 			}else{
 				console.log('both players connected');
 			}
+
+
 		}
 
 
@@ -401,11 +426,7 @@
 		function setState(newState){
 
 			state = newState;
-			//update background color
-			// animations['horizontalWipe'].start(state.theme.back);
 
-
-			//update 
 		}
 
 
@@ -443,6 +464,25 @@
 			// 	waveBackground.changeSaturation();
 
 		});
+
+
+
+
+
+
+		function switchScene(target){
+			
+			nextSceneIndex++;
+			if(currentScene!=null){
+
+				currentScene.background.transitionOut(target);
+
+			}else{
+				currentScene = scenes[target]; 
+				currentScene.background.transitionIn('#0D0A0C');
+			}
+			
+		}
 
 
 

@@ -5,6 +5,7 @@ function Thread(opts){
     this.cuePoints = {};
     this.state = 'ready'
     this.parent;
+    this.player;
 
     this.startPoint = new Point(0, view.bounds.height/2);
     this.target = new Point(view.bounds.width, view.bounds.height/2);
@@ -15,7 +16,6 @@ Thread.prototype.setOpts = function(opts){
     ////console.log(opts);
     this.pathOpts = opts.paths;
     this.cuepointOpts = opts.cuepointOpts;
-
     this.onStartDraw = opts.playbackOpts.onStartDraw;
     this.onEndDraw = opts.playbackOpts.onEndDraw;
     this.onPlay = opts.playbackOpts.onPlay;
@@ -48,6 +48,13 @@ Thread.prototype.reset = function(){
     this.state = 'ready'
 
     this.onReset();
+    
+    if(this.player){
+        globalState.complexity--;
+        this.player.state = 0
+        this.player.completeness = 0
+    }
+    
     //console.log('reset', this);
 }
 
@@ -94,14 +101,18 @@ Thread.prototype.startDraw = function(e){
 
     this.lastPoint = e.point;
 
+    
     this.onStartDraw();
+    if(this.player){
+        globalState.complexity++;
+        this.player.state = 1
+    }
 }
 
 
 
 Thread.prototype.draw = function(e){
     
-    ////console.log('FOOBAR', e.delta.length);
 
     if(this.drawSound){
         this.drawSound.gainNode.gain(e.delta.length/50);
@@ -111,7 +122,6 @@ Thread.prototype.draw = function(e){
 
         
         this.pushPoint(e);
-        // this.jitter();
        
     }else{
         
@@ -124,6 +134,8 @@ Thread.prototype.draw = function(e){
 }
 
 Thread.prototype.pushPoint = function(e){
+
+     console.log('pushing point', e);
 
     this.paths.forEach(function(path, i){
             var point = e.point.clone();
@@ -189,11 +201,16 @@ Thread.prototype.endDraw = function(e){
 
         this.getCuepointLocations();
     
-    if(this.state != 'playing'){
-        this.onPlay();
-    }
+        if(this.state != 'playing'){
+            this.onPlay();
+            if(this.player){
+                globalState.complexity++;
+                this.player.state = 2
+            }
+            
+        }
 
-    this.state = 'playing' 
+        this.state = 'playing' 
     
 
     }
@@ -301,7 +318,7 @@ Thread.prototype.update = function(frameCount){
             }
         });
 
-        // path.drawable.smooth();
+        path.drawable.smooth();
 
         
     });
@@ -364,6 +381,20 @@ Thread.prototype.triggerCuePoints = function(tick){
         //If the thread is due to be destroyed, animate it out
         this.willAnimateOut = true;
         this.onEnd();
+
+        if(this.player){
+            globalState.complexity--;
+            this.player.state = 3
+
+            var completnessTween = new TWEEN.Tween(this.player)
+                .to({completeness:0}, duration*0.25)
+                .easing( TWEEN.Easing.Circular.Out)
+                .onComplete(function() {
+            });
+
+            completnessTween.start();
+        }
+        
     }
 
     //If any cuepoints exist for the current beat, trigger them
