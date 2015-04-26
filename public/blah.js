@@ -19,7 +19,7 @@ var particleBackground = {
 		this.theme = theme;
 
 
-		$('#backgroundBitmapCanvas').css({'backgroundColor':theme.secondary[Math.floor(Math.random()*theme.secondary.length)]});
+
 
 		for(var i=0; i<6; i++){
 			var circle = new Shape.Circle({
@@ -54,22 +54,20 @@ var particleBackground = {
 
 
 		var emitter = new Proton.Emitter();
-		emitter.rate = new Proton.Rate(Proton.getSpan(200), 0.1);
+		emitter.rate = new Proton.Rate(Proton.getSpan(300), 0.1);
 		emitter.addInitialize(new Proton.Radius(5, 50));
 		emitter.addInitialize(new Proton.Velocity(Proton.getSpan(0, 1), Proton.getSpan(0, 360), 'polar'));
 		emitter.addBehaviour(new Proton.Color(hexTheme));
-		emitter.addBehaviour(new Proton.Alpha(0.8, 0));
+		emitter.addBehaviour(new Proton.Alpha(0.1, 0));
 		emitter.addBehaviour(new Proton.CrossZone(new Proton.RectZone(0, 0, view.bounds.width, view.bounds.height), 'cross'));
 		emitter.addBehaviour(new Proton.RandomDrift(100, 100, .5));
-		// emitter.addBehaviour(new Proton.Collision(emitter));
+		emitter.addBehaviour(new Proton.Collision(emitter));
 
 		this.repel = new Proton.Repulsion({x:view.bounds.width/2,y:view.bounds.height/2},30, view.bounds.width*0.5);
 		this.attract  = new Proton.Attraction({x:view.bounds.width/2,y:view.bounds.height/2},40, view.bounds.width*2);
 
 		emitter.addBehaviour(this.repel, this.attract)
 		emitter.addInitialize(new Proton.Position(new Proton.RectZone(0, 0, view.bounds.width, view.bounds.height)));
-
-		emitter.damping = 0.01
 
 
 		for(var i=0; i<2; i++){
@@ -84,16 +82,16 @@ var particleBackground = {
 					initialize : function(particle) {
 						particle.complexity = Math.floor(Math.random()*5);
 						particle.freqIndex = Math.floor(Math.random()*(globalState.byteFrequencyData.length-100));
-						particle.baseRadius = ((globalState.byteFrequencyData.length-100)-particle.freqIndex)*0.05;
+						particle.baseRadius = ((globalState.byteFrequencyData.length-100)-particle.freqIndex)*((globalState.byteFrequencyData.length-100)-particle.freqIndex)*0.0005;
 						particle.mass = particle.baseRadius*0.5;
 					},
 
 					applyBehaviour : function(particle) {
 						var d = globalState.byteFrequencyData[particle.freqIndex];
 						var a = Math.min(d/Math.abs((globalState.minDec-globalState.maxDec)), 1);
-						if(true){
-							particle.radius = Math.pow(Math.max(0, particle.baseRadius*(a)), 2);
-							// particle.alpha = a*0.8;
+						if(particle.complexity < globalState.complexity+1){
+							particle.radius = Math.max(0, particle.baseRadius*a*(globalState.complexity+1));
+							particle.alpha = a*0.8;
 						}else{
 							particle.alpha = 0;
 							particle.radius = 0;
@@ -120,7 +118,7 @@ var particleBackground = {
 
 
 	update:function(){
-		this.attract.force = globalState.averageLevel*40;
+		this.attract.force = globalState.averageLevel*30;
 
 		// this.circle.radius = globalState.averageLevel*20;
 		// this.repel.radius = globalState.averageLevel*20;
@@ -175,11 +173,9 @@ var particleBackground = {
 		// for(var i=0; i< globalState.complexity; i++){
 
 		// 	var circle = this.circles[i];
-		// 	circle.position.x = 0;
-		// 	circle.position.y = view.bounds.height/2;
 
 		// 	var animateIn = new TWEEN.Tween(circle)
-	 //            .to({radius:view.bounds.width*1.5}, duration*0.25)
+	 //            .to({radius:view.bounds.width}, duration*0.25)
 	 //            .easing( TWEEN.Easing.Circular.Out)
 	 //            .onComplete(function() {
 	 //        });
@@ -190,8 +186,6 @@ var particleBackground = {
 
 		// for(i = globalState.complexity; i< this.circles.length; i++){
 		// 	var outCircle = this.circles[i];
-		// 	outCircle.position.x = view.bounds.width;
-		// 	outCircle.position.y = view.bounds.height/2;
 
   //       	var animateOut = new TWEEN.Tween(outCircle)
 	 //            .to({radius:0}, duration*0.25)
@@ -231,21 +225,14 @@ var particleBackground = {
 
 
 	start:function(){
-		// this.group.visible = true;
-		this.emitter.emit('once');
-		this.renderer.start();
+		this.group.visible = true;
 		this.active = true;
-
-
 	},
 
 	pause:function(){
 
-		// this.group.visible = false;
-		this.emitter.removeAllParticles();
-		bContext.clearRect ( 0 , 0 , bCanvas.width, bCanvas.height );
-		this.renderer.stop();
-		this.active = false;
+		this.group.visible = false;
+		this.active = false;;
 
 	},
 
@@ -261,17 +248,12 @@ var particleBackground = {
 	        .to({radius:view.bounds.width*1.5}, duration*0.125)
 	        .easing( TWEEN.Easing.Circular.Out)
 	        .onComplete(function() {
+	            tempMask.remove();
+	            this.pause();
 
-	        	this.pause();
-	        	currentScene = scenes[target]; 
-	        	this.group.visible = false;
+	            currentScene = scenes[target]; 
 
-
-	            currentScene.background.transitionIn(tempMask.fillColor); 
-	            
-	        	
-	        	tempMask.remove();
-	            
+	            currentScene.background.transitionIn(tempMask.fillColor);
 	            // switchScene(0, tempMask.fillColor);
 
 	        }.bind(this));
@@ -280,18 +262,15 @@ var particleBackground = {
 	},
 
 	transitionIn:function(fromColor){
-		this.group.visible = true;
+
 		this.setTheme(currentScene.theme);
-		
+		this.start();
 
 
 		var tempMask = new Shape.Rectangle(new Point(0,0), view.size);
 		tempMask.fillColor = fromColor;
+
 		this.group.addChild(tempMask);
-
-		this.start();
-
-		
 
 
 
@@ -311,17 +290,6 @@ var particleBackground = {
 		this.theme = theme;
 
 		// this.background.fillColor = theme.background;
-
-		$('#backgroundBitmapCanvas').css({'backgroundColor':theme.secondary[Math.floor(Math.random()*theme.secondary.length)]});
-
-		var hexTheme = [];
-		theme.secondary.forEach(function(color){
-
-			hexTheme.push(rgb2hex(color));
-
-		});
-
-		this.emitter.addBehaviour(new Proton.Color(hexTheme));
 
 
 	}

@@ -857,6 +857,10 @@
 
             tool.onMouseDown =  function(e) {
 
+                if(cursor.state == 'ended'){
+                    return false;
+                }
+
                 cursor.targetPoint = e.point.clone();
                 mouseDown = true;
 
@@ -931,6 +935,10 @@
             }
 
             tool.onMouseDrag =  function(e) {
+
+                if(cursor.state == 'ended'){
+                    return false;
+                }
 
                 cursor.targetPoint = e.point.clone();
                 

@@ -62,8 +62,13 @@
 		}
 
 		#threadCanvas{
-			background-color: #0D0A0C;
+			/*background-color: #0D0A0C;*/
 		}
+
+		#backgroundBitmapCanvas{
+			background-color: rgba(255, 254, 202, 1)
+		}
+
 
 	</style>
 
@@ -73,7 +78,7 @@
 	<body>
 
 	
-
+	<canvas id="backgroundBitmapCanvas" width="1280" height="720" keepalive></canvas>
 	<canvas id="threadCanvas" width="1280" height="720" keepalive></canvas>
 	<canvas id="bitmapCanvas" width="1280" height="720" keepalive></canvas>
 
@@ -104,7 +109,7 @@
 
 		var proton = new Proton();
 
-		var canvas, context;
+		var canvas, context, bCanvas, bContext;
 
 		var TWO_PI = Math.PI * 2;
 
@@ -147,14 +152,16 @@
 
 		
 
+		
 
 		var background;
-		
 		var globalState = {
 			complexity:0, //int value from 0 to 5, represents the overall complexity of the system
 			byteFrequencyData:null, //levels data
 			byteTimeDomainData:null, //waveform data
 			averageLevel:0,
+			minDec:0,
+			maxDec:0,
 
 			players:[
 			],
@@ -176,6 +183,18 @@
 			{
 				background: waveBackground,
 				state: stateThree,
+				theme: themes[1],
+			},
+
+			{
+				background: particleBackground,
+				state: stateTwo,
+				theme: themes[0],
+			},
+
+			{
+				background: particleBackground,
+				state: stateTwo,
 				theme: themes[1],
 			}
 		]
@@ -203,6 +222,9 @@
 
 			canvas = document.getElementById('bitmapCanvas');
 			context = canvas.getContext('2d');
+
+			bCanvas = document.getElementById('backgroundBitmapCanvas');
+			bContext = bCanvas.getContext('2d');
 
 			console.log('PAPER IS', paper)
 			var tool = new Tool();
@@ -287,9 +309,7 @@
 				if(tickCount == 0 && !backingTrack.playing){
 					
 					playBackingTrack();
-
-					
-					
+		
 				}
 
 				if(tickCount == 0 && globalState.complexity == 0 && backingTrack.playing){
@@ -342,10 +362,11 @@
 
 
 			waveBackground.create(themes[0]);
-			
+			particleBackground.create(themes[0]);
+
+			switchScene(2);
 
 
-			// setScene(0);
 
 
 
@@ -367,6 +388,8 @@
 
 			view.onFrame = function(e) {
 
+				proton.update();
+
 				analyser.getByteFrequencyData(globalState.byteFrequencyData);
 
 				analyser.getByteTimeDomainData(globalState.byteTimeDomainData);
@@ -376,7 +399,7 @@
 
 				
 				if(globalState.byteFrequencyData){
-					// globalState.averageLevel = getAverageVolume(globalState.byteFrequencyData);
+					globalState.averageLevel = getAverageVolume(globalState.byteFrequencyData);
 					// console.log('level', globalState.averageLevel);
 				}
 
@@ -388,11 +411,14 @@
 
 				TWEEN.update();
 
-				proton.update();
+				
 
 				if(waveBackground.active){
 					waveBackground.update();
-					
+				}
+
+				if(particleBackground.active){
+					particleBackground.update();
 				}
 			}
 		});
@@ -456,6 +482,11 @@
 			if(changes[0].name == 'complexity'){
 				console.log('complexity changed', globalState.complexity);
 				updateBackingTrack();
+
+
+				if(particleBackground.active){
+					particleBackground.pew();
+				}
 			}
 			
 

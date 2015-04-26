@@ -10,11 +10,19 @@ function Player(id, index){
 	this.thread.parent = this.group;
 	this.thread.player = this;
 
+
+
 	this.cursor = {
 		isDown:false,
 		x:0, 
-		y:0,
+		y:0
 	}
+
+	// this.particleRepel = new Proton.Repulsion({x:view.bounds.width/2,y:view.bounds.height/2},0, view.bounds.width*0.5);
+	// this.particleAttract = new Proton.Attraction({x:view.bounds.width/2,y:view.bounds.height/2},0, view.bounds.width*0.5);
+
+	// this.particleRepel.added = false;
+	// this.particleAttract.added = false;
 
 	this.completeness = 0;
 	this.state = 0;
@@ -39,6 +47,11 @@ Player.prototype.drag = function(e){
 
 	this.cursor.x = e.point.x
 	this.cursor.y = e.point.y
+
+	// this.particleRepel.targetPosition.x = this.cursor.x
+	// this.particleRepel.targetPosition.y = this.cursor.y
+	// this.particleAttract.targetPosition.x = this.cursor.x
+	// this.particleAttract.targetPosition.y = this.cursor.y
 
 	if(this.thread.state == 'drawing'){
 		this.thread.draw(e);

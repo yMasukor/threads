@@ -257,6 +257,8 @@
         var bufferLength = analyser.frequencyBinCount;
         globalState.byteFrequencyData = new Uint8Array(bufferLength);
         globalState.byteTimeDomainData = new Uint8Array(bufferLength);
+        globalState.minDec = analyser.minDecibels;
+        globalState.maxDec = analyser.maxDecibels;
         analyser.getByteTimeDomainData(globalState.byteTimeDomainData);
         analyser.getByteFrequencyData(globalState.byteFrequencyData);
     }

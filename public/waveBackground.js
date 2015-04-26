@@ -189,14 +189,14 @@ var waveBackground = {
 
 
 	start:function(){
-		this.group.visible = true;
+		// this.group.visible = true;
 		this.active = true;
 		waveForeground.start();
 	},
 
 	pause:function(){
 
-		this.group.visible = false;
+		// this.group.visible = false;
 		this.active = false;
 		waveForeground.pause();
 
@@ -211,16 +211,17 @@ var waveBackground = {
 		this.group.addChild(tempMask);
 
 		var out = new TWEEN.Tween(tempMask)
-	        .to({radius:view.bounds.width*1.5}, duration*0.125)
+	        .to({radius:view.bounds.width*1.2}, duration*0.0625)
 	        .easing( TWEEN.Easing.Circular.Out)
 	        .onComplete(function() {
-	            tempMask.remove();
+
 	            this.pause();
-
 	            currentScene = scenes[target]; 
+	            this.group.visible = false;
+	            currentScene.background.transitionIn(tempMask.fillColor); 
 
-	            currentScene.background.transitionIn(tempMask.fillColor);
-	            // switchScene(0, tempMask.fillColor);
+	        	
+	        	tempMask.remove();
 
 	        }.bind(this));
 
@@ -229,25 +230,27 @@ var waveBackground = {
 
 	transitionIn:function(fromColor){
 
-		this.setTheme(currentScene.theme);
-		this.start();
-
-
+		this.group.visible = true;
 		var tempMask = new Shape.Rectangle(new Point(0,0), view.size);
 		tempMask.fillColor = fromColor;
-
 		this.group.addChild(tempMask);
 
+		this.setTheme(currentScene.theme);
 
+		this.start();
 
-	    var fadeOut = new TWEEN.Tween(tempMask)
-	        .to({opacity:0}, duration*0.125)
-	        .easing( TWEEN.Easing.Circular.Out)
-	        .onComplete(function() {
-	            tempMask.remove();
-	        });
+		window.setTimeout(function(){
+			var fadeOut = new TWEEN.Tween(tempMask)
+		        .to({opacity:0}, duration*0.5)
+		        .easing( TWEEN.Easing.Circular.Out)
+		        .onComplete(function() {
+		            tempMask.remove();
+		        });
 
-	    fadeOut.start();
+		    fadeOut.start();
+		}, 00);
+
+	    
 
 	},
 
@@ -409,7 +412,13 @@ var waveForeground = {
 
 
 	pause:function(){
+		this.emitter.stopEmit();
 		this.emitter.removeAllParticles();
+		this.playerEmitters.forEach(function(emitter){
+			emitter.stopEmit();
+			emitter.removeAllParticles();
+		});
+		context.clearRect ( 0 , 0 , canvas.width, canvas.height );
 		this.renderer.stop();
 		this.active = false;
 	},
