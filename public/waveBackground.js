@@ -217,11 +217,17 @@ var waveBackground = {
 
 	            this.pause();
 	            currentScene = scenes[target]; 
-	            this.group.visible = false;
-	            currentScene.background.transitionIn(tempMask.fillColor); 
 
-	        	
-	        	tempMask.remove();
+	            window.setTimeout(function(){
+	            	this.group.visible = false;
+		        	tempMask.remove();
+					currentScene.background.transitionIn(tempMask.fillColor); 
+		            
+				}.bind(this), 100);
+	            
+	            
+
+	            
 
 	        }.bind(this));
 
@@ -231,13 +237,19 @@ var waveBackground = {
 	transitionIn:function(fromColor){
 
 		this.group.visible = true;
+
+		this.setTheme(currentScene.theme);
 		var tempMask = new Shape.Rectangle(new Point(0,0), view.size);
 		tempMask.fillColor = fromColor;
 		this.group.addChild(tempMask);
 
-		this.setTheme(currentScene.theme);
+		
 
 		this.start();
+
+		
+
+		
 
 		window.setTimeout(function(){
 			var fadeOut = new TWEEN.Tween(tempMask)
@@ -321,8 +333,6 @@ var waveForeground = {
 					}
 				});
 
-
-		proton.addEmitter(emitter);
 		
 		this.emitter = emitter;
 
@@ -349,7 +359,6 @@ var waveForeground = {
 
 			
 			
-			proton.addEmitter(pEmitter);
 			pEmitter.isEmitting = false;
 
 			this.playerEmitters.push(pEmitter);
@@ -417,15 +426,23 @@ var waveForeground = {
 		this.playerEmitters.forEach(function(emitter){
 			emitter.stopEmit();
 			emitter.removeAllParticles();
+			proton.removeEmitter(emitter);
 		});
 		context.clearRect ( 0 , 0 , canvas.width, canvas.height );
 		this.renderer.stop();
+		proton.removeEmitter(this.emitter);
 		this.active = false;
 	},
 
 	start:function(){
+		proton.addEmitter(this.emitter);
+		this.playerEmitters.forEach(function(emitter){
+			emitter.stopEmit();
+			proton.addEmitter(emitter);
+		});
 		this.emitter.emit('once');
 		this.renderer.start();
+
 		this.active = true;
 	}
 }

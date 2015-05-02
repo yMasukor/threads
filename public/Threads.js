@@ -118,7 +118,7 @@ Thread.prototype.draw = function(e){
         this.drawSound.gainNode.gain(e.delta.length/50);
     }
 
-    if(this.lastPoint.getDistance(e.point) > 50){
+    if(this.lastPoint.getDistance(e.point) > 100){
 
         
         this.pushPoint(e);

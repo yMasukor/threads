@@ -38,6 +38,7 @@
 	<script src="waveBackground.js"></script>
 	<script src="circleBackground.js"></script>
 	<script src="particleBackground.js"></script>
+	<script src="triangleBackground.js"></script>
 
 	
 	<style type="text/css">
@@ -196,6 +197,17 @@
 				background: particleBackground,
 				state: stateTwo,
 				theme: themes[1],
+			},
+
+			{
+				background: triangleBackground,
+				state: stateTwo,
+				theme: themes[0],
+			},
+			{
+				background: triangleBackground,
+				state: stateTwo,
+				theme: themes[1],
 			}
 		]
 		
@@ -218,7 +230,7 @@
 
 			$('#threadCanvas').css({'width':'100%', 'height':'auto'})
 
-			console.log(view.bounds.width)
+			//console.log(view.bounds.width)
 
 			canvas = document.getElementById('bitmapCanvas');
 			context = canvas.getContext('2d');
@@ -226,7 +238,7 @@
 			bCanvas = document.getElementById('backgroundBitmapCanvas');
 			bContext = bCanvas.getContext('2d');
 
-			console.log('PAPER IS', paper)
+			//console.log('PAPER IS', paper)
 			var tool = new Tool();
 			loadAudio();
 
@@ -238,12 +250,12 @@
 					addPlayer(playerId);
 				});
 
-				console.log('viewer connected, existing players', players, existingPlayers);
+				//console.log('viewer connected, existing players', players, existingPlayers);
 			});
 
 			//add player when they connect
 			socket.on('addPlayer', function(playerId){
-				console.log('player connected');
+				//console.log('player connected');
 				addPlayer(playerId);
 			});
 
@@ -272,29 +284,29 @@
 				var e = {}
 				e.tool = tool;
 
-				// console.log('update', input.delta)
+				// //console.log('update', input.delta)
 
 				e.point = new Point(input.point.x*view.bounds.width, input.point.y*view.bounds.height);
 				e.delta = new Point(input.delta.x*view.bounds.width, input.delta.y*view.bounds.height);
 				
-				// console.log('update post scale', input.delta)
+				// //console.log('update post scale', input.delta)
 
 				var player = globalState.players[globalState.playerIdMap[input.id]];
 
-				console.log("UPDATING", player, input.id, globalState.playerIdMap[input.id], globalState.playerIdMap);
+				//console.log("UPDATING", player, input.id, globalState.playerIdMap[input.id], globalState.playerIdMap);
 
 				if(input.type == 'mousedown'){
-					console.log('mousedown')
+					//console.log('mousedown')
 					player.dragStart(e);
 
 				}else if(input.type == 'mousedrag'){
-					console.log('mousedrag')
+					//console.log('mousedrag')
 					player.drag(e);
 				}else if(input.type == 'mouseup'){
-					console.log('mouseup')
+					//console.log('mouseup')
 					player.dragEnd(e);
 				}else if(input.type == 'cuepoint'){
-					console.log('cuepoint recieved')
+					//console.log('cuepoint recieved')
 					// players[input.id].thread.pushPoint(e);
 					player.thread.createCuepoint();
 				}
@@ -304,7 +316,7 @@
 
 			//Listen for tick
 			socket.on('tick', function(tickCount){
-				// console.log('tick', tickCount);
+				// //console.log('tick', tickCount);
 
 				if(tickCount == 0 && !backingTrack.playing){
 					
@@ -352,6 +364,14 @@
 				if(waveBackground.active){
 					waveBackground.pulse()
 				}
+
+				if(tickCount%4 == 0){
+					if(triangleBackground.active){
+						triangleBackground.pulse()
+					}
+				}
+
+				
 			});
 
 
@@ -363,8 +383,9 @@
 
 			waveBackground.create(themes[0]);
 			particleBackground.create(themes[0]);
+			triangleBackground.create(themes[0]);
 
-			switchScene(2);
+			switchScene(0);
 
 
 
@@ -400,7 +421,7 @@
 				
 				if(globalState.byteFrequencyData){
 					globalState.averageLevel = getAverageVolume(globalState.byteFrequencyData);
-					// console.log('level', globalState.averageLevel);
+					// //console.log('level', globalState.averageLevel);
 				}
 
 				globalState.players.forEach(function(player){
@@ -420,6 +441,10 @@
 				if(particleBackground.active){
 					particleBackground.update();
 				}
+
+				if(triangleBackground.active){
+					triangleBackground.update();
+				}
 			}
 		});
 
@@ -429,7 +454,7 @@
 
 			var playerCount = globalState.players.length;
 			if(playerCount < 2){
-				console.log('adding player', playerId);
+				//console.log('adding player', playerId);
 
 				var player = new Player(playerId, playerCount);
 				// players[playerId] = player;
@@ -438,7 +463,7 @@
 
 
 			}else{
-				console.log('both players connected');
+				//console.log('both players connected');
 			}
 
 
@@ -480,7 +505,7 @@
 		Object.observe(globalState, function(changes){
 			
 			if(changes[0].name == 'complexity'){
-				console.log('complexity changed', globalState.complexity);
+				//console.log('complexity changed', globalState.complexity);
 				updateBackingTrack();
 
 
