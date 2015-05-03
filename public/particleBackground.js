@@ -292,7 +292,7 @@ var particleBackground = {
 
 	transitionOut:function(target){
 
-		var tempMask = new Shape.Circle(new Point(0,view.bounds.height/2), 0);
+		var tempMask = new Shape.Circle(new Point(view.bounds.width/2,view.bounds.height/2), 0);
 		tempMask.fillColor = '#ffffff';
 
 		this.group.addChild(tempMask);
@@ -300,7 +300,7 @@ var particleBackground = {
 		
 
 		var out = new TWEEN.Tween(tempMask)
-	        .to({radius:view.bounds.width*1.5}, duration*0.125)
+	        .to({radius:view.bounds.width}, duration*0.0625)
 	        .easing( TWEEN.Easing.Circular.Out)
 	        .onComplete(function() {
 

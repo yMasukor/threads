@@ -166,13 +166,13 @@ var triangleBackground = {
 
 	transitionOut:function(target){
 
-		var tempMask = new Shape.Circle(new Point(0,view.bounds.height/2), 0);
+		var tempMask = new Shape.Circle(new Point(view.bounds.width/2,view.bounds.height/2), 0);
 		tempMask.fillColor = '#ffffff';
 
 		this.group.addChild(tempMask);
 
 		var out = new TWEEN.Tween(tempMask)
-	        .to({radius:view.bounds.width*1.2}, duration*0.0625)
+	        .to({radius:view.bounds.width}, duration*0.0625)
 	        .easing( TWEEN.Easing.Circular.Out)
 	        .onComplete(function() {
 
@@ -239,7 +239,27 @@ var triangleBackground = {
 
 		});
 
-	}
+	},
+
+	// switchTheme(theme){
+
+	// 	this.theme = theme;
+
+	// 	// this.background.fillColor = theme.background;
+
+	// 	animatePaperPathToColor(this.background, theme.background);
+
+	// 	this.paths.forEach(function(shape){
+
+			
+	// 		// var targetColor = theme.secondary[Math.floor(Math.random()*theme.secondary.length)];
+	// 		animatePaperPathToColor(shape.path, theme.secondary[Math.floor(Math.random()*theme.secondary.length)]);
+
+	// 		// shape.path.fillColor = theme.secondary[Math.floor(Math.random()*theme.secondary.length)];
+
+	// 	});
+
+	// }
 }
 
 

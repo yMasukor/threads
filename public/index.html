@@ -39,6 +39,9 @@
 	<script src="circleBackground.js"></script>
 	<script src="particleBackground.js"></script>
 	<script src="triangleBackground.js"></script>
+	<script src="nGonBackground.js"></script>
+
+	<script src="lib/color2color.min.js"></script>
 
 	
 	<style type="text/css">
@@ -144,6 +147,10 @@
 		threadComplete,
 		threadEnds
 
+
+
+		var foo = 0;
+
 			
 		
 
@@ -180,35 +187,152 @@
 				state: stateThree,
 				theme: themes[0],
 			},
-
 			{
 				background: waveBackground,
 				state: stateThree,
 				theme: themes[1],
 			},
+			{
+				background: waveBackground,
+				state: stateThree,
+				theme: themes[2],
+			},
+			{
+				background: waveBackground,
+				state: stateThree,
+				theme: themes[3],
+			},
+			{
+				background: waveBackground,
+				state: stateThree,
+				theme: themes[4],
+			},
+			{
+				background: waveBackground,
+				state: stateThree,
+				theme: themes[5],
+			},
+			{
+				background: waveBackground,
+				state: stateThree,
+				theme: themes[6],
+			},
+
+
+
 
 			{
 				background: particleBackground,
-				state: stateTwo,
+				state: stateThree,
 				theme: themes[0],
 			},
-
 			{
 				background: particleBackground,
-				state: stateTwo,
+				state: stateThree,
 				theme: themes[1],
 			},
+			{
+				background: particleBackground,
+				state: stateThree,
+				theme: themes[2],
+			},
+			{
+				background: particleBackground,
+				state: stateThree,
+				theme: themes[3],
+			},
+			{
+				background: particleBackground,
+				state: stateThree,
+				theme: themes[4],
+			},
+			{
+				background: particleBackground,
+				state: stateThree,
+				theme: themes[5],
+			},
+			{
+				background: particleBackground,
+				state: stateThree,
+				theme: themes[6],
+			},
+
+
 
 			{
 				background: triangleBackground,
-				state: stateTwo,
+				state: stateThree,
 				theme: themes[0],
 			},
 			{
 				background: triangleBackground,
-				state: stateTwo,
+				state: stateThree,
 				theme: themes[1],
+			},
+			{
+				background: triangleBackground,
+				state: stateThree,
+				theme: themes[2],
+			},
+			{
+				background: triangleBackground,
+				state: stateThree,
+				theme: themes[3],
+			},
+			{
+				background: triangleBackground,
+				state: stateThree,
+				theme: themes[4],
+			},
+			{
+				background: triangleBackground,
+				state: stateThree,
+				theme: themes[5],
+			},
+			{
+				background: triangleBackground,
+				state: stateThree,
+				theme: themes[6],
+			},
+
+
+
+			{
+				background: nGonBackground,
+				state: stateThree,
+				theme: themes[0],
+			},
+			{
+				background: nGonBackground,
+				state: stateThree,
+				theme: themes[1],
+			},
+			{
+				background: nGonBackground,
+				state: stateThree,
+				theme: themes[2],
+			},
+			{
+				background: nGonBackground,
+				state: stateThree,
+				theme: themes[3],
+			},
+			{
+				background: nGonBackground,
+				state: stateThree,
+				theme: themes[4],
+			},
+			{
+				background: nGonBackground,
+				state: stateThree,
+				theme: themes[5],
+			},	
+			{
+				background: nGonBackground,
+				state: stateThree,
+				theme: themes[6],
 			}
+
 		]
 		
 		// var scenes = []
@@ -341,7 +465,7 @@
 				}
 
 				if(tickCount == 0){
-					switchScene(nextSceneIndex%scenes.length);
+					switchScene(Math.floor(Math.random()*scenes.length));
 				}
 
 
@@ -365,9 +489,26 @@
 					waveBackground.pulse()
 				}
 
+				
+
 				if(tickCount%4 == 0){
 					if(triangleBackground.active){
 						triangleBackground.pulse()
+					}
+
+					
+				}
+
+				if(nGonBackground.active){
+					nGonBackground.pulse(tickCount)
+				}
+
+
+				if(triangleBackground.active){
+
+					if(tickCount == 0){
+						// foo++;
+						// triangleBackground.switchTheme(themes[foo%2]);
 					}
 				}
 
@@ -384,6 +525,7 @@
 			waveBackground.create(themes[0]);
 			particleBackground.create(themes[0]);
 			triangleBackground.create(themes[0]);
+			nGonBackground.create(themes[0]);
 
 			switchScene(0);
 
@@ -444,6 +586,10 @@
 
 				if(triangleBackground.active){
 					triangleBackground.update();
+				}
+
+				if(nGonBackground.active){
+					nGonBackground.update();
 				}
 			}
 		});
