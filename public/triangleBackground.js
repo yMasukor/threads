@@ -324,31 +324,15 @@ var triangleForeground = {
 
 
 
-		// for(var i=0; i<2; i++){
+		for(var i=0; i<2; i++){
 
-		// 	var attractor = new Proton.Attraction({x:view.bounds.width,y:view.bounds.height},0, view.bounds.width*2);
-		// 	this.emitter.addBehaviour(attractor);
-		// 	this.playerAttractors.push(attractor);
-
-
-		// 	var pEmitter = new Proton.Emitter();
-		// 	pEmitter.rate = new Proton.Rate(Proton.getSpan(2, 4), 0.05); 
-		// 	pEmitter.addInitialize(new Proton.Radius(1, 4));
-		// 	pEmitter.addInitialize(new Proton.Velocity(Proton.getSpan(1, 0), Proton.getSpan(0, 360), 'polar'));
-		// 	pEmitter.addInitialize(new Proton.Life(1, 0));
-		// 	pEmitter.addBehaviour(new Proton.Color('ffffff'));
-		// 	pEmitter.addBehaviour(new Proton.Alpha(1, 0));
-		// 	pEmitter.addBehaviour(new Proton.CrossZone(new Proton.RectZone(0, 0, view.bounds.width, view.bounds.height), 'cross'));
+			var attractor = new Proton.Attraction({x:view.bounds.width,y:view.bounds.height},0, view.bounds.width*2);
+			this.emitter.addBehaviour(attractor);
+			this.playerAttractors.push(attractor);
 
 			
-			
-		// 	proton.addEmitter(pEmitter);
-		// 	pEmitter.isEmitting = false;
 
-		// 	this.playerEmitters.push(pEmitter);
-			
-
-		// };
+		};
 
 
 		
@@ -368,44 +352,24 @@ var triangleForeground = {
 
 			this.emitter.rate = new Proton.Rate(Proton.getSpan(2, globalState.complexity), 0.01);
 
-			// globalState.players.forEach(function(player, i){
-			// 	if(this.playerAttractors.length > 0){
-			// 		var attractor = this.playerAttractors[i];
+			globalState.players.forEach(function(player, i){
+				if(this.playerAttractors.length > 0){
+					var attractor = this.playerAttractors[i];
 
-			// 		if(player.cursor.isDown){
-			// 			console.log("ATTRRACTING")
-			// 			attractor.force = 1000;
-			// 			attractor.targetPosition.x = player.cursor.x;
-			// 			attractor.targetPosition.y = player.cursor.y;
-			// 		}else{
-			// 			attractor.force = 0;
-			// 		}
-			// 	}
+					if(player.cursor.isDown){
+						console.log("ATTRRACTING")
+						attractor.force = 1000;
+						attractor.targetPosition.x = player.cursor.x;
+						attractor.targetPosition.y = player.cursor.y;
+					}else{
+						attractor.force = 0;
+					}
+				}
 
-			// 	if(this.playerEmitters.length > 0){
-			// 		var pEmitter = this.playerEmitters[i];
-
-			// 		if(player.cursor.isDown){
-
-			// 			if(!pEmitter.isEmitting){
-			// 				pEmitter.emit();
-			// 				pEmitter.isEmitting = true;
-			// 			}
-
-						
-						
-			// 			pEmitter.p.x = player.cursor.x;
-			// 			pEmitter.p.y = player.cursor.y;	
-			// 				;
-			// 		}else{
-			// 			pEmitter.stopEmit();
-			// 			pEmitter.isEmitting = false;
-			// 		}
-					
-			// 	}
+				
 
 
-			// }.bind(this));
+			}.bind(this));
 		}
 	},
 

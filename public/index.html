@@ -41,6 +41,8 @@
 	<script src="triangleBackground.js"></script>
 	<script src="nGonBackground.js"></script>
 
+	<script src="permaForeground.js"></script>
+
 	<script src="lib/color2color.min.js"></script>
 
 	
@@ -408,10 +410,10 @@
 				var e = {}
 				e.tool = tool;
 
-				// //console.log('update', input.delta)
+				// console.log('update', input.delta, input.point)
 
-				e.point = new Point(input.point.x*view.bounds.width, input.point.y*view.bounds.height);
-				e.delta = new Point(input.delta.x*view.bounds.width, input.delta.y*view.bounds.height);
+				e.point = new Point(input.point.x, input.point.y);
+				e.delta = new Point(input.delta.x, input.delta.y);
 				
 				// //console.log('update post scale', input.delta)
 
@@ -527,6 +529,8 @@
 			triangleBackground.create(themes[0]);
 			nGonBackground.create(themes[0]);
 
+			permaForeground.create();
+
 			switchScene(0);
 
 
@@ -568,6 +572,7 @@
 
 				globalState.players.forEach(function(player){
 					player.thread.update(e);
+					player.update();
 				});
 
 
@@ -591,6 +596,10 @@
 				if(nGonBackground.active){
 					nGonBackground.update();
 				}
+
+				permaForeground.update();
+
+
 			}
 		});
 

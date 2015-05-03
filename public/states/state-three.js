@@ -9,12 +9,26 @@ var stateThree =
 				//An array of shapes to draw
 				paths:[
 			        {
-			            color:'rgba(255,255,255,0)',
-			            weight: 3,
-			            yOffset:0,
+			            color:'rgba(0,0,0,0)',
+			            weight: 2,
+			            yOffset:300,
 			            filled:false,
 			            blendMode:'normal'
 			        },
+			        // {
+			        //     color:'rgba(255,255,255,0.3)',
+			        //     weight: 2,
+			        //     yOffset:0,
+			        //     filled:false,
+			        //     blendMode:'normal'
+			        // },
+			        // {
+			        //     color:'rgba(0,0,0,0.01)',
+			        //     weight: 2,
+			        //     yOffset:-300,
+			        //     filled:false,
+			        //     blendMode:'normal'
+			        // },
 			    ],
 
 
@@ -96,19 +110,23 @@ var stateThree =
 						// globalState.complexity++;
 						// globalState.players[0].state = 1
 
-
+						permaForeground.pewIn();
 					},
 
 					onEndDraw:function(){
 						// this.drawSound.stop();
 						this.completeSound = threadComplete[Math.floor(Math.random()*threadComplete.length)];
 						this.completeSound.play();
+
+						
 					},
 
 					onPlay:function(){
 						console.log('start play player one');
 						// globalState.complexity++;
 						// globalState.players[0].state = 2
+
+						permaForeground.pewOut();
 					},
 
 					onEnd:function(){
@@ -154,7 +172,7 @@ var stateThree =
 				paths:[
 			        {
 			            color:'rgba(255,255,255,0)',
-			            weight: 1,
+			            weight: 2,
 			            yOffset:0,
 			            filled:false,
 			            blendMode:'normal'
@@ -236,6 +254,8 @@ var stateThree =
 						console.log('start draw player two');
 						this.drawSound = threadDraws[Math.floor(Math.random()*threadDraws.length)];
 						this.drawSound.play();
+
+						permaForeground.pewIn();
 						
 						// globalState.complexity++;
 						// globalState.players[1].state = 1
@@ -245,12 +265,16 @@ var stateThree =
 						// this.drawSound.stop();
 						this.completeSound = threadComplete[Math.floor(Math.random()*threadComplete.length)];
 						this.completeSound.play();
+
+
 					},
 
 					onPlay:function(){
 						console.log('start play player two');
 						// globalState.complexity++;
 						// globalState.players[1].state = 2
+
+						permaForeground.pewOut();
 					},
 
 					onEnd:function(){
