@@ -8,7 +8,7 @@ var nGonBackground = {
 	activeTheme:0,
 
 	group:null,
-	
+
 	create:function(theme){
 
 		this.theme = theme;
@@ -39,7 +39,7 @@ var nGonBackground = {
 
 
 
-				
+
 				path.segments.forEach(function(segment){
 					points.push(segment.point);
 				});
@@ -51,7 +51,7 @@ var nGonBackground = {
 				});
 
 				path.fillColor = theme.secondary[Math.floor(Math.random()*theme.secondary.length)];
-		
+
 				var complexity = Math.floor(Math.random()*3);
 				this.paths.push({path:path, complexity:complexity, points:points, pulses:true});
 
@@ -83,17 +83,17 @@ var nGonBackground = {
 				}
 
 				path.fillColor = theme.secondary[Math.floor(Math.random()*theme.secondary.length)];
-		
+
 				var complexity = Math.floor(Math.random()*3);
 				this.paths.push({path:path, complexity:complexity, points:points});
 
 			}
 
 
-			
 
 
-			
+
+
 		}
 
 
@@ -235,7 +235,7 @@ var nGonBackground = {
 
 
 		nGonForeground.create();
-		
+
 
 
 	},
@@ -261,7 +261,7 @@ var nGonBackground = {
 				shape.path.opacity = Math.max(a, 0);
 			}
 
-			
+
 
 			// console.log(shape.path);
 
@@ -312,26 +312,26 @@ var nGonBackground = {
 		            }
 				}
 
-				
-		        
+
+
 			}.bind(this));
 
 
 
-			
-			
+
+
 
 			// if(false){
 			// 	shape.path.opacity = 1;
 			// }else{
 			// 	if(shape.complexity <= globalState.complexity+1){
-					
+
 			// 	}else{
 			// 		shape.path.opacity = 0;
 			// 	}
 			// }
-			
-			
+
+
 			// if(globalState.players.length > 0){
 
 			// 	globalState.players.forEach(function(player, j){
@@ -351,8 +351,8 @@ var nGonBackground = {
 			// }
 
 
-			
-			
+
+
 
 			// var maxVel = 3+(((globalState.complexity+1)/6)*10);
    //          var minVel = 0
@@ -375,7 +375,7 @@ var nGonBackground = {
 
    //          shape.acc.set(0, 0)
 
-			
+
 
 			if(shape.path.opacity == 0){
 				shape.path.fillColor = this.theme.secondary[Math.floor(Math.random()*this.theme.secondary.length)];
@@ -392,7 +392,7 @@ var nGonBackground = {
 	pulse:function(tickCount){
 
 
-		if(globalState.complexity == 0){
+		if(globalState.complexity < 2){
 			if(tickCount%8 == 0){
 				this.paths.forEach(function(shape, i){
 					if(shape.pulses){
@@ -426,9 +426,9 @@ var nGonBackground = {
 			}
 		}
 
-		
 
-		
+
+
 	},
 
 
@@ -459,18 +459,18 @@ var nGonBackground = {
 	        .onComplete(function() {
 
 	            this.pause();
-	            currentScene = scenes[target]; 
+	            currentScene = scenes[target];
 
 	            window.setTimeout(function(){
 	            	this.group.visible = false;
 		        	tempMask.remove();
-					currentScene.background.transitionIn(tempMask.fillColor); 
-		            
-				}.bind(this), 100);
-	            
-	            
+					currentScene.background.transitionIn(tempMask.fillColor);
 
-	            
+				}.bind(this), 100);
+
+
+
+
 
 	        }.bind(this));
 
@@ -486,13 +486,13 @@ var nGonBackground = {
 		tempMask.fillColor = fromColor;
 		this.group.addChild(tempMask);
 
-		
+
 
 		this.start();
 
-		
 
-		
+
+
 
 		window.setTimeout(function(){
 			var fadeOut = new TWEEN.Tween(tempMask)
@@ -505,7 +505,7 @@ var nGonBackground = {
 		    fadeOut.start();
 		}, 00);
 
-	    
+
 
 	},
 
@@ -539,7 +539,7 @@ var nGonForeground = {
 	active:false,
 
 	create:function(){
-		
+
 		var emitter = new Proton.Emitter();
 		emitter.rate = new Proton.Rate(Proton.getSpan(30, 100), 0.1);
 		emitter.addInitialize(new Proton.Radius(2, 10));
@@ -570,25 +570,25 @@ var nGonForeground = {
 					}
 				});
 
-		
+
 		this.emitter = emitter;
 
 
-		
+
 		for(var i=0; i<2; i++){
 
 			var attractor = new Proton.Attraction({x:view.bounds.width,y:view.bounds.height},0, view.bounds.width*2);
 			this.emitter.addBehaviour(attractor);
 			this.playerAttractors.push(attractor);
 
-			
+
 
 		};
 
 
 
 
-		
+
 
 
 		this.renderer = new Proton.Renderer('canvas', proton, canvas);
@@ -617,11 +617,11 @@ var nGonForeground = {
 					}
 				}
 
-				
+
 
 
 			}.bind(this));
-			
+
 		}
 	},
 
@@ -630,7 +630,7 @@ var nGonForeground = {
 		this.emitter.stopEmit();
 		this.emitter.removeAllParticles();
 		context.clearRect ( 0 , 0 , canvas.width, canvas.height );
-		
+
 		this.renderer.stop();
 		proton.removeEmitter(this.emitter);
 		this.active = false;

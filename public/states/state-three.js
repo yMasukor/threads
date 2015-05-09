@@ -1,4 +1,4 @@
-var stateThree = 
+var stateThree =
 {
 
 	players:[
@@ -70,7 +70,7 @@ var stateThree =
 							radius: 0
 						});
 						ping.fillColor = palette.light[0];
-						drawable.addChild(ping);	
+						drawable.addChild(ping);
 
 						var pingIn = new TWEEN.Tween(ping)
 				            .to({radius:startRadius*10, opacity:0}, duration*0.25)
@@ -86,13 +86,20 @@ var stateThree =
 
 				  //       //Trigger audio for cuepoint
 
-			        	triggerables[Math.floor(Math.random()*triggerables.length)].play();
+						if(Math.round(Math.random()) == 0){
+							triggerables[Math.floor(Math.random()*triggerables.length)].play();
+						}else{
+							guitar[Math.floor(Math.random()*guitar.length)].play();
+						}
+
+						console.log('PLAYING', this.size);
+
 
 			        	if(Math.floor(Math.random()*8) == 0){
 							vocals[Math.floor(Math.random()*vocals.length)].play();
 						}
-				        
-				        
+
+
 					},
 					onDestroy:function(){
 						this.drawable.remove();
@@ -106,7 +113,7 @@ var stateThree =
 						console.log('start draw player one');
 						this.drawSound = threadDraws[Math.floor(Math.random()*threadDraws.length)];
 						this.drawSound.play();
-						
+
 						// globalState.complexity++;
 						// globalState.players[0].state = 1
 
@@ -118,7 +125,7 @@ var stateThree =
 						this.completeSound = threadComplete[Math.floor(Math.random()*threadComplete.length)];
 						this.completeSound.play();
 
-						
+
 					},
 
 					onPlay:function(){
@@ -127,11 +134,14 @@ var stateThree =
 						// globalState.players[0].state = 2
 
 						permaForeground.pewOut();
+
+
+						switchScene(currentSceneIndex);
 					},
 
 					onEnd:function(){
 						console.log('end play player one');
-						
+
 						this.endSound = threadEnds[Math.floor(Math.random()*threadEnds.length)];
 						this.endSound.play();
 
@@ -152,6 +162,15 @@ var stateThree =
 						console.log('reset player one');
 						this.completeSound = threadComplete[Math.floor(Math.random()*threadComplete.length)];
 						this.completeSound.play();
+
+
+
+						console.log(globalState.complexity);
+						if(globalState.players[1].completeness == 0){
+							switchScene(Math.floor(Math.random()*scenes.length));
+						}else{
+							// switchScene(currentSceneIndex);
+						}
 						// globalState.complexity--;
 						// globalState.players[0].state = 0
 						// globalState.players[0].completeness = 0
@@ -218,7 +237,7 @@ var stateThree =
 							radius: 0
 						});
 						ping.fillColor = palette.light[0];
-						drawable.addChild(ping);	
+						drawable.addChild(ping);
 
 						var pingIn = new TWEEN.Tween(ping)
 				            .to({radius:startRadius*10, opacity:0}, duration*0.25)
@@ -234,13 +253,20 @@ var stateThree =
 
 				  //       //Trigger audio for cuepoint
 
-			        	triggerables[Math.floor(Math.random()*triggerables.length)].play();
+						if(Math.round(Math.random()) == 0){
+							triggerables[Math.floor(Math.random()*triggerables.length)].play();
+						}else{
+							guitar[Math.floor(Math.random()*guitar.length)].play();
+						}
 
-			        	if(Math.floor(Math.random()*8) == 0){
+						console.log('PLAYING', this.size);
+
+
+						if(Math.floor(Math.random()*8) == 0){
 							vocals[Math.floor(Math.random()*vocals.length)].play();
 						}
-				        
-				        
+
+
 					},
 					onDestroy:function(){
 						this.drawable.remove();
@@ -256,7 +282,7 @@ var stateThree =
 						this.drawSound.play();
 
 						permaForeground.pewIn();
-						
+
 						// globalState.complexity++;
 						// globalState.players[1].state = 1
 					},
@@ -275,6 +301,10 @@ var stateThree =
 						// globalState.players[1].state = 2
 
 						permaForeground.pewOut();
+
+
+
+						switchScene(currentSceneIndex);
 					},
 
 					onEnd:function(){
@@ -297,6 +327,17 @@ var stateThree =
 						console.log('reset player two');
 						this.completeSound = threadComplete[Math.floor(Math.random()*threadComplete.length)];
 						this.completeSound.play();
+
+
+
+						console.log(globalState.complexity);
+
+						if(globalState.players[0].completeness == 0){
+							switchScene(Math.floor(Math.random()*scenes.length));
+						}else{
+							// switchScene(currentSceneIndex);
+						}
+
 						// globalState.complexity--;
 						// globalState.players[1].state = 0
 						// globalState.players[1].completeness = 0
@@ -305,9 +346,7 @@ var stateThree =
 					}
 				}
 			}
-		}	
+		}
 	]
-	
+
 }
-
-

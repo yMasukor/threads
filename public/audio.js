@@ -1,12 +1,12 @@
- 
 
 
-    
+
+
     var audioContext = tsw.context();
     var analyser = audioContext.createAnalyser();
     var gain = tsw.gain(1)
 
-    
+
 
     var namedSamples = {}
 
@@ -49,6 +49,9 @@
         backingDrums1:'samples/vivid/backing-track/Drum Loop 1.mp3',
         backingDrums2:'samples/vivid/backing-track/Drum Loop 2.mp3',
         backingDrums3:'samples/vivid/backing-track/Drum Loop 3.mp3',
+        backingDrums4:'samples/vivid/backing-track/Drum Loop 4.mp3',
+        backingDrums5:'samples/vivid/backing-track/Drum Loop 5.mp3',
+        backingDrums6:'samples/vivid/backing-track/Drum Loop 6.mp3',
         backingChords:'samples/vivid/backing-track/Chord Loop.mp3',
         backingSynth:'samples/vivid/backing-track/Synth Loop 1.mp3',
         // backingSynth2:'samples/vivid/backing-track/Loop 1.mp3',
@@ -63,6 +66,8 @@
         sound2:'samples/vivid/background-textures/Sound 2.mp3',
         sound3:'samples/vivid/background-textures/Sound 3.mp3',
         backgroundBass:'samples/vivid/background-textures/Bass.mp3',
+        vinyl:'samples/vivid/background-textures/Vinyl Noise.mp3',
+        strings:'samples/vivid/background-textures/Strings 1.mp3',
 
 
         bass1:'samples/vivid/Bass 1.mp3',
@@ -94,7 +99,15 @@
         note7:'samples/vivid/notes/Sound 8.mp3',
         note8:'samples/vivid/notes/Sound 9.mp3',
 
-        
+        //guitar notes
+        guitar1:'samples/vivid/guitar/Guitar 1.mp3',
+        guitar2:'samples/vivid/guitar/Guitar 2.mp3',
+        guitar3:'samples/vivid/guitar/Guitar 3.mp3',
+        guitar4:'samples/vivid/guitar/Guitar 4.mp3',
+        guitar5:'samples/vivid/guitar/Guitar 5.mp3',
+
+
+
 
         synthPad1:'samples/vivid/Synth Pad 1.mp3',
         synthPad2:'samples/vivid/Synth Pad 2.mp3',
@@ -133,10 +146,10 @@
         threadsEnd8:'samples/vivid/thread-ends/Sound 30.mp3',
         threadsEnd9:'samples/vivid/thread-ends/Trickle 1.mp3',
         threadsEnd10:'samples/vivid/thread-ends/Trickle 2.mp3'
-      
+
     }
 
-    
+
 
 
     function loadAudio(){
@@ -158,12 +171,14 @@
 
 
             backgroundTextures = [
-                samples.buzz1, 
+                samples.buzz1,
                 samples.buzz2,
-                samples.sound1, 
-                samples.sound2, 
+                samples.sound1,
+                samples.sound2,
                 samples.sound3,
-                samples.piano1
+                samples.piano1,
+                samples.vinyl,
+                // samples.strings,
             ];
 
             vocals = [
@@ -181,7 +196,7 @@
             ];
 
             triggerables = [
-                
+
 
                 // samples.note1,
                 samples.note2,
@@ -192,8 +207,16 @@
                 samples.note7,
                 samples.note8,
 
-                
+
             ];
+
+            guitar = [
+                samples.guitar1,
+                samples.guitar2,
+                samples.guitar3,
+                samples.guitar4,
+                samples.guitar5,
+            ]
 
             threadDraws = [
                 samples.threadsDraw1,
@@ -226,10 +249,18 @@
                 samples.threadsEnd8,
                 samples.threadsEnd9,
                 samples.threadsEnd10
-                
+
             ]
 
             samplesLoaded = true;
+
+            samples.vinyl.gainNode.gain(0.5);
+
+            samples.guitar1.gainNode.gain(0.5);
+            samples.guitar2.gainNode.gain(0.5);
+            samples.guitar3.gainNode.gain(0.5);
+            samples.guitar4.gainNode.gain(0.5);
+            samples.guitar5.gainNode.gain(0.5);
 
             // switchScene(0, '#0D0A0C');
 
@@ -237,7 +268,7 @@
         });
     }
 
-    
+
 
 
     gain.output.connect(analyser);
@@ -246,7 +277,7 @@
     analyser.fftSize = 512
     analyser.smoothingTimeConstant = 0.9;
 
-    
+
 
     // console.log(audioContext, tsw.speakers)
 
@@ -276,33 +307,58 @@
 
 
 
-            samples['backingDrums1'].loop(true).play();
-            samples['backingDrums2'].loop(true).play();
-            samples['backingDrums3'].loop(true).play();
-            samples['backingChords'].loop(true).play();
-            samples['backingSynth'].loop(true).play();
-            samples['backingBass'].loop(true).play();
+            samples.backingDrums1.loop(true).play();
+            samples.backingDrums2.loop(true).play();
+            samples.backingDrums3.loop(true).play();
+            samples.backingDrums4.loop(true).play();
+            samples.backingDrums5.loop(true).play();
+            samples.backingDrums6.loop(true).play();
+            samples.backingChords.loop(true).play();
+            samples.backingSynth.loop(true).play();
+            samples.backingBass.loop(true).play();
 
-            console.log("FOOBAR", samples['backingDrums1'] );
-            samples['backingDrums1'].loop = true;
-            samples['backingDrums2'].loop = true;
-            samples['backingDrums3'].loop = true;
-            samples['backingChords'].loop = true;
-            samples['backingSynth'].loop = true;
-            samples['backingBass'].loop = true;
-            
+            console.log("FOOBAR", samples.backingDrums1 );
+            samples.backingDrums1.loop = true;
+            samples.backingDrums2.loop = true;
+            samples.backingDrums3.loop = true;
+            samples.backingDrums4.loop = true;
+            samples.backingDrums5.loop = true;
+            samples.backingDrums6.loop = true;
+            samples.backingChords.loop = true;
+            samples.backingSynth.loop = true;
+            samples.backingBass.loop = true;
+
             // samples['backingDrums1'].onE
-            
-            
+
+
             backingTrack = {
-                drums1:samples['backingDrums1'],
-                drums2:samples['backingDrums2'],
-                drums3:samples['backingDrums3'],
-                chords:samples['backingChords'],
-                synth:samples['backingSynth'],
-                bass:samples['backingBass'],
+                drums1:samples.backingDrums1,
+                drums2:samples.backingDrums2,
+                drums3:samples.backingDrums3,
+                drums4:samples.backingDrums4,
+                drums5:samples.backingDrums5,
+                drums6:samples.backingDrums6,
+                chords:samples.backingChords,
+                synth:samples.backingSynth,
+                bass:samples.backingBass,
                 playing:true,
             }
+
+            // backingTrack = [
+            //     //complexity 0
+            //     [samples.backingDrums4, samples.backingDrums5],
+            //     //complexity 5
+            //     [samples.synt6],
+            //     //complexity 2
+            //     [],
+            //     //complexity 3
+            //     [],
+            //     //complexity 4
+            //     [],
+            //
+            // ]
+
+
 
             backingTrack.drums1.gainNode.gain(0)
             backingTrack.drums2.gainNode.gain(0)
@@ -321,7 +377,7 @@
             //     // samples['backingSynth'].play();
 
             // }else if(threadStatus == 'playing'){
-                
+
 
             // }else{
 
@@ -344,46 +400,95 @@
             backingTrack.drums1.gainNode.gain(0)
             backingTrack.drums2.gainNode.gain(0)
             backingTrack.drums3.gainNode.gain(0)
+            backingTrack.drums4.gainNode.gain(0)
+            backingTrack.drums5.gainNode.gain(0)
+            backingTrack.drums6.gainNode.gain(0)
             backingTrack.chords.gainNode.gain(1)
             backingTrack.bass.gainNode.gain(0)
             backingTrack.synth.gainNode.gain(0)
+
+            if(Math.floor(Math.random()*3) == 0){
+                backingTrack.chords.gainNode.gain(0)
+            }
+
+            if(Math.floor(Math.random()*3) == 0){
+                backingTrack.drums1.gainNode.gain(1)
+            }else if(Math.floor(Math.random()*3) == 1){
+                backingTrack.drums5.gainNode.gain(1)
+            }
 
         }else if(globalState.complexity == 1){
             //1 Thread Drawing
             backingTrack.drums1.gainNode.gain(0)
             backingTrack.drums2.gainNode.gain(0)
             backingTrack.drums3.gainNode.gain(0)
+            backingTrack.drums4.gainNode.gain(0)
+            backingTrack.drums5.gainNode.gain(0)
+            backingTrack.drums6.gainNode.gain(0)
             backingTrack.chords.gainNode.gain(1)
             backingTrack.bass.gainNode.gain(0)
             backingTrack.synth.gainNode.gain(1)
+
+            if(Math.floor(Math.random()*2) == 0){
+                backingTrack.drums1.gainNode.gain(1)
+            }else if(Math.floor(Math.random()*2) == 1){
+                backingTrack.drums5.gainNode.gain(1)
+            }
 
 
         }else if(globalState.complexity == 2){
             //2 Threads Drawing OR 1 Thread Playing
-            backingTrack.drums1.gainNode.gain(1)
+            backingTrack.drums1.gainNode.gain(0)
             backingTrack.drums2.gainNode.gain(0)
             backingTrack.drums3.gainNode.gain(0)
+            backingTrack.drums4.gainNode.gain(0)
+            backingTrack.drums5.gainNode.gain(0)
+            backingTrack.drums6.gainNode.gain(0)
             backingTrack.chords.gainNode.gain(1)
             backingTrack.bass.gainNode.gain(0)
             backingTrack.synth.gainNode.gain(1)
 
+            if(Math.round(Math.random()) == 0){
+                backingTrack.drums1.gainNode.gain(1)
+            }else{
+                backingTrack.drums5.gainNode.gain(1)
+            }
+
         }else if(globalState.complexity == 3){
             //1 Thread Drawing, 1 Thread Playing
             backingTrack.drums1.gainNode.gain(0)
-            backingTrack.drums2.gainNode.gain(1)
+            backingTrack.drums2.gainNode.gain(0)
             backingTrack.drums3.gainNode.gain(0)
+            backingTrack.drums4.gainNode.gain(0)
+            backingTrack.drums5.gainNode.gain(0)
+            backingTrack.drums6.gainNode.gain(0)
             backingTrack.chords.gainNode.gain(1)
             backingTrack.bass.gainNode.gain(1)
             backingTrack.synth.gainNode.gain(1)
+
+            if(Math.round(Math.random()) == 0){
+                backingTrack.drums2.gainNode.gain(1)
+            }else{
+                backingTrack.drums6.gainNode.gain(0.7)
+            }
 
         }else if(globalState.complexity == 4){
             //2 Threads Playing
             backingTrack.drums1.gainNode.gain(0)
             backingTrack.drums2.gainNode.gain(0)
-            backingTrack.drums3.gainNode.gain(1)
+            backingTrack.drums3.gainNode.gain(0)
+            backingTrack.drums4.gainNode.gain(0)
+            backingTrack.drums5.gainNode.gain(0)
+            backingTrack.drums6.gainNode.gain(0)
             backingTrack.chords.gainNode.gain(1)
             backingTrack.bass.gainNode.gain(1)
             backingTrack.synth.gainNode.gain(1)
+
+            if(Math.round(Math.random()) == 4){
+                backingTrack.drums3.gainNode.gain(1)
+            }else{
+                backingTrack.drums4.gainNode.gain(0.7)
+            }
 
         }
     }

@@ -48,13 +48,13 @@ Thread.prototype.reset = function(){
     this.state = 'ready'
 
     this.onReset();
-    
+
     if(this.player){
         globalState.complexity--;
         this.player.state = 0
         this.player.completeness = 0
     }
-    
+
     //console.log('reset', this);
 }
 
@@ -101,7 +101,7 @@ Thread.prototype.startDraw = function(e){
 
     this.lastPoint = e.point;
 
-    
+
     this.onStartDraw();
     if(this.player){
         globalState.complexity++;
@@ -112,19 +112,19 @@ Thread.prototype.startDraw = function(e){
 
 
 Thread.prototype.draw = function(e){
-    
+
 
     if(this.drawSound){
-        this.drawSound.gainNode.gain(e.delta.length/50);
+        this.drawSound.gainNode.gain(Math.min(1, e.delta.length/100));
     }
 
     if(this.lastPoint.getDistance(e.point) > 100){
 
-        
+
         this.pushPoint(e);
-       
+
     }else{
-        
+
     }
 
     this.paths.forEach(function(path){
@@ -135,24 +135,24 @@ Thread.prototype.draw = function(e){
 
 Thread.prototype.pushPoint = function(e){
 
-     console.log('pushing point', e);
+     console.log('pushing point', e.delta);
 
     this.paths.forEach(function(path, i){
             var point = e.point.clone();
             point.dest = e.point.clone();
-            point.vel = e.delta.multiply(10);
+            point.vel = e.delta.multiply(2);
             // point.vel = point.vel.add(new Point(15-Math.random()*30, 15-Math.random()*30))
             // console.log(point.vel, i)
             // point.vel.x = 0;
-            point.size = e.delta.length;
+            point.size = e.delta.length*0.5;
             point.acc = new Point(0,0);
 
             // point.acc = point.acc.add(new Point(0, 5-Math.random()*10*i))
-            
 
-            
+
+
             path.points.push(point);
-            console.log("point pushed", point.vel, i);
+            // console.log("point pushed", point.vel, i);
         });
 
 
@@ -166,9 +166,9 @@ Thread.prototype.pushPoint = function(e){
     });
 
         // if(Math.floor(Math.random()*4) == 0){
-        //       
+        //
         // }
-        
+
 
         this.lastPoint = e.point;
 
@@ -181,7 +181,7 @@ Thread.prototype.pushPoint = function(e){
 Thread.prototype.endDraw = function(e){
 
     this.onEndDraw();
-    
+
     // var point = e.point.clone();
     // point.dest = e.point.clone();
     // point.vel = e.delta;
@@ -200,26 +200,26 @@ Thread.prototype.endDraw = function(e){
         });
 
         this.getCuepointLocations();
-    
+
         if(this.state != 'playing'){
             this.onPlay();
             if(this.player){
                 globalState.complexity++;
                 this.player.state = 2
             }
-            
+
         }
 
-        this.state = 'playing' 
-    
+        this.state = 'playing'
+
 
     }
 
-    
-    
 
 
-    
+
+
+
 }
 
 
@@ -244,20 +244,20 @@ Thread.prototype.update = function(frameCount){
                 accelerateToPoint(point, nextPoint, 0.000005);
 
                 if(point.getDistance(nextPoint) > 1){
-                    
+
                 }else{
                     // point.vel.set(0, 0)
                 }
-                
+
 
             }else if(i != 0 && i!=path.points.length){
 
                 accelerateToPoint(point, point.dest, 0.000001)
             }
 
-            
-            // var point; 
-            //     
+
+            // var point;
+            //
 
 
             var maxVel = 20;
@@ -267,12 +267,12 @@ Thread.prototype.update = function(frameCount){
                 maxVel = 0;
                 minVel = 0;
             }
-            
 
 
 
-            
-            
+
+
+
              if(point.cuePoint){
                 // point.acc = point.acc.multiply(0.1);
             }
@@ -288,14 +288,14 @@ Thread.prototype.update = function(frameCount){
                 point.vel.length = minVel
             }
 
-            
 
-            
+
+
 
             var newPoint = point.add(point.vel);
 
             // console.log("c", newPoint, point.vel, j);
-            
+
             point.x = newPoint.x;
             point.y = newPoint.y;
 
@@ -320,7 +320,7 @@ Thread.prototype.update = function(frameCount){
 
         path.drawable.smooth();
 
-        
+
     });
 }
 
@@ -337,7 +337,7 @@ Thread.prototype.createCuepoint = function(){
         point.cuePoint = cuePoint;
     }
 
-    
+
     // this.cuePoints.push(cuePoint);
 }
 
@@ -361,7 +361,7 @@ Thread.prototype.getCuepointLocations = function(){
     this.cuePoints = cuePoints;
 }
 
-        
+
 
 
 
@@ -369,7 +369,7 @@ Thread.prototype.getCuepointLocations = function(){
 
 
 Thread.prototype.triggerCuePoints = function(tick){
-    
+
     if(tick == 0 && this.state == 'playing'){
         if(this.lifespan == 0){
             this.reset(); //Destroy the thread if it's done
@@ -394,7 +394,7 @@ Thread.prototype.triggerCuePoints = function(tick){
 
             completnessTween.start();
         }
-        
+
     }
 
     //If any cuepoints exist for the current beat, trigger them
@@ -418,7 +418,7 @@ Thread.prototype.jitter = function(){
         });
     });
 
-        
+
 
 }
 
@@ -438,9 +438,7 @@ Thread.prototype.jitter = function(){
 
 
 function accelerateToPoint(point, dest, forceMult){
-    // //console.log(point, dest, forceMult)
     var dir = point.subtract(dest);
-
 
     var distSqrd = point.getDistance(dest, true);
 
@@ -467,30 +465,3 @@ function accelerateToPoint(point, dest, forceMult){
 
 
 // THREADS.Thread = Thread;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        

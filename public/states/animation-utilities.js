@@ -46,27 +46,27 @@ function ping(position, size, length, color){
 
 function animatePaperPathToColor(path, targetColor){
 
-    targetColor = color2color( targetColor, "hsla" ); 
+    targetColor = color2color( targetColor, "hsla" );
     targetColor = targetColor.replace('hsl(', '');
     targetColor = targetColor.replace('/%/g', '');
-    targetColor = targetColor.replace(')', ''); 
+    targetColor = targetColor.replace(')', '');
     targetColorComponents = targetColor.split(',');
 
     console.log(targetColor, targetColorComponents);
-    
+
     var t = [];
     targetColorComponents.forEach(function(component){
         // component = parseFloat(component);
         t.push(parseFloat(component));
     });
 
-    
+
 
     var colorTween = new TWEEN.Tween(path.fillColor)
         .to({hue:t[0], saturation:t[1]/100, lightness:t[2]/100}, duration*0.125)
         .easing( TWEEN.Easing.Circular.Out)
         .onComplete(function() {
-       
+
         });
 
     colorTween.start();

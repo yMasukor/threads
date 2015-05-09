@@ -141,3 +141,20 @@ var themes = [
 ]
 
 
+var darkThemes = [
+
+    {
+        primary:'rgba(255, 233, 0, 0.8)',
+
+        secondary:[
+            'rgba(25, 34, 125, 0.8)',
+            'rgba(25, 30, 48, 0.8)',
+            'rgba(255, 233, 0, 0.8)',
+            'rgba(255, 213, 0, 0.8)',
+            'rgba(35, 40, 61, 0.8)',
+            'rgba(27, 33, 68, 0.8)',
+        ],
+        background:'rgba(17, 20, 45, 1)'
+    }
+
+]

@@ -44,18 +44,18 @@ io.on('connection', function(socket){
 
 	socket.on('connectPlayer', function(){
 		//user joined
-		
+
 
 		viewers.forEach(function(viewerId){
 			io.to(viewerId).emit('addPlayer', socket.id);
 		});
-		
+
 		console.log('player connected');
 		players.push(socket.id);
 
 		io.to(socket.id).emit('connected', players.length);
 	});
-	
+
 	socket.on('disconnect', function(){
 
 		if(players.indexOf(socket.id) > -1){
@@ -76,34 +76,31 @@ io.on('connection', function(socket){
 				// barCount = 0;
 				// interval = null;
 			}
-			
+
 		}
 
 		console.log('disconnected', players)
-	});	
+	});
 
 
 	socket.on('connectViewer', function(){
 		//user joined - add to active players, and update everyone
 		viewers.push(socket.id)
 		io.to(socket.id).emit('connected', players);
-	
+
 		console.log('viewer connected', players)
 
 
-		
-		
+
+
 
 	});
-	
+
 
 	socket.on('playerInput', function(input){
 
 		// console.log('input', input.point.x);
 		input.id = socket.id
-
-
-		// 
 
 		viewers.forEach(function(viewerId){
 			io.to(viewerId).emit('playerUpdate', input);

@@ -2,7 +2,7 @@ var permaForeground = {
 	paths:[],
 
 	group:null,
-	
+
 	create:function(){
 
 
@@ -16,7 +16,7 @@ var permaForeground = {
 
 	update:function(){
 
-		
+
 		globalState.players.forEach(function(player){
 
 			if(player.drawable){
@@ -71,21 +71,7 @@ var permaForeground = {
 
 	    out.start();
 	}
+
+
+	
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
