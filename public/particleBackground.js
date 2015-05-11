@@ -14,7 +14,7 @@ var particleBackground = {
 	playerControls:[],
 
 	circles:[],
-	
+
 	create:function(theme){
 
 		this.theme = theme;
@@ -35,7 +35,7 @@ var particleBackground = {
 		// }
 
 
-		
+
 
 		var hexTheme = [];
 		theme.secondary.forEach(function(color){
@@ -79,8 +79,8 @@ var particleBackground = {
 		emitter.addBehaviour({
 					initialize : function(particle) {
 						particle.complexity = Math.floor(Math.random()*5);
-						particle.freqIndex = Math.floor(Math.random()*(globalState.byteFrequencyData.length-100));
-						particle.baseRadius = ((globalState.byteFrequencyData.length-100)-particle.freqIndex)*0.05;
+						particle.freqIndex = Math.floor(Math.random()*(globalState.byteFrequencyData.length));
+						particle.baseRadius = ((globalState.byteFrequencyData.length)-particle.freqIndex)*0.05;
 						particle.mass = particle.baseRadius*0.5;
 					},
 
@@ -94,11 +94,11 @@ var particleBackground = {
 							particle.alpha = 0;
 							particle.radius = 0;
 						}
-						
+
 					}
 				});
 
-		
+
 		emitter.emit('once');
 		this.emitter = emitter;
 		this.renderer = new Proton.Renderer('canvas', proton, bCanvas);
@@ -122,7 +122,7 @@ var particleBackground = {
 		secondaryEmitter.addBehaviour(this.repel)
 		secondaryEmitter.addInitialize(new Proton.Position(new Proton.RectZone(0, 0, view.bounds.width, view.bounds.height)));
 
-		
+
 
 		this.secondaryEmitter = secondaryEmitter;
 		// secondaryEmitter.addBehaviour(new Proton.RandomDrift(100, 100, .5));
@@ -164,7 +164,7 @@ var particleBackground = {
 
 
 			if(player.cursor.isDown){
-				
+
 				this.playerControls[i].repel.force = -10000;
 				this.playerControls[i].repel.targetPosition.x = player.cursor.x
 				this.playerControls[i].repel.targetPosition.y = player.cursor.y
@@ -238,11 +238,11 @@ var particleBackground = {
 	 //        animateOut.start();
 		// }
 
-		
+
 
 
   //       if(globalState.complexity+1 < this.circles.length){
-        	
+
   //       }
 
 	},
@@ -297,7 +297,7 @@ var particleBackground = {
 
 		this.group.addChild(tempMask);
 
-		
+
 
 		var out = new TWEEN.Tween(tempMask)
 	        .to({radius:view.bounds.width}, duration*0.0625)
@@ -305,19 +305,19 @@ var particleBackground = {
 	        .onComplete(function() {
 
 	        	this.pause();
-	        	currentScene = scenes[target]; 
+	        	currentScene = scenes[target];
 
 	        	window.setTimeout(function(){
 	        		this.group.visible = false;
 		        	tempMask.remove();
-					currentScene.background.transitionIn(tempMask.fillColor); 
-		            
+					currentScene.background.transitionIn(tempMask.fillColor);
+
 				}.bind(this), 100);
 
-	             
-	            
-	        	
-	            
+
+
+
+
 	            // switchScene(0, tempMask.fillColor);
 
 	        }.bind(this));
@@ -335,9 +335,9 @@ var particleBackground = {
 		tempMask.fillColor = fromColor;
 		// this.group.addChild(tempMask);
 
-		
 
-		
+
+
 
 
 
@@ -406,7 +406,7 @@ function rgb2hex(rgb){
 // 	active:false,
 
 // 	create:function(){
-		
+
 // 		var emitter = new Proton.Emitter();
 // 		emitter.rate = new Proton.Rate(Proton.getSpan(10, 60), 0.1);
 // 		emitter.addInitialize(new Proton.Radius(2, 10));
@@ -433,11 +433,11 @@ function rgb2hex(rgb){
 
 
 // 		proton.addEmitter(emitter);
-		
+
 // 		this.emitter = emitter;
 
 
-		
+
 
 
 
@@ -449,7 +449,7 @@ function rgb2hex(rgb){
 
 
 // 			var pEmitter = new Proton.Emitter();
-// 			pEmitter.rate = new Proton.Rate(Proton.getSpan(2, 4), 0.05); 
+// 			pEmitter.rate = new Proton.Rate(Proton.getSpan(2, 4), 0.05);
 // 			pEmitter.addInitialize(new Proton.Radius(1, 4));
 // 			pEmitter.addInitialize(new Proton.Velocity(Proton.getSpan(1, 0), Proton.getSpan(0, 360), 'polar'));
 // 			pEmitter.addInitialize(new Proton.Life(1, 0));
@@ -457,18 +457,18 @@ function rgb2hex(rgb){
 // 			pEmitter.addBehaviour(new Proton.Alpha(1, 0));
 // 			pEmitter.addBehaviour(new Proton.CrossZone(new Proton.RectZone(0, 0, view.bounds.width, view.bounds.height), 'cross'));
 
-			
-			
+
+
 // 			proton.addEmitter(pEmitter);
 // 			pEmitter.isEmitting = false;
 
 // 			this.playerEmitters.push(pEmitter);
-			
+
 
 // 		};
 
 
-		
+
 
 
 // 		this.renderer = new Proton.Renderer('canvas', proton, canvas);
@@ -503,16 +503,16 @@ function rgb2hex(rgb){
 // 							pEmitter.isEmitting = true;
 // 						}
 
-						
-						
+
+
 // 						pEmitter.p.x = player.cursor.x;
-// 						pEmitter.p.y = player.cursor.y;	
+// 						pEmitter.p.y = player.cursor.y;
 // 							;
 // 					}else{
 // 						pEmitter.stopEmit();
 // 						pEmitter.isEmitting = false;
 // 					}
-					
+
 // 				}
 
 
@@ -533,8 +533,3 @@ function rgb2hex(rgb){
 // 		this.active = true;
 // 	}
 // }
-
-
-
-
-

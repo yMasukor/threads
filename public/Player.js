@@ -10,12 +10,17 @@ function Player(id, index){
 	this.thread.parent = this.group;
 	this.thread.player = this;
 
+	this.group.style = {
+		shadowColor:'#ffffff',
+		shadowBlur:30,
+	}
+
 	this.drawable = null;
 
 	this.cursor = {
 		isDown:false,
 		x:0,
-		y:0
+		y:view.bounds.height/2
 	};
 
 	this.targetPos = new Point(0,0);
@@ -38,9 +43,25 @@ function Player(id, index){
 
 Player.prototype.dragStart = function(e){
 
-	console.log('FUCKING FUCK START')
-
+	console.log('FUCKING FUCK START');
 	this.cursor.isDown = true;
+
+	if(this.thread.state == 'ready'){
+
+		this.thread.setOpts(currentScene.state.players[this.index].threadOpts);
+		this.thread.startDraw(e);
+
+		this.cursor = {
+			isDown:true,
+			x:0,
+			y:view.bounds.height/2
+		};
+
+	}else if(this.thread.state == 'drawing'){
+		this.thread.draw(e);
+	}
+
+
 
 	this.targetPos.x = e.point.x
 	this.targetPos.y = e.point.y
@@ -51,6 +72,9 @@ Player.prototype.dragStart = function(e){
 			center: e.point,
 			radius: 0
 		});
+
+		pointer.shadowColor = '#ffffff';
+		pointer.shadowBlur = 200;
 
 		pointer.fillColor = palette.light[0];
 		permaForeground.group.addChild(pointer);
@@ -82,14 +106,7 @@ Player.prototype.dragStart = function(e){
 
 
 
-	if(this.thread.state == 'ready'){
 
-		this.thread.setOpts(currentScene.state.players[this.index].threadOpts);
-		this.thread.startDraw(e);
-
-	}else if(this.thread.state == 'drawing'){
-		this.thread.draw(e);
-	}
 }
 
 Player.prototype.drag = function(e){
@@ -106,6 +123,8 @@ Player.prototype.drag = function(e){
 	// this.particleRepel.targetPosition.y = this.cursor.y
 	// this.particleAttract.targetPosition.x = this.cursor.x
 	// this.particleAttract.targetPosition.y = this.cursor.y
+
+	e.point = new Point(this.cursor.x, this.cursor.y);
 
 	if(this.thread.state == 'drawing'){
 		this.thread.draw(e);
@@ -140,8 +159,8 @@ Player.prototype.update = function(){
 
 	// this.cursor.update();
 
-	this.cursor.x += (this.targetPos.x-this.cursor.x)/10;
-	this.cursor.y += (this.targetPos.y-this.cursor.y)/10;
+	this.cursor.x += (this.targetPos.x-this.cursor.x)/2;
+	this.cursor.y += (this.targetPos.y-this.cursor.y)/2;
 
 	if(this.drawable){
 		this.drawable.position.x = this.cursor.x;

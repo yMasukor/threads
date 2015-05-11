@@ -8,7 +8,7 @@ var waveBackground = {
 	activeTheme:0,
 
 	group:null,
-	
+
 	create:function(theme){
 
 		this.theme = theme;
@@ -34,7 +34,7 @@ var waveBackground = {
 			var path = new Path();
 			this.group.addChild(path);
 			path.opacity = 1;
-			
+
 			// path.strokeColor = '#ffffff'
 			path.strokeWidth = 2
 			var complexity = 0;
@@ -54,11 +54,11 @@ var waveBackground = {
 			if(false){
 
 			}else{
-				
+
 				points.push(new Point(-300, view.bounds.bottomLeft.y));
 
 			    // points.push(new Point(-50, view.bounds.bottomLeft.y));
-			    
+
 				for(var j=0; j<Math.floor(globalState.byteFrequencyData.length/count); j++){
 					var x = -300;
 					if(j == 0){
@@ -93,7 +93,7 @@ var waveBackground = {
 
 		waveForeground.create();
 
-		
+
 
 
 	},
@@ -138,7 +138,7 @@ var waveBackground = {
 		        }
 			});
 
-			
+
 
 			this.paths.forEach(function(shape, i){
 				shape.path.segments[0].linear = true;
@@ -159,7 +159,7 @@ var waveBackground = {
 					shape.path.opacity = 0;
 				}
 			}
-			
+
 
 			if(shape.path.opacity == 0){
 				shape.path.fillColor = this.theme.secondary[Math.floor(Math.random()*this.theme.secondary.length)];
@@ -216,18 +216,18 @@ var waveBackground = {
 	        .onComplete(function() {
 
 	            this.pause();
-	            currentScene = scenes[target]; 
+	            currentScene = scenes[target];
 
 	            window.setTimeout(function(){
 	            	this.group.visible = false;
 		        	tempMask.remove();
-					currentScene.background.transitionIn(tempMask.fillColor); 
-		            
-				}.bind(this), 100);
-	            
-	            
+					currentScene.background.transitionIn(tempMask.fillColor);
 
-	            
+				}.bind(this), 100);
+
+
+
+
 
 	        }.bind(this));
 
@@ -243,13 +243,13 @@ var waveBackground = {
 		tempMask.fillColor = fromColor;
 		this.group.addChild(tempMask);
 
-		
+
 
 		this.start();
 
-		
 
-		
+
+
 
 		window.setTimeout(function(){
 			var fadeOut = new TWEEN.Tween(tempMask)
@@ -262,7 +262,7 @@ var waveBackground = {
 		    fadeOut.start();
 		}, 00);
 
-	    
+
 
 	},
 
@@ -313,7 +313,7 @@ var waveForeground = {
 	active:false,
 
 	create:function(){
-		
+
 		var emitter = new Proton.Emitter();
 		emitter.rate = new Proton.Rate(Proton.getSpan(10, 60), 0.1);
 		emitter.addInitialize(new Proton.Radius(2, 10));
@@ -334,15 +334,15 @@ var waveForeground = {
 
 					applyBehaviour : function(particle) {
 						particle.tha += particle.thaSpeed;
-						particle.alpha = Math.abs(Math.cos(particle.tha));
+						particle.alpha = Math.min(Math.abs(Math.cos(particle.tha)), 0.5);
 					}
 				});
 
-		
+
 		this.emitter = emitter;
 
 
-		
+
 
 
 
@@ -354,7 +354,7 @@ var waveForeground = {
 
 
 			var pEmitter = new Proton.Emitter();
-			pEmitter.rate = new Proton.Rate(Proton.getSpan(2, 4), 0.05); 
+			pEmitter.rate = new Proton.Rate(Proton.getSpan(2, 4), 0.05);
 			pEmitter.addInitialize(new Proton.Radius(1, 4));
 			pEmitter.addInitialize(new Proton.Velocity(Proton.getSpan(1, 0), Proton.getSpan(0, 360), 'polar'));
 			pEmitter.addInitialize(new Proton.Life(1, 0));
@@ -362,17 +362,17 @@ var waveForeground = {
 			pEmitter.addBehaviour(new Proton.Alpha(1, 0));
 			pEmitter.addBehaviour(new Proton.CrossZone(new Proton.RectZone(0, 0, view.bounds.width, view.bounds.height), 'cross'));
 
-			
-			
+
+
 			pEmitter.isEmitting = false;
 
 			this.playerEmitters.push(pEmitter);
-			
+
 
 		};
 
 
-		
+
 
 
 		this.renderer = new Proton.Renderer('canvas', proton, canvas);
@@ -387,8 +387,10 @@ var waveForeground = {
 				if(this.playerAttractors.length > 0){
 					var attractor = this.playerAttractors[i];
 
+					console.log('DIP DURP', player.cursor.isDown);
+
 					if(player.cursor.isDown){
-						console.log("ATTRRACTING")
+						// console.log("ATTRRACTING")
 						attractor.force = 1000;
 						attractor.targetPosition.x = player.cursor.x;
 						attractor.targetPosition.y = player.cursor.y;
@@ -407,16 +409,16 @@ var waveForeground = {
 							pEmitter.isEmitting = true;
 						}
 
-						
-						
+
+
 						pEmitter.p.x = player.cursor.x;
-						pEmitter.p.y = player.cursor.y;	
+						pEmitter.p.y = player.cursor.y;
 							;
 					}else{
 						pEmitter.stopEmit();
 						pEmitter.isEmitting = false;
 					}
-					
+
 				}
 
 

@@ -6,6 +6,17 @@
     var analyser = audioContext.createAnalyser();
     var gain = tsw.gain(1)
 
+    var pan = tsw.panner(0);
+    // var pan = tsw.panner(-1);
+
+    // var filter = tsw.filter({
+    //     type: 'highpass',
+    //     frequency: 100,
+    //     Q: 1
+    // });
+
+    tsw.connect(gain, pan, tsw.speakers);
+
 
 
     var namedSamples = {}
@@ -178,7 +189,7 @@
                 samples.sound3,
                 samples.piano1,
                 samples.vinyl,
-                // samples.strings,
+                samples.strings,
             ];
 
             vocals = [
@@ -255,6 +266,7 @@
             samplesLoaded = true;
 
             samples.vinyl.gainNode.gain(0.5);
+            samples.strings.gainNode.gain(0.5);
 
             samples.guitar1.gainNode.gain(0.5);
             samples.guitar2.gainNode.gain(0.5);

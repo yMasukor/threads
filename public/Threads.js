@@ -73,9 +73,18 @@ Thread.prototype.startDraw = function(e){
             drawable:new Path({
                 strokeColor: opts.color,
                 strokeWidth: opts.weight,
-                strokeCap: 'round'
+                // strokeCap: 'round',
+                // dashArray: [20, 60],
+                // strokeWidth: 8,
+                // strokeCap: 'round'
+
             })
+
+
         }
+
+
+
 
         if(opts.blendMode){
             path.drawable.blendMode = opts.blendMode;

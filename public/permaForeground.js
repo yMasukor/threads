@@ -3,6 +3,8 @@ var permaForeground = {
 
 	group:null,
 
+	freqBars:[],
+
 	create:function(){
 
 
@@ -12,10 +14,37 @@ var permaForeground = {
 
 
 
+
+
+		// DEBUG FREQ HISTOGRAM
+
+		// for(var i=0; i<globalState.byteFrequencyData.length; i++){
+		//
+		// 	var bar = new Shape.Rectangle(new Point(i*3, 0), new Size(2, 1));
+		// 	bar.fillColor = '#ffffff';
+		// 	this.freqBars.push(bar);
+		//
+		// }
+
+
+
+
+
 	},
 
 	update:function(){
 
+
+
+		//DEBUG FREQ HISTOGRAM
+		// for(var i=0; i<globalState.byteFrequencyData.length; i++){
+		//
+		// 	var bar = this.freqBars[i];
+		// 	bar.size.height = Math.pow(globalState.byteFrequencyData[i], 4)*0.000001;
+		//
+		// 	// console.log(globalState.byteFrequencyData[i]);
+		//
+		// }
 
 		globalState.players.forEach(function(player){
 
@@ -25,6 +54,9 @@ var permaForeground = {
 				// player.drawable.position.y = (player.drawable.position.y-player.cursor.y)/10
 
 			}
+
+
+
 
 		});
 
@@ -73,5 +105,5 @@ var permaForeground = {
 	}
 
 
-	
+
 }

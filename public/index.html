@@ -386,9 +386,16 @@
 			socket.emit('connectViewer');
 
 			socket.on('connected', function(existingPlayers){
-				existingPlayers.forEach(function(playerId){
+
+				_.each(existingPlayers, function(socketId, playerId){
+					console.log(socketId, playerId);
+
 					addPlayer(playerId);
 				});
+
+				// existingPlayers.forEach(function(player){
+				// 	addPlayer(playerId);
+				// });
 
 				//console.log('viewer connected, existing players', players, existingPlayers);
 			});
@@ -563,8 +570,6 @@
 
 			createAnalyser();
 
-
-
 			waveBackground.create(themes[0]);
 			particleBackground.create(themes[0]);
 			triangleBackground.create(themes[0]);
@@ -649,18 +654,19 @@
 
 
 			var playerCount = globalState.players.length;
-			if(playerCount < 2){
-				//console.log('adding player', playerId);
 
+			var playerAlreadyConnected = false;
+			if(globalState.playerIdMap[playerId] != null){
+				console.log('player ', playerId, " already connected");
+			}else{
 				var player = new Player(playerId, playerCount);
-				// players[playerId] = player;
 				globalState.playerIdMap[playerId] = playerCount;
 				globalState.players.push(player);
-
-
-			}else{
-				//console.log('both players connected');
 			}
+
+
+
+			console.log('current players are', globalState.playerIdMap);
 
 
 		}

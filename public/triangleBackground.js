@@ -8,7 +8,7 @@ var triangleBackground = {
 	activeTheme:0,
 
 	group:null,
-	
+
 	create:function(theme){
 
 		this.theme = theme;
@@ -36,7 +36,7 @@ var triangleBackground = {
 				path = new Path.RegularPolygon(new Point(Math.floor(Math.random()*view.bounds.width), Math.floor(Math.random()*view.bounds.height)), 3, 20*Math.pow(((i)+1), 2));
 			}
 
-			 
+
 
 			if(Math.round(Math.random()*3)== 0){
 				path.rotate(180);
@@ -52,7 +52,7 @@ var triangleBackground = {
 
 
 		triangleForeground.create();
-		
+
 
 
 	},
@@ -70,20 +70,20 @@ var triangleBackground = {
 			var d = getAverageVolume(slice);
 			var a = Math.min(d/Math.abs((globalState.minDec-globalState.maxDec)), 1);
 
-			
+
 			shape.path.opacity = Math.max(a, 0);
 
 			// if(false){
 			// 	shape.path.opacity = 1;
 			// }else{
 			// 	if(shape.complexity <= globalState.complexity+1){
-					
+
 			// 	}else{
 			// 		shape.path.opacity = 0;
 			// 	}
 			// }
-			
-			
+
+
 			if(globalState.players.length > 0){
 
 				globalState.players.forEach(function(player, j){
@@ -103,8 +103,8 @@ var triangleBackground = {
 			}
 
 
-			
-			
+
+
 
 			var maxVel = 3+(((globalState.complexity+1)/6)*10);
             var minVel = 0
@@ -127,7 +127,7 @@ var triangleBackground = {
 
             shape.acc.set(0, 0)
 
-			
+
 
 			if(shape.path.opacity == 0){
 				shape.path.fillColor = this.theme.secondary[Math.floor(Math.random()*this.theme.secondary.length)];
@@ -177,18 +177,18 @@ var triangleBackground = {
 	        .onComplete(function() {
 
 	            this.pause();
-	            currentScene = scenes[target]; 
+	            currentScene = scenes[target];
 
 	            window.setTimeout(function(){
 	            	this.group.visible = false;
 		        	tempMask.remove();
-					currentScene.background.transitionIn(tempMask.fillColor); 
-		            
-				}.bind(this), 100);
-	            
-	            
+					currentScene.background.transitionIn(tempMask.fillColor);
 
-	            
+				}.bind(this), 100);
+
+
+
+
 
 	        }.bind(this));
 
@@ -204,13 +204,13 @@ var triangleBackground = {
 		tempMask.fillColor = fromColor;
 		this.group.addChild(tempMask);
 
-		
+
 
 		this.start();
 
-		
 
-		
+
+
 
 		window.setTimeout(function(){
 			var fadeOut = new TWEEN.Tween(tempMask)
@@ -223,7 +223,7 @@ var triangleBackground = {
 		    fadeOut.start();
 		}, 00);
 
-	    
+
 
 	},
 
@@ -251,7 +251,7 @@ var triangleBackground = {
 
 	// 	this.paths.forEach(function(shape){
 
-			
+
 	// 		// var targetColor = theme.secondary[Math.floor(Math.random()*theme.secondary.length)];
 	// 		animatePaperPathToColor(shape.path, theme.secondary[Math.floor(Math.random()*theme.secondary.length)]);
 
@@ -289,7 +289,7 @@ var triangleForeground = {
 	active:false,
 
 	create:function(){
-		
+
 		var emitter = new Proton.Emitter();
 		emitter.rate = new Proton.Rate(Proton.getSpan(1, 2), 0.05);
 		emitter.addInitialize(new Proton.Radius(2, 10));
@@ -316,11 +316,11 @@ var triangleForeground = {
 		// 		});
 
 
-		
+
 		this.emitter = emitter;
 
 
-		
+
 
 
 
@@ -330,12 +330,12 @@ var triangleForeground = {
 			this.emitter.addBehaviour(attractor);
 			this.playerAttractors.push(attractor);
 
-			
+
 
 		};
 
 
-		
+
 		this.emitter.emit();
 
 		this.renderer = new Proton.Renderer('canvas', proton, canvas);
@@ -350,7 +350,7 @@ var triangleForeground = {
 			var d = globalState.averageLevel;
 			var a = Math.min(d/Math.abs((globalState.minDec-globalState.maxDec)), 1);
 
-			this.emitter.rate = new Proton.Rate(Proton.getSpan(2, globalState.complexity), 0.01);
+			this.emitter.rate = new Proton.Rate(Proton.getSpan(2, Math.floor(globalState.complexity*0.75)), 0.01);
 
 			globalState.players.forEach(function(player, i){
 				if(this.playerAttractors.length > 0){
@@ -366,7 +366,7 @@ var triangleForeground = {
 					}
 				}
 
-				
+
 
 
 			}.bind(this));

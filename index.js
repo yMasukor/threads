@@ -18,7 +18,7 @@ var tickDuration = ((loopDuration/barsPerLoop)/beatsPerBar)/ticksPerBeat
 var tickCount = 0;
 
 
-var players = [];
+var players = {};
 var viewers = [];
 
 
@@ -41,58 +41,64 @@ app.use(express.static(__dirname + '/public'));
 io.on('connection', function(socket){
 	// console.log('a user connected');
 
-
-	socket.on('connectPlayer', function(){
+	socket.on('connectPlayer', function(id){
 		//user joined
 
+		// socket.playerID = id;
 
 		viewers.forEach(function(viewerId){
-			io.to(viewerId).emit('addPlayer', socket.id);
+			io.to(viewerId).emit('addPlayer', id);
 		});
 
-		console.log('player connected');
-		players.push(socket.id);
+		// socket.id = id;
+		if(Object.keys(players).length < 3){
+			players[id] = socket.id;
 
-		io.to(socket.id).emit('connected', players.length);
+			console.log(players, Object.keys(players).length)
+
+			io.to(socket.id).emit('connected', Object.keys(players).length);
+		}
+		// console.log('player connected');
+
+
 	});
+
+
 
 	socket.on('disconnect', function(){
 
-		if(players.indexOf(socket.id) > -1){
-			console.log('removing player')
-			players.splice(players.indexOf(socket.id), 1);
-
-			viewers.forEach(function(viewerId){
-				io.to(viewerId).emit('removePlayer', socket.id);
-			});
-		}else if(viewers.indexOf(socket.id) > -1){
+		// if(players.indexOf(socket.id) > -1){
+		// 	console.log('removing player')
+		// 	players.splice(players.indexOf(socket.id), 1);
+		//
+		// 	viewers.forEach(function(viewerId){
+		// 		io.to(viewerId).emit('removePlayer', socket.id);
+		// 	});
+		// }else
+		if(viewers.indexOf(socket.id) > -1){
 
 			console.log('removing viewer')
 			viewers.splice(viewers.indexOf(socket.id), 1);
 
 			if(viewers.length == 0){
-				// clearInterval(interval);
-				// beatCount = 0;
-				// barCount = 0;
-				// interval = null;
+
 			}
 
 		}
-
-		console.log('disconnected', players)
+		//
+		console.log('disconnected', players, socket.io)
 	});
+
+
 
 
 	socket.on('connectViewer', function(){
 		//user joined - add to active players, and update everyone
+
 		viewers.push(socket.id)
 		io.to(socket.id).emit('connected', players);
-
-		console.log('viewer connected', players)
-
-
-
-
+		//
+		// console.log('viewer connected', players)
 
 	});
 
@@ -100,7 +106,7 @@ io.on('connection', function(socket){
 	socket.on('playerInput', function(input){
 
 		// console.log('input', input.point.x);
-		input.id = socket.id
+		// input.id = socket.id
 
 		viewers.forEach(function(viewerId){
 			io.to(viewerId).emit('playerUpdate', input);

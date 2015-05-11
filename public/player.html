@@ -2,8 +2,9 @@
 <html>
     <head>
 
-     <meta name="viewport" content="width=device-width, minimum-scale=1.0">
-     <meta name="mobile-web-app-capable" content="yes">
+     <meta name="viewport" content="width=device-width, minimum-scale=1.0" user-scalable="no">
+     <!-- <meta name="mobile-web-app-capable" content="yes"> -->
+     <!-- <meta name="apple-mobile-web-app-capable" content="yes" /> -->
 
     <script src="lib/jquery-2.1.3.min.js"></script>
     <script src="lib/tween.min.js"></script>
@@ -12,22 +13,11 @@
     <script src="lib/paper-full.js"></script>
     <script src="lib/proton-1.0.1.js"></script>
 
-
-
-
     <script src="https://cdn.socket.io/socket.io-1.3.3.js"></script>
-
-
-    <!-- <script src="audio.js"></script> -->
 
     <script src="CuePoint.js"></script>
     <script src="Threads.js"></script>
     <script src="Player.js"></script>
-
-<!--
-    <script src="metronome.js"></script>
-    <script src="animations.js"></script> -->
-
 
     <script src="states/themes.js"></script>
     <script src="states/state-two.js"></script>
@@ -80,10 +70,36 @@
 
     <script type="text/javascript" >
 
+        // localStorage.removeItem('playerId')
+        var playerId = localStorage.getItem('playerId')
+
+
+
+        if(playerId == null){
+            playerId = generateUUID();
+            localStorage.setItem('playerId', playerId);
+
+        }
+
+        console.log(playerId);
+
+        function generateUUID(){
+            var d = Date.now();
+            var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                var r = (d + Math.random()*16)%16 | 0;
+                d = Math.floor(d/16);
+                return (c=='x' ? r : (r&0x3|0x8)).toString(16);
+            });
+            return uuid;
+        };
+
+
         paper.install(window);
         var proton = new Proton();
 
         var TWO_PI = Math.PI * 2;
+
+        var MAX_LENGTH = 40;
 
 
         var players = {},
@@ -106,7 +122,6 @@
 
         var state = stateTwo,
         samplesLoaded = false;
-
 
         var playbackState = 'empty'
 
@@ -231,13 +246,6 @@
                 }
             }
         }
-
-
-
-
-
-
-
 
 
         var cursor = {
@@ -409,9 +417,9 @@
 
                 sendInput(e, 'mousedrag');
 
-                console.log(thread.paths[0].points.length);
+                // console.log(thread.paths[0].points.length);
 
-                if(thread.paths[0].points.length > 30){
+                if(thread.paths[0].points.length > MAX_LENGTH){
                     this.kill = true;
                 }
 
@@ -496,7 +504,8 @@
             var input = {
                 point:{x:e.point.x, y:e.point.y},
                 delta:{x:e.delta.x, y:e.delta.y},
-                type:type
+                type:type,
+                id:playerId
             }
             socket.emit('playerInput', input);
         }
@@ -520,17 +529,19 @@
             bCanvas = document.getElementById('bitmapCanvas');
 			bContext = bCanvas.getContext('2d');
 
-
-
             start = new Point(0, view.bounds.height/2);
             end = new Point(view.bounds.width, view.bounds.height/2);
 
 
-            socket.emit('connectPlayer');
+            socket.emit('connectPlayer', playerId);
+
             socket.on('connected', function(index){
+
+                // alert("foobar "+index);
 
                 playerIndex = Math.min(1, index-1);
                 // alert(playerIndex)
+                console.log(index);
                 background = new Shape.Rectangle(new Point(0,0), view.size);
                 background.fillColor = themes[playerIndex].background;
 
@@ -681,7 +692,7 @@
             dir.normalize();
             var force = distSqrd*0.0001;
 
-            console.log(dir, distSqrd, force);
+            // console.log(dir, distSqrd, force);
 
             point.acc = point.acc.add(dir.multiply(force));
         }
