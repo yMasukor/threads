@@ -203,10 +203,18 @@ var stateThree =
 			threadOpts:{
 				//An array of shapes to draw
 				paths:[
-			        {
-			            color:'rgba(255,255,255,0.8)',
+					{
+			            color:'rgba(255,255,255,0)',
+			            weight: 0,
+			            yOffset:300,
+			            filled:false,
+			            blendMode:'normal'
+			        },
+
+					{
+			            color:'rgba(255,255,255,0.2)',
 			            weight: 3,
-			            yOffset:0,
+			            yOffset:300,
 			            filled:false,
 			            blendMode:'normal'
 			        },
@@ -217,7 +225,8 @@ var stateThree =
 				cuepointOpts:{
 					onCreate:function(){
 
-						this.size = Math.max(10, Math.min((this.size*this.size)*0.25, 100));
+						this.size = Math.max(2, Math.min(this.size*this.size, 200)*0.3);
+						// this.size = Math.max(10, Math.min((this.size*this.size)*0.25, 100));
 
 						var group = new Group();
 
@@ -225,8 +234,12 @@ var stateThree =
 							center: this.point,
 							radius: 0
 						});
-						circle.strokeColor = palette.light[0];
-						circle.strokeWidth = 6;
+						// circle.strokeColor = palette.light[0];
+						// circle.strokeWidth = 6;
+
+						circle.fillColor = palette.light[0];
+						circle.shadowColor = '#ffffff';
+						circle.shadowBlur = 30;
 
 						var animateIn = new TWEEN.Tween(circle)
 				            .to({radius:this.size}, duration*0.25)
