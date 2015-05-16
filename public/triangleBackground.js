@@ -14,7 +14,9 @@ var triangleBackground = {
 		this.theme = theme;
 
 		this.group = new Group();
+		this.topGroup = new Group();
 		this.group.visible = false;
+		this.topGroup.visible = false;
 
 		var count = this.count;
 		var activeTheme = this.activeTheme;
@@ -31,9 +33,10 @@ var triangleBackground = {
 
 			var path
 			if(false ){
-				path = new Path.RegularPolygon(new Point(Math.floor(Math.random()*view.bounds.width), view.bounds.center.y), 3, 20*Math.pow((i+1), 2));
+				// path = new Path.RegularPolygon(new Point(Math.floor(Math.random()*view.bounds.width), view.bounds.center.y), 3, 20*Math.pow((i+1), 2));
+
 			}else{
-				path = new Path.RegularPolygon(new Point(Math.floor(Math.random()*view.bounds.width), Math.floor(Math.random()*view.bounds.height)), 3, 20*Math.pow(((i)+1), 2));
+				path = new Path.RegularPolygon(new Point(Math.floor(Math.random()*view.bounds.width), Math.floor(Math.random()*view.bounds.height)), 3, 10*Math.pow(((i)+1), 2));
 			}
 
 
@@ -43,7 +46,13 @@ var triangleBackground = {
 			}
 
 			path.fillColor = theme.secondary[Math.floor(Math.random()*theme.secondary.length)];
-			this.group.addChild(path);
+
+			if(i < 3){
+				this.topGroup.addChild(path);
+			}else{
+				this.group.addChild(path);
+			}
+
 
 
 			var complexity = Math.floor(Math.random()*3);
@@ -134,9 +143,11 @@ var triangleBackground = {
 				shape.path.y = Math.floor(Math.random()*view.bounds.height)
 			}
 
+
+
 		}.bind(this));
 
-
+		this.topGroup.bringToFront();
 		triangleForeground.update();
 
 
@@ -145,8 +156,26 @@ var triangleBackground = {
 
 	pulse:function(){
 		this.paths.forEach(function(shape, i){
-			shape.dest = new Point(shape.dest.x, Math.floor(Math.random()*view.bounds.height))
-		})
+			shape.dest = new Point(shape.dest.x, Math.floor(Math.random()*view.bounds.height));
+		});
+	},
+
+	onCuePoint:function(){
+
+		var shape = this.paths[Math.floor(Math.random()*this.paths.length)];
+
+		shape.path.transformContent = false;
+
+		// shape.flip = true;
+		var flip = new TWEEN.Tween(shape.path)
+			.to({rotation:shape.path.rotation+180}, duration*0.0625)
+			.easing( TWEEN.Easing.Circular.Out)
+			.onComplete(function() {
+				// tempMask.remove();
+			});
+
+		flip.start();
+
 	},
 
 
@@ -169,7 +198,7 @@ var triangleBackground = {
 		var tempMask = new Shape.Circle(new Point(view.bounds.width/2,view.bounds.height/2), 0);
 		tempMask.fillColor = '#ffffff';
 
-		this.group.addChild(tempMask);
+		this.topGroup.addChild(tempMask);
 
 		var out = new TWEEN.Tween(tempMask)
 	        .to({radius:view.bounds.width}, duration*0.0625)
@@ -181,6 +210,7 @@ var triangleBackground = {
 
 	            window.setTimeout(function(){
 	            	this.group.visible = false;
+	            	this.topGroup.visible = false;
 		        	tempMask.remove();
 					currentScene.background.transitionIn(tempMask.fillColor);
 
@@ -198,11 +228,12 @@ var triangleBackground = {
 	transitionIn:function(fromColor){
 
 		this.group.visible = true;
+		this.topGroup.visible = true;
 
 		this.setTheme(currentScene.theme);
 		var tempMask = new Shape.Rectangle(new Point(0,0), view.size);
 		tempMask.fillColor = fromColor;
-		this.group.addChild(tempMask);
+		this.topGroup.addChild(tempMask);
 
 
 
@@ -292,7 +323,7 @@ var triangleForeground = {
 
 		var emitter = new Proton.Emitter();
 		emitter.rate = new Proton.Rate(Proton.getSpan(1, 2), 0.05);
-		emitter.addInitialize(new Proton.Radius(2, 10));
+		emitter.addInitialize(new Proton.Radius(1, 5));
 		emitter.addInitialize(new Proton.Velocity(Proton.getSpan(0, 10), 30, 'polar'));
 		emitter.addBehaviour(new Proton.Color(['ffffff']));
 		emitter.addBehaviour(new Proton.Alpha(0.8, 0));

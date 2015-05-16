@@ -80,7 +80,7 @@ Player.prototype.dragStart = function(e){
 		permaForeground.group.addChild(pointer);
 
 		var pointerIn = new TWEEN.Tween(pointer)
-		    .to({radius:48, opacity:1}, duration*0.25)
+		    .to({radius:24, opacity:1}, duration*0.25)
 		    .easing( TWEEN.Easing.Circular.Out)
 		    .onComplete(function() {
 
@@ -95,7 +95,7 @@ Player.prototype.dragStart = function(e){
 		this.drawable.position.y = this.targetPos.y;
 
 		var pointerIn = new TWEEN.Tween(this.drawable)
-		    .to({radius:48, opacity:1}, duration*0.25)
+		    .to({radius:24, opacity:1}, duration*0.25)
 		    .easing( TWEEN.Easing.Circular.Out)
 		    .onComplete(function() {
 
@@ -159,8 +159,8 @@ Player.prototype.update = function(){
 
 	// this.cursor.update();
 
-	this.cursor.x += (this.targetPos.x-this.cursor.x)/2;
-	this.cursor.y += (this.targetPos.y-this.cursor.y)/2;
+	this.cursor.x += (this.targetPos.x-this.cursor.x)/4;
+	this.cursor.y += (this.targetPos.y-this.cursor.y)/4;
 
 	if(this.drawable){
 		this.drawable.position.x = this.cursor.x;

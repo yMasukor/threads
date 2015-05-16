@@ -51,6 +51,7 @@
 	body{
 		background: #000000;
 		overflow: hidden;
+
 	}
 
 		*{
@@ -85,9 +86,9 @@
 	<body>
 
 
-	<canvas id="backgroundBitmapCanvas" width="1280" height="720" keepalive></canvas>
-	<canvas id="threadCanvas" width="1280" height="720" keepalive></canvas>
-	<canvas id="bitmapCanvas" width="1280" height="720" keepalive></canvas>
+	<canvas id="backgroundBitmapCanvas" width="640" height="360" keepalive></canvas>
+	<canvas id="threadCanvas" width="640" height="360" keepalive></canvas>
+	<canvas id="bitmapCanvas" width="640" height="360" keepalive></canvas>
 
 
 	<script type="text/javascript">
@@ -188,88 +189,27 @@
 		var currentTheme;
 
 		var scenes = [
-			{
-				background:waveBackground,
-				state:stateThree,
-				theme:themes[0]
-			},
-
 			// {
-			// 	background: waveBackground,
+			// 	background:waveBackground,
+			// 	state:stateThree,
+			// 	theme:themes[0]
+			// },
+			//
+			//
+			//
+			//
+			//
+			//
+			// {
+			// 	background: particleBackground,
 			// 	state: stateThree,
 			// 	theme: themes[0],
 			// },
-			// {
-			// 	background: waveBackground,
-			// 	state: stateThree,
-			// 	theme: themes[1],
-			// },
-			// {
-			// 	background: waveBackground,
-			// 	state: stateThree,
-			// 	theme: themes[2],
-			// },
-			// {
-			// 	background: waveBackground,
-			// 	state: stateThree,
-			// 	theme: themes[3],
-			// },
-			// {
-			// 	background: waveBackground,
-			// 	state: stateThree,
-			// 	theme: themes[4],
-			// },
-			// {
-			// 	background: waveBackground,
-			// 	state: stateThree,
-			// 	theme: themes[5],
-			// },
-			// {
-			// 	background: waveBackground,
-			// 	state: stateThree,
-			// 	theme: themes[6],
-			// },
 
 
 
 
-			{
-				background: particleBackground,
-				state: stateThree,
-				theme: themes[0],
-			},
 
-
-			// {
-			// 	background: particleBackground,
-			// 	state: stateThree,
-			// 	theme: themes[1],
-			// },
-			// {
-			// 	background: particleBackground,
-			// 	state: stateThree,
-			// 	theme: themes[2],
-			// },
-			// {
-			// 	background: particleBackground,
-			// 	state: stateThree,
-			// 	theme: themes[3],
-			// },
-			// {
-			// 	background: particleBackground,
-			// 	state: stateThree,
-			// 	theme: themes[4],
-			// },
-			// {
-			// 	background: particleBackground,
-			// 	state: stateThree,
-			// 	theme: themes[5],
-			// },
-			// {
-			// 	background: particleBackground,
-			// 	state: stateThree,
-			// 	theme: themes[6],
-			// },
 
 
 
@@ -280,73 +220,14 @@
 			},
 
 
-			// {
-			// 	background: triangleBackground,
-			// 	state: stateThree,
-			// 	theme: themes[1],
-			// },
-			// {
-			// 	background: triangleBackground,
-			// 	state: stateThree,
-			// 	theme: themes[2],
-			// },
-			// {
-			// 	background: triangleBackground,
-			// 	state: stateThree,
-			// 	theme: themes[3],
-			// },
-			// {
-			// 	background: triangleBackground,
-			// 	state: stateThree,
-			// 	theme: themes[4],
-			// },
-			// {
-			// 	background: triangleBackground,
-			// 	state: stateThree,
-			// 	theme: themes[5],
-			// },
-			// {
-			// 	background: triangleBackground,
-			// 	state: stateThree,
-			// 	theme: themes[6],
-			// },
 
 
 
-			{
-				background: nGonBackground,
-				state: stateThree,
-				theme: themes[0],
-			},
+			// 
 			// {
 			// 	background: nGonBackground,
 			// 	state: stateThree,
-			// 	theme: themes[1],
-			// },
-			// {
-			// 	background: nGonBackground,
-			// 	state: stateThree,
-			// 	theme: themes[2],
-			// },
-			// {
-			// 	background: nGonBackground,
-			// 	state: stateThree,
-			// 	theme: themes[3],
-			// },
-			// {
-			// 	background: nGonBackground,
-			// 	state: stateThree,
-			// 	theme: themes[4],
-			// },
-			// {
-			// 	background: nGonBackground,
-			// 	state: stateThree,
-			// 	theme: themes[5],
-			// },
-			// {
-			// 	background: nGonBackground,
-			// 	state: stateThree,
-			// 	theme: themes[6],
+			// 	theme: themes[0],
 			// }
 
 		]
@@ -366,7 +247,7 @@
 
 			paper.setup('threadCanvas')
 
-			paper.view.viewSize = new Size(1280, 720)
+			paper.view.viewSize = new Size(640, 360)
 
 			$('#threadCanvas').css({'width':'100%', 'height':'auto'})
 
@@ -626,6 +507,8 @@
 				TWEEN.update();
 
 
+				permaForeground.update();
+
 
 				if(waveBackground.active){
 					waveBackground.update();
@@ -643,7 +526,7 @@
 					nGonBackground.update();
 				}
 
-				permaForeground.update();
+
 
 
 			}

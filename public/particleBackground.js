@@ -80,7 +80,7 @@ var particleBackground = {
 					initialize : function(particle) {
 						particle.complexity = Math.floor(Math.random()*5);
 						particle.freqIndex = Math.floor(Math.random()*(globalState.byteFrequencyData.length));
-						particle.baseRadius = ((globalState.byteFrequencyData.length)-particle.freqIndex)*0.05;
+						particle.baseRadius = ((globalState.byteFrequencyData.length)-particle.freqIndex)*0.025;
 						particle.mass = particle.baseRadius*0.5;
 					},
 
@@ -113,7 +113,7 @@ var particleBackground = {
 
 		var secondaryEmitter = new Proton.Emitter();
 		secondaryEmitter.rate = new Proton.Rate(Proton.getSpan(1), 0.01);
-		secondaryEmitter.addInitialize(new Proton.Radius(2, 8));
+		secondaryEmitter.addInitialize(new Proton.Radius(1, 5));
 		secondaryEmitter.addInitialize(new Proton.Velocity(Proton.getSpan(0, 1), Proton.getSpan(0, 360), 'polar'));
 		secondaryEmitter.addBehaviour(new Proton.Color('ffffff'));
 		secondaryEmitter.addBehaviour(new Proton.Alpha(0.8, 0));
@@ -190,6 +190,10 @@ var particleBackground = {
 		// this.attract.targetPosition.x = view.bounds.width/2;
 		// this.attract.targetPosition.y = view.bounds.height/2;
 		// this.repel.force = 0;
+	},
+
+	onCuePoint:function(){
+
 	},
 
 	cuepoint:function(x, y){

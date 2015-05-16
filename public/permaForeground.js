@@ -2,6 +2,7 @@ var permaForeground = {
 	paths:[],
 
 	group:null,
+	superTopGroup:null,
 
 	freqBars:[],
 
@@ -11,7 +12,8 @@ var permaForeground = {
 		this.group = new Group();
 		this.group.visible = true;
 
-
+		this.superTopGroup = new Group();
+		this.superTopGroup.visible = true;
 
 
 
@@ -61,7 +63,7 @@ var permaForeground = {
 		});
 
 
-		this.group.bringToFront();
+		// this.group.bringToFront();
 
 
 

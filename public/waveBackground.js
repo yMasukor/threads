@@ -2,12 +2,15 @@ var waveBackground = {
 	paths:[],
 	active:false,
 	sectionHeight:0,
-	count:7,
+	count:5,
 
 
 	activeTheme:0,
 
 	group:null,
+	topGroup:null,
+
+	groups:[],
 
 	create:function(theme){
 
@@ -16,10 +19,18 @@ var waveBackground = {
 		this.group = new Group();
 		this.group.visible = false;
 
+		// this.group.potato = 'potato';
+
+		this.topGroup = new Group();
+		this.topGroup.visible = false;
+
+
+		this.groups = [this.group, this.topGroup];
+
 		var count = this.count;
 		var activeTheme = this.activeTheme;
 
-		var sliceWidth = ((view.bounds.width+600)/(analyser.frequencyBinCount/count));
+		var sliceWidth = ((view.bounds.width+600)/((analyser.frequencyBinCount*0.5)/count));
 		this.sectionHeight = (view.bounds.height/(count+1));
 		this.background = new Shape.Rectangle(new Point(0,0), view.size);
 		this.background.fillColor = theme.background;
@@ -32,7 +43,15 @@ var waveBackground = {
 
 			var points = [];
 			var path = new Path();
-			this.group.addChild(path);
+
+
+			if(i > 3){
+				this.topGroup.addChild(path);
+			}else{
+				this.group.addChild(path);
+			}
+
+
 			path.opacity = 1;
 
 			// path.strokeColor = '#ffffff'
@@ -59,11 +78,11 @@ var waveBackground = {
 
 			    // points.push(new Point(-50, view.bounds.bottomLeft.y));
 
-				for(var j=0; j<Math.floor(globalState.byteFrequencyData.length/count); j++){
+				for(var j=0; j<Math.floor((globalState.byteFrequencyData.length*0.5)/count); j++){
 					var x = -300;
 					if(j == 0){
 						x = -300;
-					}else if(j+1 == Math.floor(globalState.byteFrequencyData.length/count)){
+					}else if(j+1 == Math.floor((globalState.byteFrequencyData.length*0.5)/count)){
 						x += j*sliceWidth;
 					}else{
 						x += j*sliceWidth;
@@ -167,6 +186,8 @@ var waveBackground = {
 
 		}.bind(this));
 
+		this.topGroup.bringToFront();
+
 		waveForeground.update();
 
 	},
@@ -185,6 +206,10 @@ var waveBackground = {
 				}
 			});
 		});
+	},
+
+	onCuePoint:function(){
+
 	},
 
 
@@ -208,7 +233,7 @@ var waveBackground = {
 		var tempMask = new Shape.Circle(new Point(view.bounds.width/2,view.bounds.height/2), 0);
 		tempMask.fillColor = '#ffffff';
 
-		this.group.addChild(tempMask);
+		this.topGroup.addChild(tempMask);
 
 		var out = new TWEEN.Tween(tempMask)
 	        .to({radius:view.bounds.width}, duration*0.0625)
@@ -220,6 +245,7 @@ var waveBackground = {
 
 	            window.setTimeout(function(){
 	            	this.group.visible = false;
+					this.topGroup.visible = false;
 		        	tempMask.remove();
 					currentScene.background.transitionIn(tempMask.fillColor);
 
@@ -237,11 +263,12 @@ var waveBackground = {
 	transitionIn:function(fromColor){
 
 		this.group.visible = true;
+		this.topGroup.visible = true;
 
 		this.setTheme(currentScene.theme);
 		var tempMask = new Shape.Rectangle(new Point(0,0), view.size);
 		tempMask.fillColor = fromColor;
-		this.group.addChild(tempMask);
+		this.topGroup.addChild(tempMask);
 
 
 
@@ -280,10 +307,6 @@ var waveBackground = {
 
 	}
 
-
-
-
-
 }
 
 
@@ -316,7 +339,7 @@ var waveForeground = {
 
 		var emitter = new Proton.Emitter();
 		emitter.rate = new Proton.Rate(Proton.getSpan(10, 60), 0.1);
-		emitter.addInitialize(new Proton.Radius(2, 10));
+		emitter.addInitialize(new Proton.Radius(1, 5));
 		emitter.addInitialize(new Proton.Velocity(Proton.getSpan(0, 1), Proton.getSpan(0, 360), 'polar'));
 		emitter.addBehaviour(new Proton.Color(['ffffff']));
 		emitter.addBehaviour(new Proton.Alpha(0.8, 0));
@@ -387,7 +410,7 @@ var waveForeground = {
 				if(this.playerAttractors.length > 0){
 					var attractor = this.playerAttractors[i];
 
-					console.log('DIP DURP', player.cursor.isDown);
+					// console.log('DIP DURP', player.cursor.isDown);
 
 					if(player.cursor.isDown){
 						// console.log("ATTRRACTING")

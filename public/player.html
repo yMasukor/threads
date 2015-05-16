@@ -2,7 +2,7 @@
 <html>
     <head>
 
-     <meta name="viewport" content="width=device-width, minimum-scale=1.0" user-scalable="no">
+     <meta name="viewport" content="minimum-scale=2.0, initial-scale=2.0" user-scalable="no">
      <!-- <meta name="mobile-web-app-capable" content="yes"> -->
      <!-- <meta name="apple-mobile-web-app-capable" content="yes" /> -->
 
@@ -26,19 +26,27 @@
 
 
     <style type="text/css">
+
+    body{
+        width: 640px;
+        overflow: hidden;
+
+    }
         *{
             margin: 0px;
             padding: 0px;
         }
 
         canvas{
-            position: absolute;
-            top: 0px;
-            left: 0px;
-            right: 0px;
-            bottom: 0px;
-            width: 100%;
-        }
+			position: absolute;
+			top: 0px;
+			left: 0px;
+			right: 0px;
+			bottom: 0px;
+			width: 100%;
+			margin: auto;
+		}
+
 
         #bitmapCanvas{
             pointer-events: none;
@@ -53,8 +61,8 @@
     <body>
 
 
-    <canvas id="myCanvas" width="1280" height="720" keepalive></canvas>
-	<canvas id="bitmapCanvas" width="1280" height="720" keepalive></canvas>
+    <canvas id="myCanvas" width="640" height="360" keepalive></canvas>
+	<canvas id="bitmapCanvas" width="640" height="360" keepalive></canvas>
 
 
     <script type="text/javascript">
@@ -99,7 +107,7 @@
 
         var TWO_PI = Math.PI * 2;
 
-        var MAX_LENGTH = 40;
+        var MAX_LENGTH = 35;
 
 
         var players = {},
@@ -151,7 +159,7 @@
             paths:[
                 {
                     color:themes[playerIndex].foreground,
-                    weight: 2,
+                    weight: 1,
                     yOffset:0,
                     filled:false,
                 }
@@ -171,7 +179,7 @@
                     });
                     circle.fillColor = themes[playerIndex].background;
                     circle.strokeColor = themes[playerIndex].foreground;
-                    circle.strokeWidth = 2;;
+                    circle.strokeWidth = 1;
 
                     var animateIn = new TWEEN.Tween(circle)
                         .to({radius:this.size}, duration*0.25)
@@ -263,7 +271,7 @@
             create:function(){
 
                 this.endDrawable = new Shape.Circle({
-        			radius: 36
+        			radius: 18
         		});
 
                 this.endDrawable.fillColor = themes[playerIndex].highlight;
@@ -272,7 +280,7 @@
                 this.endDrawable.position = end;
 
                 this.drawable = new Shape.Circle({
-        			radius: 36
+        			radius: 18
         		});
 
 
@@ -383,7 +391,7 @@
                 }
 
                 var completeness = this.drawable.position.getDistance(this.endDrawable.position)/view.bounds.width;
-                this.endDrawable.radius = 36+(100*(1-completeness));
+                this.endDrawable.radius = 18+(100*(1-completeness));
 
                 // sendInput({point:{x:this.currentPos.x, y:this.currentPos.y}}, 'mousedrag');
 
@@ -401,7 +409,7 @@
 
 
                 if(!this.isEnded){
-                    this.tweenRadius(48, this.drawable);
+                    this.tweenRadius(24, this.drawable);
 
                     sendInput(e, 'mousedown');
                 }
@@ -449,7 +457,7 @@
                 this.currentPos.vel.set(0, 0);
                 this.drawable.position.set(start.x, start.y);
                 this.kill = false;
-                this.tweenRadius(36, this.drawable);
+                this.tweenRadius(18, this.drawable);
                 ping(start, view.bounds.width, duration/8, '#ffffff');
             },
 
@@ -484,7 +492,7 @@
             if(lastDelta){
                 if((Math.abs(lastDelta.angleInDegrees-e.delta.angleInDegrees) > 30 && !triggered) || (Math.abs(lastDelta.length-e.delta.length) > 30 && !triggered) || Math.floor(Math.random()*100) == 0){
                     // thread.pushPoint(e);
-                    if(cuepointCount < 10){
+                    if(cuepointCount < 6){
                         thread.createCuepoint();
                         triggered = true;
                         sendInput(e, 'cuepoint');
@@ -526,6 +534,8 @@
             paper.setup('myCanvas')
             var tool = new Tool();
 
+            paper.view.viewSize = new Size(640, 360)
+
             bCanvas = document.getElementById('bitmapCanvas');
 			bContext = bCanvas.getContext('2d');
 
@@ -555,7 +565,7 @@
 
                     {
                         color:themes[playerIndex].foreground,
-                        weight: 2,
+                        weight: 1,
                         yOffset:0,
                         filled:false,
                     },

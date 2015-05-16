@@ -18,7 +18,7 @@ var stateThree =
 
 					{
 			            color:'rgba(255,255,255,0.2)',
-			            weight: 3,
+			            weight: 1,
 			            yOffset:300,
 			            filled:false,
 			            blendMode:'normal'
@@ -50,6 +50,10 @@ var stateThree =
 
 						var group = new Group();
 
+						console.log("current scene children", currentScene.background.group.children.length);
+
+
+
 				  		var circle = new Shape.Circle({
 							center: this.point,
 							radius: this.size
@@ -72,6 +76,10 @@ var stateThree =
 				        flicker(circle, duration*0.03125, palette.light[0]);
 
 				        group.addChild(circle);
+
+						//
+
+
 						return group;
 					},
 					onTrigger:function(){
@@ -113,6 +121,9 @@ var stateThree =
 							vocals[Math.floor(Math.random()*vocals.length)].play();
 						}
 
+						if(currentScene.background.onCuePoint){
+							currentScene.background.onCuePoint();
+						}
 
 					},
 					onDestroy:function(){
@@ -180,11 +191,13 @@ var stateThree =
 
 
 						console.log(globalState.complexity);
-						if(globalState.players[1].completeness == 0){
-							switchScene(Math.floor(Math.random()*scenes.length));
-						}else{
-							// switchScene(currentSceneIndex);
-						}
+						// if(globalState.players[1].completeness == 0 || globalState.players.length){
+						// 	switchScene(Math.floor(Math.random()*scenes.length));
+						// }else{
+						// 	// switchScene(currentSceneIndex);
+						// }
+
+						switchScene(Math.floor(Math.random()*scenes.length));
 						// globalState.complexity--;
 						// globalState.players[0].state = 0
 						// globalState.players[0].completeness = 0
@@ -213,7 +226,7 @@ var stateThree =
 
 					{
 			            color:'rgba(255,255,255,0.2)',
-			            weight: 3,
+			            weight: 1,
 			            yOffset:300,
 			            filled:false,
 			            blendMode:'normal'
@@ -293,6 +306,9 @@ var stateThree =
 							vocals[Math.floor(Math.random()*vocals.length)].play();
 						}
 
+						if(currentScene.background.onCuePoint){
+							currentScene.background.onCuePoint();
+						}
 
 					},
 					onDestroy:function(){

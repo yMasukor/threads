@@ -40,6 +40,8 @@ Thread.prototype.reset = function(){
         cuePoint = null;
     });
 
+    console.log("cuepoints", this.cuePoints)
+
     this.paths = [];
     this.cuePoints = {};
     this.willAnimateOut = false;
@@ -144,7 +146,7 @@ Thread.prototype.draw = function(e){
 
 Thread.prototype.pushPoint = function(e){
 
-     console.log('pushing point', e.delta);
+    //  console.log('pushing point', e.delta);
 
     this.paths.forEach(function(path, i){
             var point = e.point.clone();
@@ -251,14 +253,6 @@ Thread.prototype.update = function(frameCount){
                 }
 
                 accelerateToPoint(point, nextPoint, 0.000005);
-
-                if(point.getDistance(nextPoint) > 1){
-
-                }else{
-                    // point.vel.set(0, 0)
-                }
-
-
             }else if(i != 0 && i!=path.points.length){
 
                 accelerateToPoint(point, point.dest, 0.000001)
@@ -277,14 +271,6 @@ Thread.prototype.update = function(frameCount){
                 minVel = 0;
             }
 
-
-
-
-
-
-             if(point.cuePoint){
-                // point.acc = point.acc.multiply(0.1);
-            }
 
             point.vel = point.vel.add(point.acc);
             point.vel = point.vel.multiply(0.98);
@@ -328,8 +314,6 @@ Thread.prototype.update = function(frameCount){
         });
 
         path.drawable.smooth();
-
-
     });
 }
 

@@ -14,7 +14,9 @@ var nGonBackground = {
 		this.theme = theme;
 
 		this.group = new Group();
+		this.topGroup = new Group();
 		this.group.visible = false;
+		this.topGroup.visible = false;
 
 		var count = this.count;
 		var activeTheme = this.activeTheme;
@@ -34,7 +36,7 @@ var nGonBackground = {
 			var points = [];
 
 			if(i == 0){
-				path = new Path.RegularPolygon(view.bounds.center, 12, 300);
+				path = new Path.RegularPolygon(view.bounds.center, 12, 80);
 				this.group.addChild(path);
 
 
@@ -59,7 +61,14 @@ var nGonBackground = {
 			}else{
 
 				path = new Path();
-				this.group.addChild(path);
+
+				if(i > 10){
+					this.topGroup.addChild(path);
+
+				}else{
+					this.group.addChild(path);
+
+				}
 				var parentPathPoints = this.paths[0].points
 
 				var startOffset = Math.floor(Math.random()*parentPathPoints.length);
@@ -383,6 +392,7 @@ var nGonBackground = {
 
 		}.bind(this));
 
+		this.topGroup.bringToFront();
 		nGonForeground.update();
 
 
@@ -397,7 +407,7 @@ var nGonBackground = {
 				this.paths.forEach(function(shape, i){
 					if(shape.pulses){
 						shape.points.forEach(function(point, i){
-							point.acc = new Point(5-Math.floor(Math.random()*10), 5-Math.floor(Math.random()*10));
+							point.acc = new Point(3-Math.floor(Math.random()*6), 3-Math.floor(Math.random()*6));
 						});
 					}
 				})
@@ -408,7 +418,7 @@ var nGonBackground = {
 				this.paths.forEach(function(shape, i){
 					if(shape.pulses){
 						shape.points.forEach(function(point, i){
-							point.acc = new Point(5-Math.floor(Math.random()*10), 5-Math.floor(Math.random()*10));
+							point.acc = new Point(3-Math.floor(Math.random()*6), 3-Math.floor(Math.random()*6));
 						});
 					}
 				})
@@ -419,7 +429,7 @@ var nGonBackground = {
 				this.paths.forEach(function(shape, i){
 					if(shape.pulses){
 						shape.points.forEach(function(point, i){
-							point.acc = new Point(5-Math.floor(Math.random()*10), 5-Math.floor(Math.random()*10));
+							point.acc = new Point(3-Math.floor(Math.random()*6), 3-Math.floor(Math.random()*6));
 						});
 					}
 				})
@@ -431,6 +441,9 @@ var nGonBackground = {
 
 	},
 
+	onCuePoint:function(){
+
+	},
 
 	start:function(){
 		// this.group.visible = true;
@@ -451,7 +464,7 @@ var nGonBackground = {
 		var tempMask = new Shape.Circle(new Point(view.bounds.width/2,view.bounds.height/2), 0);
 		tempMask.fillColor = '#ffffff';
 
-		this.group.addChild(tempMask);
+		this.topGroup.addChild(tempMask);
 
 		var out = new TWEEN.Tween(tempMask)
 	        .to({radius:view.bounds.width}, duration*0.0625)
@@ -463,6 +476,7 @@ var nGonBackground = {
 
 	            window.setTimeout(function(){
 	            	this.group.visible = false;
+	            	this.topGroup.visible = false;
 		        	tempMask.remove();
 					currentScene.background.transitionIn(tempMask.fillColor);
 
@@ -480,11 +494,12 @@ var nGonBackground = {
 	transitionIn:function(fromColor){
 
 		this.group.visible = true;
+		this.topGroup.visible = true;
 
 		this.setTheme(currentScene.theme);
 		var tempMask = new Shape.Rectangle(new Point(0,0), view.size);
 		tempMask.fillColor = fromColor;
-		this.group.addChild(tempMask);
+		this.topGroup.addChild(tempMask);
 
 
 
@@ -542,7 +557,7 @@ var nGonForeground = {
 
 		var emitter = new Proton.Emitter();
 		emitter.rate = new Proton.Rate(Proton.getSpan(30, 100), 0.1);
-		emitter.addInitialize(new Proton.Radius(2, 10));
+		emitter.addInitialize(new Proton.Radius(1, 5));
 		emitter.addInitialize(new Proton.Velocity(Proton.getSpan(0, 1), Proton.getSpan(0, 360), 'polar'));
 		emitter.addBehaviour(new Proton.Color(['ffffff']));
 		emitter.addBehaviour(new Proton.Alpha(0.8, 0));
