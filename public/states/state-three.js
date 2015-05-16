@@ -108,17 +108,27 @@ var stateThree =
 
 				  //       //Trigger audio for cuepoint
 
-						if(Math.round(Math.random()) == 0){
-							triggerables[Math.floor(Math.random()*triggerables.length)].play();
-						}else{
-							guitar[Math.floor(Math.random()*guitar.length)].play();
-						}
-
-						console.log('PLAYING', this.size);
+						// if(Math.round(Math.random()) == 0){
+						// 	triggerables[Math.floor(Math.random()*triggerables.length)].play();
+						// }else{
+						// 	guitar[Math.floor(Math.random()*guitar.length)].play();
+						// }
 
 
-			        	if(Math.floor(Math.random()*8) == 0){
-							vocals[Math.floor(Math.random()*vocals.length)].play();
+						var x = this.drawable.position.x;
+						var index = Math.floor((x/view.bounds.width)*triggerables.length);
+						triggerables[index].play();
+
+
+						// console.log('PLAYING', this.size);
+
+
+						if(Math.floor(Math.random()*8) == 0){
+							if(Math.round(Math.random()) == 0){
+								vocals[Math.floor(Math.random()*vocals.length)].play();
+							}else{
+								guitar[Math.floor(Math.random()*guitar.length)].play();
+							}
 						}
 
 						if(currentScene.background.onCuePoint){
@@ -191,13 +201,13 @@ var stateThree =
 
 
 						console.log(globalState.complexity);
-						// if(globalState.players[1].completeness == 0 || globalState.players.length){
-						// 	switchScene(Math.floor(Math.random()*scenes.length));
-						// }else{
-						// 	// switchScene(currentSceneIndex);
-						// }
+						if(globalState.players[1].completeness == 0 || globalState.players.length){
+							switchScene(Math.floor(Math.random()*scenes.length));
+						}else{
+							switchScene(currentSceneIndex);
+						}
 
-						switchScene(Math.floor(Math.random()*scenes.length));
+						// switchScene(Math.floor(Math.random()*scenes.length));
 						// globalState.complexity--;
 						// globalState.players[0].state = 0
 						// globalState.players[0].completeness = 0
@@ -293,17 +303,25 @@ var stateThree =
 
 				  //       //Trigger audio for cuepoint
 
-						if(Math.round(Math.random()) == 0){
-							triggerables[Math.floor(Math.random()*triggerables.length)].play();
-						}else{
-							guitar[Math.floor(Math.random()*guitar.length)].play();
-						}
+						// if(Math.round(Math.random()) == 0){
+						// 	triggerables[Math.floor(Math.random()*triggerables.length)].play();
+						// }else{
+						// 	guitar[Math.floor(Math.random()*guitar.length)].play();
+						// }
 
 						console.log('PLAYING', this.size);
 
 
+						var x = this.drawable.position.x;
+						var index = Math.floor((x/view.bounds.width)*triggerables.length);
+						triggerables[index].play();
+
 						if(Math.floor(Math.random()*8) == 0){
-							vocals[Math.floor(Math.random()*vocals.length)].play();
+							if(Math.round(Math.random()) == 0){
+								vocals[Math.floor(Math.random()*vocals.length)].play();
+							}else{
+								guitar[Math.floor(Math.random()*guitar.length)].play();
+							}
 						}
 
 						if(currentScene.background.onCuePoint){

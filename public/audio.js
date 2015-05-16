@@ -102,13 +102,27 @@
 
         //Single Notes
         note1:'samples/vivid/notes/Note 1.mp3',
+        note1Hi:'samples/vivid/notes/Note 1_Hi.mp3',
+        note1Low:'samples/vivid/notes/Note 1_Lo.mp3',
         note2:'samples/vivid/notes/Note 2.mp3',
+        note2Hi:'samples/vivid/notes/Note 2_Hi.mp3',
+        note2Low:'samples/vivid/notes/Note 2_Lo.mp3',
         note3:'samples/vivid/notes/Note 3.mp3',
+        note3Hi:'samples/vivid/notes/Note 3_Hi.mp3',
+        note3Low:'samples/vivid/notes/Note 3_Lo.mp3',
         note4:'samples/vivid/notes/Note 4.mp3',
+        note4Hi:'samples/vivid/notes/Note 4_Hi.mp3',
+        note4Low:'samples/vivid/notes/Note 4_Lo.mp3',
         note5:'samples/vivid/notes/Sound 1.mp3',
         note6:'samples/vivid/notes/Sound 10.mp3',
+        note6Hi:'samples/vivid/notes/Sound 10_Hi.mp3',
+        note6Low:'samples/vivid/notes/Sound 10_Lo.mp3',
         note7:'samples/vivid/notes/Sound 8.mp3',
+        note7Hi:'samples/vivid/notes/Sound 8_Lo.mp3',
+        note7Low:'samples/vivid/notes/Sound 8_Hi.mp3',
         note8:'samples/vivid/notes/Sound 9.mp3',
+        note8Hi:'samples/vivid/notes/Sound 9_Hi.mp3',
+        note8Low:'samples/vivid/notes/Sound 9_Lo.mp3',
 
         //guitar notes
         guitar1:'samples/vivid/guitar/Guitar 1.mp3',
@@ -166,6 +180,8 @@
     function loadAudio(){
 
         tsw.load(samplesToLoad, function (response) {
+            $('#loader').css({'display':'none'});
+
             for(key in response){
                 console.log(response[key], 'loaded')
 
@@ -210,13 +226,27 @@
 
 
                 // samples.note1,
+                // samples.note1Hi,
+                // samples.note1Low,
                 samples.note2,
+                samples.note2Hi,
+                samples.note2Low,
                 samples.note3,
+                samples.note3Hi,
+                samples.note3Low,
                 samples.note4,
+                samples.note4Hi,
+                samples.note4Low,
                 // samples.note5,
                 samples.note6,
+                samples.note6Hi,
+                samples.note6Low,
                 samples.note7,
+                samples.note7Hi,
+                samples.note7Low,
                 samples.note8,
+                samples.note8Hi,
+                samples.note8Low,
 
 
             ];

@@ -376,20 +376,20 @@ var waveForeground = {
 			this.playerAttractors.push(attractor);
 
 
-			var pEmitter = new Proton.Emitter();
-			pEmitter.rate = new Proton.Rate(Proton.getSpan(2, 4), 0.05);
-			pEmitter.addInitialize(new Proton.Radius(1, 4));
-			pEmitter.addInitialize(new Proton.Velocity(Proton.getSpan(1, 0), Proton.getSpan(0, 360), 'polar'));
-			pEmitter.addInitialize(new Proton.Life(1, 0));
-			pEmitter.addBehaviour(new Proton.Color('ffffff'));
-			pEmitter.addBehaviour(new Proton.Alpha(1, 0));
-			pEmitter.addBehaviour(new Proton.CrossZone(new Proton.RectZone(0, 0, view.bounds.width, view.bounds.height), 'cross'));
-
-
-
-			pEmitter.isEmitting = false;
-
-			this.playerEmitters.push(pEmitter);
+			// var pEmitter = new Proton.Emitter();
+			// pEmitter.rate = new Proton.Rate(Proton.getSpan(2, 4), 0.05);
+			// pEmitter.addInitialize(new Proton.Radius(1, 4));
+			// pEmitter.addInitialize(new Proton.Velocity(Proton.getSpan(1, 0), Proton.getSpan(0, 360), 'polar'));
+			// pEmitter.addInitialize(new Proton.Life(1, 0));
+			// pEmitter.addBehaviour(new Proton.Color('ffffff'));
+			// pEmitter.addBehaviour(new Proton.Alpha(1, 0));
+			// pEmitter.addBehaviour(new Proton.CrossZone(new Proton.RectZone(0, 0, view.bounds.width, view.bounds.height), 'cross'));
+			//
+			//
+			//
+			// pEmitter.isEmitting = false;
+			//
+			// this.playerEmitters.push(pEmitter);
 
 
 		};
@@ -422,27 +422,27 @@ var waveForeground = {
 					}
 				}
 
-				if(this.playerEmitters.length > 0){
-					var pEmitter = this.playerEmitters[i];
-
-					if(player.cursor.isDown){
-
-						if(!pEmitter.isEmitting){
-							pEmitter.emit();
-							pEmitter.isEmitting = true;
-						}
-
-
-
-						pEmitter.p.x = player.cursor.x;
-						pEmitter.p.y = player.cursor.y;
-							;
-					}else{
-						pEmitter.stopEmit();
-						pEmitter.isEmitting = false;
-					}
-
-				}
+				// if(this.playerEmitters.length > 0){
+				// 	var pEmitter = this.playerEmitters[i];
+				//
+				// 	if(player.cursor.isDown){
+				//
+				// 		if(!pEmitter.isEmitting){
+				// 			pEmitter.emit();
+				// 			pEmitter.isEmitting = true;
+				// 		}
+				//
+				//
+				//
+				// 		pEmitter.p.x = player.cursor.x;
+				// 		pEmitter.p.y = player.cursor.y;
+				// 			;
+				// 	}else{
+				// 		pEmitter.stopEmit();
+				// 		pEmitter.isEmitting = false;
+				// 	}
+				//
+				// }
 
 
 			}.bind(this));
@@ -453,11 +453,7 @@ var waveForeground = {
 	pause:function(){
 		this.emitter.stopEmit();
 		this.emitter.removeAllParticles();
-		this.playerEmitters.forEach(function(emitter){
-			emitter.stopEmit();
-			emitter.removeAllParticles();
-			proton.removeEmitter(emitter);
-		});
+
 		context.clearRect ( 0 , 0 , canvas.width, canvas.height );
 		this.renderer.stop();
 		proton.removeEmitter(this.emitter);
@@ -466,10 +462,7 @@ var waveForeground = {
 
 	start:function(){
 		proton.addEmitter(this.emitter);
-		this.playerEmitters.forEach(function(emitter){
-			emitter.stopEmit();
-			proton.addEmitter(emitter);
-		});
+
 		this.emitter.emit('once');
 		this.renderer.start();
 

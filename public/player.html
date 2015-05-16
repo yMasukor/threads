@@ -78,6 +78,8 @@
 
     <script type="text/javascript" >
 
+        var monkeyTest = false;
+
         // localStorage.removeItem('playerId')
         var playerId = localStorage.getItem('playerId')
 
@@ -638,40 +640,79 @@
 
             var lastPoint;
 
-            tool.onMouseDown =  function(e) {
-                if(cursor.active){
-                    cursor.isDown = true;
-                    cursor.targetPos = e.point.clone();
+            if(!monkeyTest){
+
+                tool.onMouseDown =  function(e) {
+                    if(cursor.active){
+                        cursor.isDown = true;
+                        cursor.targetPos = e.point.clone();
+                    }
+
+                    // sendInput(e, 'mousedown');
+
+                    ping(e.point, 200, duration/8, themes[playerIndex].highlight);
+                    sendInput(e, 'tap');
                 }
 
-                // sendInput(e, 'mousedown');
+                tool.onMouseDrag =  function(e) {
+                    if(cursor.active){
+                        cursor.targetPos = e.point.clone();
+                        cursor.delta = e.delta.clone();
+                    }
 
-                ping(e.point, 200, duration/8, themes[playerIndex].highlight);
-                sendInput(e, 'tap');
-            }
+                    // sendInput(e, 'mousedrag');
 
-            tool.onMouseDrag =  function(e) {
-                if(cursor.active){
-                    cursor.targetPos = e.point.clone();
-                    cursor.delta = e.delta.clone();
                 }
 
-                // sendInput(e, 'mousedrag');
-
-            }
 
 
+                tool.onMouseUp =  function(e) {
+                    if(cursor.active){
+                        cursor.isDown = false;
+                        cursor.targetPos = e.point.clone();
+                    }
 
-            tool.onMouseUp =  function(e) {
-                if(cursor.active){
-                    cursor.isDown = false;
-                    cursor.targetPos = e.point.clone();
+                    if(!cursor.isEnded){cursor.tweenRadius(36, cursor.drawable);}
+
+                    // sendInput(e, 'mouseup');
                 }
 
-                if(!cursor.isEnded){cursor.tweenRadius(36, cursor.drawable);}
+            }else{
 
-                // sendInput(e, 'mouseup');
+
+                window.setInterval(function(){
+                    var e = {
+                        point:new Point(Math.floor(Math.random()*view.bounds.width), Math.floor(Math.random()*view.bounds.height))
+                    }
+
+                    if(cursor.active){
+                        cursor.isDown = true;
+                        cursor.targetPos = e.point.clone();
+                    }
+
+                    // sendInput(e, 'mousedown');
+
+                    ping(e.point, 200, duration/8, themes[playerIndex].highlight);
+                    sendInput(e, 'tap');
+
+
+                    window.setTimeout(function(){
+
+                        if(cursor.active){
+                            cursor.isDown = false;
+                            cursor.targetPos = e.point.clone();
+                        }
+
+                        if(!cursor.isEnded){cursor.tweenRadius(36, cursor.drawable);}
+
+                    }, 100);
+
+                }, 500);
+
+
             }
+
+
 
 
         });

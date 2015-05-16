@@ -172,9 +172,14 @@ var triangleBackground = {
 			.easing( TWEEN.Easing.Circular.Out)
 			.onComplete(function() {
 				// tempMask.remove();
+				shape.flipping = false;
 			});
 
-		flip.start();
+		if(shape.flipping != true){
+			shape.flipping = true;
+			flip.start();
+		}
+
 
 	},
 

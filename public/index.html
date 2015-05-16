@@ -78,6 +78,26 @@
 		}
 
 
+		#loader{
+			background-color: #000000;
+			position: absolute;
+			top: 0px;
+			left: 0px;
+			right: 0px;
+			bottom: 0px;
+		}
+
+		#loader h1{
+			/*position: absolute;*/
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+			font-family: sans-serif;
+			color: #fff;
+			font-size: 24px;
+		}
+
 	</style>
 
 
@@ -89,6 +109,11 @@
 	<canvas id="backgroundBitmapCanvas" width="640" height="360" keepalive></canvas>
 	<canvas id="threadCanvas" width="640" height="360" keepalive></canvas>
 	<canvas id="bitmapCanvas" width="640" height="360" keepalive></canvas>
+	<canvas id="foregroundBitmapCanvas" width="640" height="360" keepalive></canvas>
+
+	<div id="loader">
+		<h1>LOADING</h1>
+	</div>
 
 
 	<script type="text/javascript">
@@ -106,18 +131,10 @@
 
 		paper.install(window);
 
-
-
-
-
-
-
-
-
-
 		var proton = new Proton();
+		var fProton = new Proton();
 
-		var canvas, context, bCanvas, bContext;
+		var canvas, context, bCanvas, bContext, fCanvas, fContext;
 
 		var TWO_PI = Math.PI * 2;
 
@@ -189,29 +206,17 @@
 		var currentTheme;
 
 		var scenes = [
-			// {
-			// 	background:waveBackground,
-			// 	state:stateThree,
-			// 	theme:themes[0]
-			// },
-			//
-			//
-			//
-			//
-			//
-			//
-			// {
-			// 	background: particleBackground,
-			// 	state: stateThree,
-			// 	theme: themes[0],
-			// },
+			{
+				background:waveBackground,
+				state:stateThree,
+				theme:themes[0]
+			},
 
-
-
-
-
-
-
+			{
+				background: particleBackground,
+				state: stateThree,
+				theme: themes[0],
+			},
 
 			{
 				background: triangleBackground,
@@ -219,17 +224,11 @@
 				theme: themes[0],
 			},
 
-
-
-
-
-			// 
-			// {
-			// 	background: nGonBackground,
-			// 	state: stateThree,
-			// 	theme: themes[0],
-			// }
-
+			{
+				background: nGonBackground,
+				state: stateThree,
+				theme: themes[0],
+			}
 		]
 
 		// var scenes = []
@@ -258,6 +257,9 @@
 
 			bCanvas = document.getElementById('backgroundBitmapCanvas');
 			bContext = bCanvas.getContext('2d');
+
+			fCanvas = document.getElementById('foregroundBitmapCanvas');
+			fContext = bCanvas.getContext('2d');
 
 			//console.log('PAPER IS', paper)
 			var tool = new Tool();
@@ -321,6 +323,14 @@
 
 				var player = globalState.players[globalState.playerIdMap[input.id]];
 
+				console.log(globalState.playerIdMap[input.id]);
+				if(globalState.playerIdMap[input.id] == 0){
+
+					pan.pan(-1);
+				}else{
+					pan.pan(1);
+				}
+
 				//console.log("UPDATING", player, input.id, globalState.playerIdMap[input.id], globalState.playerIdMap);
 
 				if(input.type == 'mousedown'){
@@ -348,7 +358,11 @@
 				}else if(input.type == 'tap'){
 
 					ping(e.point, 300, duration/8, '#ffffff');
-					triggerables[Math.floor(Math.random()*triggerables.length)].play();
+					// triggerables[Math.floor(Math.random()*triggerables.length)].play();
+
+					if(permaForeground.active){
+						permaForeground.tap(e.point);
+					}
 
 				}
 			});
@@ -375,6 +389,7 @@
 					}
 
 					updateBackingTrack();
+					pan.pan(1);
 				}
 
 				if(globalState.complexity > 1){
@@ -396,8 +411,6 @@
 				if(Math.floor(Math.random()*16) == 0 && backgroundTextures){
 					backgroundTextures[Math.floor(Math.random()*backgroundTextures.length)].play();
 				}
-
-
 
 
 
@@ -455,10 +468,13 @@
 			particleBackground.create(themes[0]);
 			triangleBackground.create(themes[0]);
 			nGonBackground.create(themes[0]);
+			switchScene(0);
 
 			permaForeground.create();
 
-			switchScene(0);
+
+
+
 
 
 
@@ -483,6 +499,7 @@
 			view.onFrame = function(e) {
 
 				proton.update();
+				fProton.update();
 
 				analyser.getByteFrequencyData(globalState.byteFrequencyData);
 
@@ -531,6 +548,11 @@
 
 			}
 		});
+
+
+		function init(){
+
+		}
 
 
 		function addPlayer(playerId){
