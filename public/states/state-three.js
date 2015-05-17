@@ -132,7 +132,7 @@ var stateThree =
 						}
 
 						if(currentScene.background.onCuePoint){
-							currentScene.background.onCuePoint();
+							currentScene.background.onCuePoint(this.drawable.position);
 						}
 
 					},
@@ -325,7 +325,7 @@ var stateThree =
 						}
 
 						if(currentScene.background.onCuePoint){
-							currentScene.background.onCuePoint();
+							currentScene.background.onCuePoint(this.drawable.position);
 						}
 
 					},

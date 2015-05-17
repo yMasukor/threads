@@ -1,9 +1,14 @@
+var app = require('app');  // Module to control application life.
+var BrowserWindow = require('browser-window');
+
+
 var express = require('express');
-var app = express();
-var http = require('http').Server(app);
+var expressApp = express();
+var http = require('http').Server(expressApp);
 var io = require('socket.io')(http);
+var path = require('path');
 
-
+// var BrowserWindow = require('browser-window');
 
 
 var interval
@@ -22,21 +27,74 @@ var players = {};
 var viewers = [];
 
 
-if(!interval){
-			interval = setInterval(function(){
+// expressApp.use(express.static(path.join(__dirname, 'workspace')));
 
-				io.sockets.emit('tick', tickCount);
 
-				tickCount++;
-				tickCount = tickCount%(beatsPerBar*barsPerLoop*ticksPerBeat)
+expressApp.set('port', (process.env.PORT || 5000));
+// expressApp.use(express.static(__dirname + 'public'));
+// expressApp.use(express.static(process.cwd() + 'public'));
+expressApp.use(express.static(path.join(__dirname, 'public')));
 
-				// console.log('tick')
 
-			}, tickDuration);
-		}
 
-app.set('port', (process.env.PORT || 5000));
-app.use(express.static(__dirname + '/public'));
+app.on('window-all-closed', function() {
+  if (process.platform != 'darwin'){app.quit();}
+
+var globalShortcut = require('global-shortcut');
+  globalShortcut.register('Alt+Command+I', function() {
+
+  });
+
+
+});
+
+
+
+app.on('ready', function() {
+  // Create the browser window.
+  mainWindow = new BrowserWindow({width: 800, height: 600});
+
+  tick();
+
+
+// interval = setInterval(function(){
+//
+// 	io.sockets.emit('tick', tickCount);
+// 	console.log('tick', tickCount)
+//
+// 	tickCount++;
+// 	tickCount = tickCount%(beatsPerBar*barsPerLoop*ticksPerBeat)
+//
+// 	// console.log('tick')
+//
+// }, tickDuration);
+
+  // and load the index.html of the app.
+  mainWindow.loadUrl('file://' + __dirname + '/index.html');
+// mainWindow.toggleDevTools();
+  // Emitted when the window is closed.
+  mainWindow.on('closed', function() {
+    // Dereference the window object, usually you would store windows
+    // in an array if your app supports multi windows, this is the time
+    // when you should delete the corresponding element.
+    mainWindow = null;
+  });
+});
+
+
+function tick(){
+
+	io.sockets.emit('tick', tickCount);
+	console.log('tick', tickCount)
+
+	tickCount++;
+	tickCount = tickCount%(beatsPerBar*barsPerLoop*ticksPerBeat)
+
+    setTimeout(tick, tickDuration);
+}
+
+
+
 
 io.on('connection', function(socket){
 	// console.log('a user connected');
@@ -137,6 +195,6 @@ io.on('connection', function(socket){
 
 
 
-http.listen(app.get('port'), function(){
+http.listen(expressApp.get('port'), function(){
 	console.log('listening on *:5000');
 });

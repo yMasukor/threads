@@ -11,7 +11,7 @@
 
 
 
-	<script src="https://cdn.socket.io/socket.io-1.3.3.js"></script>
+	<script src="lib/socket.io-1.3.3.js"></script>
 
 
 	<script src="audio.js"></script>
@@ -128,6 +128,9 @@
 
 
 	<script type="text/javascript" >
+
+	// alert(window.location)
+	console.log('FOOBAR', window.location);
 
 		paper.install(window);
 
@@ -371,9 +374,10 @@
 
 			//Listen for tick
 			socket.on('tick', function(tickCount){
-				// //console.log('tick', tickCount);
+				console.log('tick', tickCount);
 
 				if(tickCount == 0 && !backingTrack.playing){
+					console.log('starting backing track');
 
 					playBackingTrack();
 

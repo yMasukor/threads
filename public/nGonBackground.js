@@ -263,12 +263,18 @@ var nGonBackground = {
 			var d = getAverageVolume(slice);
 			var a = Math.min(d/Math.abs((globalState.minDec-globalState.maxDec)), 1);
 
-			if(!shape.nonReactive){
-				shape.path.opacity = Math.max(a, 0);
-			}else{
-				a = Math.min(globalState.averageLevel/Math.abs((globalState.minDec-globalState.maxDec)), 1);
-				shape.path.opacity = Math.max(a, 0);
+
+			if(!shape.locked){
+				if(!shape.nonReactive){
+					shape.path.opacity = Math.max(a, 0);
+				}else{
+					a = Math.min(globalState.averageLevel/Math.abs((globalState.minDec-globalState.maxDec)), 1);
+					shape.path.opacity = Math.max(a, 0);
+				}
 			}
+
+
+
 
 
 
@@ -441,7 +447,52 @@ var nGonBackground = {
 
 	},
 
-	onCuePoint:function(){
+	onCuePoint:function(point){
+
+
+
+		console.log('bloop')
+		var foo = this.paths[Math.floor(Math.random()*this.paths.length)];
+
+		if(!foo.locked){
+			var shape = foo.path;
+			// this.topGroup.addChild(shape);shape.bringToFront();
+
+
+			foo.locked = true;
+
+			shape.originalColor = shape.fillColor.clone();
+			// var originalParent = shape.parent;
+			console.log('is in top group ', shape.parent == this.topGroup)
+
+			var shouldBeInTop = (shape.parent == this.topGroup);
+
+			this.topGroup.addChild(shape);
+			shape.bringToFront();
+
+			shape.fillColor = '#ffffff';
+			shape.opacity = 1
+
+			var fadeBack = new TWEEN.Tween(shape)
+				.to({opacity: 0}, duration*0.25)
+				.easing( TWEEN.Easing.Circular.Out)
+				.onComplete(function() {
+					foo.locked = false;
+					shape.fillColor = shape.originalColor;
+					// originalParent.addChild(shape);
+
+					if(!shouldBeInTop){
+						this.group.addChild(shape);
+					}
+				}.bind(this));
+
+			fadeBack.start();
+		}
+
+
+
+
+
 
 	},
 
@@ -533,6 +584,7 @@ var nGonBackground = {
 		this.paths.forEach(function(shape){
 
 			shape.path.fillColor = theme.secondary[Math.floor(Math.random()*theme.secondary.length)];
+			shape.path.originalColor = shape.path.fillColor.clone();
 
 		});
 
@@ -585,7 +637,7 @@ var nGonForeground = {
 					}
 				});
 
-
+				emitter.damping = 0.01
 		this.emitter = emitter;
 
 

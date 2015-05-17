@@ -160,7 +160,7 @@ var triangleBackground = {
 		});
 	},
 
-	onCuePoint:function(){
+	onCuePoint:function(point){
 
 		var shape = this.paths[Math.floor(Math.random()*this.paths.length)];
 
@@ -352,7 +352,7 @@ var triangleForeground = {
 		// 		});
 
 
-
+		emitter.damping = 0.01
 		this.emitter = emitter;
 
 

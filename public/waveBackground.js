@@ -208,8 +208,8 @@ var waveBackground = {
 		});
 	},
 
-	onCuePoint:function(){
-
+	onCuePoint:function(point){
+		this.pulse();
 	},
 
 
@@ -361,7 +361,7 @@ var waveForeground = {
 					}
 				});
 
-
+				emitter.damping = 0.01
 		this.emitter = emitter;
 
 

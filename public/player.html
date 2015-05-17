@@ -3,8 +3,8 @@
     <head>
 
      <meta name="viewport" content="minimum-scale=2.0, initial-scale=2.0" user-scalable="no">
-     <!-- <meta name="mobile-web-app-capable" content="yes"> -->
-     <!-- <meta name="apple-mobile-web-app-capable" content="yes" /> -->
+     <meta name="mobile-web-app-capable" content="yes">
+     <meta name="apple-mobile-web-app-capable" content="yes" />
 
     <script src="lib/jquery-2.1.3.min.js"></script>
     <script src="lib/tween.min.js"></script>
@@ -13,7 +13,7 @@
     <script src="lib/paper-full.js"></script>
     <script src="lib/proton-1.0.1.js"></script>
 
-    <script src="https://cdn.socket.io/socket.io-1.3.3.js"></script>
+    <script src="lib/socket.io-1.3.3.js"></script>
 
     <script src="CuePoint.js"></script>
     <script src="Threads.js"></script>
@@ -30,6 +30,8 @@
     body{
         width: 640px;
         overflow: hidden;
+        /*height: 360px;*/
+        background: #000000;
 
     }
         *{
@@ -77,6 +79,8 @@
 
 
     <script type="text/javascript" >
+
+
 
         var monkeyTest = false;
 
@@ -681,8 +685,12 @@
 
 
                 window.setInterval(function(){
+                    var p = new Point(Math.floor(Math.random()*view.bounds.width), Math.floor(Math.random()*view.bounds.height));
+
                     var e = {
-                        point:new Point(Math.floor(Math.random()*view.bounds.width), Math.floor(Math.random()*view.bounds.height))
+                        point:p,
+                        delta:new Point(p.x-10, p.y-10)
+
                     }
 
                     if(cursor.active){
@@ -696,6 +704,29 @@
                     sendInput(e, 'tap');
 
 
+                    if(cursor.active){
+                        cursor.targetPos = e.point.clone();
+                        cursor.delta = e.delta.clone();
+                    }
+
+                    window.setTimeout(function(){
+
+                        var p = new Point(Math.floor(Math.random()*view.bounds.width), Math.floor(Math.random()*view.bounds.height));
+
+                        var e = {
+                            point:p,
+                            delta:new Point(p.x-10, p.y-10)
+
+                        }
+
+                        if(cursor.active){
+                            cursor.targetPos = e.point.clone();
+                            cursor.delta = e.delta.clone();
+                        }
+
+                    }, 100);
+
+
                     window.setTimeout(function(){
 
                         if(cursor.active){
@@ -705,9 +736,9 @@
 
                         if(!cursor.isEnded){cursor.tweenRadius(36, cursor.drawable);}
 
-                    }, 100);
+                    }, 200);
 
-                }, 500);
+                }, 1000);
 
 
             }

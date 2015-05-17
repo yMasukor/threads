@@ -164,7 +164,7 @@ var permaForeground = {
 		stripeStretch.start();
 
 
-		currentScene.background.onCuePoint();
+		currentScene.background.onCuePoint(point);
 
 	}
 
